@@ -1,0 +1,7 @@
+# Created by .ignore support plugin (hsz.mobi)
+.idea/*
+go.sum
+logs/*
+minecraft-servers/*
+minecraft-contains/*
+databases/*
