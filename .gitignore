@@ -5,3 +5,6 @@ logs/*
 minecraft-servers/*
 minecraft-contains/*
 databases/*
+*.zip
+test.go
+.DS_Store
