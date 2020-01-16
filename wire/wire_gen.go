@@ -6,12 +6,13 @@
 package wire
 
 import (
+	"github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/service"
 )
 
 // Injectors from wire.go:
 
-func GetConfIntance() *service.Conf {
+func GetConfIntance() _interface.Conf {
 	terminalType := service.InitFlag()
 	conf := service.GetConfObj(terminalType)
 	return conf

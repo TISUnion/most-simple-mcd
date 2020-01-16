@@ -4,11 +4,12 @@
 package wire
 
 import (
+	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/service"
 	"github.com/google/wire"
 )
 
-func GetConfIntance() *service.Conf {
+func GetConfIntance() _interface.Conf {
 	wire.Build(service.InitFlag, service.GetConfObj)
 	return &service.Conf{}
 }

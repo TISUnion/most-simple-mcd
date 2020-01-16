@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/TISUnion/most-simple-mcd/contants"
+	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
 	"io/ioutil"
@@ -200,7 +201,7 @@ func (c *Conf) SetConfig(key string, val string) {
 }
 
 // 获取配置
-func GetConfObj(terminalConfs TerminalType) *Conf {
+func GetConfObj(terminalConfs TerminalType) _interface.Conf {
 	if appConf != nil {
 		return appConf
 	}
