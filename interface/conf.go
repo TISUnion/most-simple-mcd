@@ -13,6 +13,10 @@ type Conf interface {
 	// 获取单个配置
 	GetConfVal(string) string
 
+	// SetConfig
+	// 设置一个配置变量（若存在则覆盖）
+	SetConfig(string, string)
+
 	// reloadConfig
 	// 重载配置
 	ReloadConfig()
