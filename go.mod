@@ -3,9 +3,12 @@ module github.com/TISUnion/most-simple-mcd
 go 1.12
 
 require (
+	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/google/wire v0.4.0
 	github.com/mholt/archiver/v3 v3.3.0
+	github.com/robfig/cron v1.2.0 // indirect
+	github.com/robfig/cron/v3 v3.0.0
 	golang.org/x/crypto v0.0.0-20200115085410-6d4e4cb37c7d // indirect
 	golang.org/x/mod v0.2.0 // indirect
 	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa // indirect

@@ -17,7 +17,7 @@ type Conf interface {
 	// 设置一个配置变量（若存在则覆盖）
 	SetConfig(string, string)
 
-	// reloadConfig
+	// ReloadConfig
 	// 重载配置
 	ReloadConfig()
 }

@@ -7,6 +7,7 @@ package wire
 
 import (
 	"github.com/TISUnion/most-simple-mcd/interface"
+	"github.com/TISUnion/most-simple-mcd/interface/container"
 	"github.com/TISUnion/most-simple-mcd/service"
 )
 
@@ -16,4 +17,9 @@ func GetConfIntance() _interface.Conf {
 	terminalType := service.InitFlag()
 	conf := service.GetConfObj(terminalType)
 	return conf
+}
+
+func GetJobContainerIntance() container.JobContainer {
+	jobContainer := service.GetJobContainerObj()
+	return jobContainer
 }

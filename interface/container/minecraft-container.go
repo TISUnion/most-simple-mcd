@@ -1,6 +1,4 @@
-// _interface
-// 接口库
-package _interface
+package container
 
 import "github.com/TISUnion/most-simple-mcd/interface/server"
 
