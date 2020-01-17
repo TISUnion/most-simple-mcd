@@ -9,6 +9,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/container"
 	"github.com/TISUnion/most-simple-mcd/service"
+	container2 "github.com/TISUnion/most-simple-mcd/service/container"
 )
 
 // Injectors from wire.go:
@@ -20,6 +21,6 @@ func GetConfIntance() _interface.Conf {
 }
 
 func GetJobContainerIntance() container.JobContainer {
-	jobContainer := service.GetJobContainerObj()
+	jobContainer := container2.GetJobContainerObj()
 	return jobContainer
 }

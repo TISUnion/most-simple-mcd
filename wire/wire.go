@@ -7,6 +7,7 @@ import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/container"
 	"github.com/TISUnion/most-simple-mcd/service"
+	container2 "github.com/TISUnion/most-simple-mcd/service/container"
 	"github.com/google/wire"
 )
 
@@ -16,6 +17,6 @@ func GetConfIntance() _interface.Conf {
 }
 
 func GetJobContainerIntance() container.JobContainer {
-	wire.Build(service.GetJobContainerObj)
-	return &service.JobContainer{}
+	wire.Build(container2.GetJobContainerObj)
+	return &container2.JobContainer{}
 }

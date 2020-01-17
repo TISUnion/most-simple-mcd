@@ -1,4 +1,4 @@
-package service
+package container
 
 import (
 	"fmt"

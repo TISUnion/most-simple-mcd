@@ -4,16 +4,26 @@ package _interface
 
 // log
 // 日志接口
-type log interface {
-	// append
-	// 日志尾追加
-	append(string) error
+type Log interface {
 
-	// getLines
+	// Write
+	// 写入日志 第一个string为日志等级分为：debug、info、warn、error、fatal，依次递增
+	// 第二个string为写入日志内容，无需加入日志格式
+	Write(string, string) error
+
+	// SetLogLevel
+	// 修改日志等级, 如果日志等级比传入的等级低则不会写入该日志
+	SetLogLevel(string)
+
+	// IsShowCodeLine
+	// 是否显示调用代码行数和文件
+	IsShowCodeLine(bool)
+
+	// GetLines
 	// 获取日志， 第一个int为开始行数，第二个为偏移量
-	getLines(string, int, int)
+	GetLines(string, int, int)
 
-	//CompressLogs
-	// 压缩日志
-	CompressLogs()
+	// CompressLogs
+	// 压缩日志 传空字符串就表是压缩在当前文件夹内
+	CompressLogs(path string)
 }
