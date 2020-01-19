@@ -13,7 +13,7 @@ const (
 	LOG_ERROR                     = "error"
 	LOG_WARNING                   = "warning"
 	LOG_FATAL                     = "fatal"
-	LOG_FORMAT                    = "%s [%s]: %s"
-	LOG_CODELINE_FORMAT           = "%s [%s] %s : %s"
+	LOG_FORMAT                    = "%s [%s]: %s\r\n"
+	LOG_CODELINE_FORMAT           = "%s [%s] %s : %s\r\n"
 	LOG_TIME_FORMAT               = "2006-01-02 15:04:05.000000"
 )

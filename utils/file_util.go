@@ -20,7 +20,11 @@ func ExistsResource(path string) bool {
 
 // 判断所给路径是否为文件
 func IsFile(path string) bool {
-	return !IsDir(path)
+	// 先判断文件是否存在
+	if ExistsResource(path) {
+		return !IsDir(path)
+	}
+	return false
 }
 
 // 压缩多个文件
@@ -36,14 +40,23 @@ func CompressFile(source, destination string) error {
 // 创建文件
 func CreateFile(path string) (*os.File, error) {
 	dirPath := filepath.Dir(path)
-	if IsDir(dirPath) {
-		if err := CreatDir(dirPath); err != nil {
+	var file *os.File
+	var err error
+	if !ExistsResource(dirPath) {
+		if err = CreatDir(dirPath); err != nil {
 			return nil, err
 		}
 	}
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
-	if err != nil {
-		return nil, err
+	if !ExistsResource(path) {
+		file, err = os.Create(path)
+		if file, err = os.Create(path); err != nil {
+			return nil, err
+		}
+		_ = os.Chmod(path, 0666)
+	} else {
+		if file, err = os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666); err != nil {
+			return nil, err
+		}
 	}
 	return file, nil
 }

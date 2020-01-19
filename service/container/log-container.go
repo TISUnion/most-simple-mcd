@@ -18,8 +18,6 @@ var (
 	_logContainer container.LogContainer
 )
 
-
-
 func getIncreateId() int {
 	idLock.Lock()
 	defer idLock.Unlock()
@@ -61,20 +59,21 @@ func (l *LogContainer) AddLog(name string, params ...interface{}) _interface.Log
 	// 优先使用传入的目录，再使用容器配置目录，最后使用默认目录
 	if dirPath == "" {
 		if currentPath, err := utils.GetCurrentPath(); err == nil {
-			dirPath = filepath.Join(currentPath, "logs", name)
+			dirPath = filepath.Join(currentPath, "logs")
 		} else {
-			dirPath = filepath.Join("./", "logs", name)
+			dirPath = filepath.Join("./", "logs")
 		}
 	}
-	if len(params) >= 0 {
+	if len(params) > 0 {
 		logLevel = params[0].(string)
 	}
-	if len(params) >= 1 {
+	if len(params) > 1 {
 		isShowCodeLine = params[1].(bool)
 	}
-	if len(params) >= 2 {
+	if len(params) > 2 {
 		dirPath = filepath.Join(params[2].(string))
 	}
+	dirPath = filepath.Join(dirPath, name)
 	path = fmt.Sprintf("%s/%s.log", dirPath, time.Now().Format("2006-01-02"))
 	id := getIncreateId()
 	logItem := &service.Log{
@@ -87,7 +86,7 @@ func (l *LogContainer) AddLog(name string, params ...interface{}) _interface.Log
 	}
 
 	if err := logItem.Init(); err != nil {
-		utils.PanicError(constant.CREATE_LOG_FAILED)
+		utils.PanicError(constant.CREATE_LOG_FAILED, err)
 	}
 	l.Logs[id] = logItem
 	l.NameIdMapping[name] = id
@@ -100,7 +99,7 @@ func (l *LogContainer) AddLogJob() {
 		logDir := filepath.Dir(k.Path)
 		logPath := fmt.Sprintf("%s/%s.log", logDir, time.Now().Format("2006-01-02"))
 		if fileObj, err := utils.CreateFile(logPath); err != nil {
-			utils.PanicError(constant.CREATE_LOG_FAILED)
+			utils.PanicError(constant.CREATE_LOG_FAILED, err)
 		} else {
 			fileObj.Close()
 			k.Path = logPath
@@ -131,13 +130,13 @@ func (l *LogContainer) WriteLog(params ...string) {
 		msg   string
 		level string
 	)
-	if len(params) >= 0 {
+	if len(params) > 0 {
 		msg = params[0]
 	} else {
 		return
 	}
 
-	if len(params) >= 1 {
+	if len(params) > 1 {
 		level = params[1]
 	}
 	log.Write(&_interface.LogMsgType{

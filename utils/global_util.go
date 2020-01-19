@@ -1,10 +1,10 @@
 package utils
 
-import "github.com/TISUnion/most-simple-mcd/wire"
+import "fmt"
 
 // 致命错误，退出程序
-func PanicError(msg string) {
-	panic(msg)
+func PanicError(msg string, err error) {
+	panic(fmt.Sprintf("%s, reason: %v", msg, err))
 }
 
 // 判断字符串是否在数组中
@@ -32,9 +32,5 @@ func RemoveRepeatedElement(arr []string) []string {
 		}
 	}
 	return noRepeatArr
-}
-
-func WriteLog(msg string, level string) {
-	wire.GetLogContainerInstance().WriteLog(msg, level)
 }
 

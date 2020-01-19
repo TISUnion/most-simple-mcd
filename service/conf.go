@@ -31,7 +31,7 @@ const (
 	IS_MANAGE_HTTP          = "http.manage.server"          // 启动管理后台
 	MANAGE_HTTP_SERVER_PORT = "http.manage.server.port"     // 管理后台服务端口
 	LOG_PATH                = "log.path"                    // 日志写入目录
-	LOG_SAVE_INTERVAL		= "log.interval"				// 日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中
+	LOG_SAVE_INTERVAL       = "log.interval"                // 日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中
 	IS_START_MC_GUI         = "server.gui"                  // 启动gui
 	WORKSPACE               = "workspace"                   // 工作目录
 	I18N                    = "i18n"                        // 国际化
@@ -67,19 +67,14 @@ func init() {
 	DefaultConfig[IS_MANAGE_HTTP] = "true"
 	DefaultConfig[MANAGE_HTTP_SERVER_PORT] = "80"
 
-	if currentPath, err := utils.GetCurrentPath(); err == nil {
-		DefaultConfig[LOG_PATH]  = filepath.Join(currentPath, "logs")
-	} else {
-		DefaultConfig[LOG_PATH]  = filepath.Join("./", "logs")
-	}
-
-	DefaultConfig[LOG_SAVE_INTERVAL]  = constant.LOG_SAVE_INTERVAL_TWICEDAY
+	DefaultConfig[LOG_SAVE_INTERVAL] = constant.LOG_SAVE_INTERVAL_TWICEDAY
 
 	if workspace, err := utils.GetCurrentPath(); err == nil {
 		DefaultConfig[WORKSPACE] = workspace
 	} else {
 		DefaultConfig[WORKSPACE] = "./"
 	}
+	DefaultConfig[LOG_PATH] = filepath.Join(DefaultConfig["workspace"], "logs")
 	DefaultConfig[CONF_PATH] = filepath.Join(DefaultConfig["workspace"], "conf/mcd.ini")
 	DefaultConfig[I18N] = "zh"
 }
@@ -88,47 +83,43 @@ func init() {
 // 获取配置文件目录
 func (c *Conf) loadFilePath(terminalConfs TerminalType) {
 	// 根据优先级获取配置文件目录
-	if path, ok := terminalConfs[CONF_PATH]; ok {
+	if path, ok := terminalConfs[CONF_PATH]; ok && *path != "" {
 		c.confs[CONF_PATH] = *path
 	} else if path := os.Getenv(CONF_PATH); path != "" {
 		c.confs[CONF_PATH] = path
 	}
-
 	// 验证文件是否存在
 	path := c.confs[CONF_PATH]
 	// 没有文件就创建文件
-	if !utils.IsFile(path) {
+	if !utils.ExistsResource(path) {
 		var (
 			f   *os.File
 			err error
 		)
 		if f, err = utils.CreateFile(path); err != nil {
-			// 写入日志
-			utils.WriteLog(constant.CREATE_CONF_FAILED_AND_ROLLBACK, constant.LOG_ERROR)
 			if path != DefaultConfig["CONF_PATH"] {
 				// 回退至默认配置
 				c.confs[CONF_PATH] = DefaultConfig["CONF_PATH"]
-				if !utils.IsFile(c.confs[CONF_PATH]) {
+				if !utils.ExistsResource(c.confs[CONF_PATH]) {
 					if f, err = utils.CreateFile(c.confs[CONF_PATH]); err != nil {
-						utils.PanicError(constant.CREATE_CONF_ERROR)
+						utils.PanicError(constant.CREATE_CONF_ERROR, err)
 					}
 				}
 			} else {
-				utils.PanicError(constant.CREATE_CONF_ERROR)
+				utils.PanicError(constant.CREATE_CONF_ERROR, err)
 			}
 		}
 		defer f.Close()
 	}
-
 	// 配置文件内容为空就写入默认配置
 	data, err := ioutil.ReadFile(c.confs[CONF_PATH])
 	if err != nil {
-		utils.PanicError(constant.READ_CONF_ERROR)
+		utils.PanicError(constant.READ_CONF_ERROR, err)
 	}
 	if len(data) == 0 {
 		cfg := setIniCfg(DefaultConfig)
 		if err := cfg.SaveTo(c.confs[CONF_PATH]); err != nil {
-			utils.PanicError(constant.WRITE_CONF_ERROR)
+			utils.PanicError(constant.WRITE_CONF_ERROR, err)
 		}
 	}
 }
@@ -155,10 +146,10 @@ func (c *Conf) ReloadConfig() {
 // loadFileConf
 // 加载文件配置
 func (c *Conf) loadFileConf() {
-	cfg, err := ini.Load(c.confs["CONF_PATH"])
+	cfg, err := ini.Load(c.confs[CONF_PATH])
 	if err != nil {
 		// 文件解析错误
-		utils.PanicError(constant.PARSE_INI_CONF_ERROR)
+		utils.PanicError(constant.PARSE_INI_CONF_ERROR, err)
 	} else {
 		sec := cfg.Section("")
 		keys := sec.KeyStrings()
@@ -248,8 +239,9 @@ func GetConfObj(terminalConfs TerminalType) _interface.Conf {
 // 这是ini配置对象
 func setIniCfg(data map[string]string) *ini.File {
 	cfg := ini.Empty()
-	sec, _ := cfg.NewSection("")
+	sec, _ := cfg.NewSection("DEFAULT")
 	for k, v := range data {
+		v = "\"" + v + "\""
 		_, _ = sec.NewKey(k, v)
 	}
 	return cfg

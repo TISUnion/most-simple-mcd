@@ -54,7 +54,7 @@ func (l *Log) writeToFile() {
 		if l.Level <= LogLevel[msg.Level] {
 			l.lock.Lock()
 			if _, err := l.FileObj.WriteString(l.getLogMsg(msg.Level, msg.Message)); err != nil {
-				utils.PanicError(fmt.Sprintf("%s, reason: %s", constant.WRITE_LOG_FAILED, err))
+				utils.PanicError(constant.WRITE_LOG_FAILED, err)
 			}
 			l.lock.Unlock()
 		}
@@ -122,11 +122,12 @@ func (l *Log) InitFileObj() {
 	var err error
 	// 文件不存在则新建
 	if l.FileObj, err = utils.CreateFile(l.Path); err != nil {
-		utils.PanicError(constant.CREATE_LOG_FAILED)
+		utils.PanicError(constant.CREATE_LOG_FAILED, err)
 	}
 }
 
 func (l *Log) Init() error {
+	l.lock = &sync.Mutex{}
 	l.InitFileObj()
 	go l.writeToFile()
 	return nil

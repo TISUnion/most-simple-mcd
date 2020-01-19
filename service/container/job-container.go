@@ -1,7 +1,6 @@
 package container
 
 import (
-	"fmt"
 	"github.com/TISUnion/most-simple-mcd/interface/container"
 	"github.com/robfig/cron/v3"
 	"sync"
@@ -78,7 +77,6 @@ func (jc *JobContainer) StopJob(name string) {
 	jc.lock.Lock()
 	defer jc.lock.Unlock()
 	tjob, ok := jc.jobs[name]
-	fmt.Println(tjob, ok)
 	if !ok || !tjob.IsStop {
 		return
 	}
