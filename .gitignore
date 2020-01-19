@@ -6,5 +6,5 @@ minecraft-servers/*
 minecraft-contains/*
 databases/*
 *.zip
-test.go
+test.*
 .DS_Store
