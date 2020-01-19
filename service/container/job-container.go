@@ -93,10 +93,6 @@ func (jc *JobContainer) StopJobs(names ...string) {
 	}
 }
 
-func (jc *JobContainer) StopAll() {
-	jc.StopJobs(jc.jobNames...)
-}
-
 func GetJobContainerObj() container.JobContainer {
 	if JobContainerObj != nil {
 		return JobContainerObj

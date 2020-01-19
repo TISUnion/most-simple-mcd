@@ -14,13 +14,20 @@ import (
 
 // Injectors from wire.go:
 
-func GetConfIntance() _interface.Conf {
+func GetConfInstance() _interface.Conf {
 	terminalType := service.InitFlag()
 	conf := service.GetConfObj(terminalType)
 	return conf
 }
 
-func GetJobContainerIntance() container.JobContainer {
+func GetJobContainerInstance() container.JobContainer {
 	jobContainer := container2.GetJobContainerObj()
 	return jobContainer
+}
+
+func GetLogContainerInstance() container.LogContainer {
+	jobContainer := GetJobContainerInstance()
+	conf := GetConfInstance()
+	logContainer := container2.GetLogContainerObj(jobContainer, conf)
+	return logContainer
 }

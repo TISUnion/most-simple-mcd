@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/TISUnion/most-simple-mcd/contants"
+	"github.com/TISUnion/most-simple-mcd/constant"
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
@@ -28,11 +28,20 @@ const (
 	IS_RELOAD_CONF          = "config.auto.reload"          // 自动加载配置文件
 	RELOAD_CONF_INTERVAL    = "config.auto.reload.interval" // 自动加载配置文件间隔，单位：毫秒
 	CONF_PATH               = "config.path"                 // 配置文件地址
-	IS_START_MC_GUI         = "server.gui"                  // 启动gui
 	IS_MANAGE_HTTP          = "http.manage.server"          // 启动管理后台
 	MANAGE_HTTP_SERVER_PORT = "http.manage.server.port"     // 管理后台服务端口
+	LOG_PATH                = "log.path"                    // 日志写入目录
+	LOG_SAVE_INTERVAL		= "log.interval"				// 日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中
+	IS_START_MC_GUI         = "server.gui"                  // 启动gui
 	WORKSPACE               = "workspace"                   // 工作目录
 	I18N                    = "i18n"                        // 国际化
+)
+
+const (
+	LOG_SAVE_INTERVAL_EVERYDAY = "59 23 * * *"	// cron每日表达式
+	LOG_SAVE_INTERVAL_TWICEDAY = "59 23 1/2 * ?" // cron每隔2天表达式
+	LOG_SAVE_INTERVAL_EVERYMONDAY = "59 23 * * 0" // cron每周一表达式
+	LOG_SAVE_INTERVAL_EVERYMONTH = "59 23 1 * ?" // cron每月1日表达式
 )
 
 // Conf
@@ -65,6 +74,14 @@ func init() {
 	DefaultConfig[IS_MANAGE_HTTP] = "true"
 	DefaultConfig[MANAGE_HTTP_SERVER_PORT] = "80"
 
+	if currentPath, err := utils.GetCurrentPath(); err == nil {
+		DefaultConfig[LOG_PATH]  = filepath.Join(currentPath, "logs")
+	} else {
+		DefaultConfig[LOG_PATH]  = filepath.Join("./", "logs")
+	}
+
+	DefaultConfig[LOG_SAVE_INTERVAL]  = LOG_SAVE_INTERVAL_TWICEDAY
+
 	if workspace, err := utils.GetCurrentPath(); err == nil {
 		DefaultConfig[WORKSPACE] = workspace
 	} else {
@@ -88,32 +105,37 @@ func (c *Conf) loadFilePath(terminalConfs TerminalType) {
 	path := c.confs[CONF_PATH]
 	// 没有文件就创建文件
 	if !utils.IsFile(path) {
-		if err := utils.CreateFile(path); err != nil {
+		var (
+			f   *os.File
+			err error
+		)
+		if f, err = utils.CreateFile(path); err != nil {
 			// TODO 写入日志
 
 			if path != DefaultConfig["CONF_PATH"] {
 				// 回退至默认配置
 				c.confs[CONF_PATH] = DefaultConfig["CONF_PATH"]
 				if !utils.IsFile(c.confs[CONF_PATH]) {
-					if err := utils.CreateFile(c.confs[CONF_PATH]); err != nil {
-						utils.PanicError(contants.CREATE_CONF_ERROR)
+					if f, err = utils.CreateFile(c.confs[CONF_PATH]); err != nil {
+						utils.PanicError(constant.CREATE_CONF_ERROR)
 					}
 				}
 			} else {
-				utils.PanicError(contants.CREATE_CONF_ERROR)
+				utils.PanicError(constant.CREATE_CONF_ERROR)
 			}
 		}
+		defer f.Close()
 	}
 
 	// 配置文件内容为空就写入默认配置
 	data, err := ioutil.ReadFile(c.confs[CONF_PATH])
 	if err != nil {
-		utils.PanicError(contants.READ_CONF_ERROR)
+		utils.PanicError(constant.READ_CONF_ERROR)
 	}
 	if len(data) == 0 {
-		cfg := utils.SetIniCfg(DefaultConfig)
-		if err := cfg.SaveTo(c.confs[CONF_PATH]) ; err != nil {
-			utils.PanicError(contants.WRITE_CONF_ERROR)
+		cfg := setIniCfg(DefaultConfig)
+		if err := cfg.SaveTo(c.confs[CONF_PATH]); err != nil {
+			utils.PanicError(constant.WRITE_CONF_ERROR)
 		}
 	}
 }
@@ -142,7 +164,8 @@ func (c *Conf) ReloadConfig() {
 func (c *Conf) loadFileConf() {
 	cfg, err := ini.Load(c.confs["CONF_PATH"])
 	if err != nil {
-		// 文件解析错误 TODO 写入日志
+		// 文件解析错误
+		utils.PanicError(constant.PARSE_INI_CONF_ERROR)
 	} else {
 		sec := cfg.Section("")
 		keys := sec.KeyStrings()
@@ -200,7 +223,7 @@ func (c *Conf) SetConfig(key string, val string) {
 	}
 }
 
-// 获取配置
+// 获取配置实例
 func GetConfObj(terminalConfs TerminalType) _interface.Conf {
 	if appConf != nil {
 		return appConf
@@ -227,4 +250,14 @@ func GetConfObj(terminalConfs TerminalType) _interface.Conf {
 	appConf.loadTerminalConf(terminalConfs)
 
 	return appConf
+}
+
+// 这是ini配置对象
+func setIniCfg(data map[string]string) *ini.File {
+	cfg := ini.Empty()
+	sec, _ := cfg.NewSection("")
+	for k, v := range data {
+		_, _ = sec.NewKey(k, v)
+	}
+	return cfg
 }

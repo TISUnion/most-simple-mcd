@@ -11,12 +11,17 @@ import (
 	"github.com/google/wire"
 )
 
-func GetConfIntance() _interface.Conf {
+func GetConfInstance() _interface.Conf {
 	wire.Build(service.InitFlag, service.GetConfObj)
 	return &service.Conf{}
 }
 
-func GetJobContainerIntance() container.JobContainer {
+func GetJobContainerInstance() container.JobContainer {
 	wire.Build(container2.GetJobContainerObj)
 	return &container2.JobContainer{}
+}
+
+func GetLogContainerInstance() container.LogContainer {
+	wire.Build(GetConfInstance, GetJobContainerInstance, container2.GetLogContainerObj)
+	return &container2.LogContainer{}
 }

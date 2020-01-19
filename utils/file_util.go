@@ -8,7 +8,7 @@ import (
 
 // 判断所给路径文件/文件夹是否存在
 func ExistsResource(path string) bool {
-	_, err := os.Stat(path)    //os.Stat获取文件信息
+	_, err := os.Stat(path) //os.Stat获取文件信息
 	if err != nil {
 		if os.IsExist(err) {
 			return true
@@ -34,17 +34,16 @@ func CompressFile(source, destination string) error {
 }
 
 // 创建文件
-func CreateFile(path string) error {
-	dirPath, _ := filepath.Split(path)
+func CreateFile(path string) (*os.File, error) {
+	dirPath := filepath.Dir(path)
 	if IsDir(dirPath) {
-		if err := CreatDir(dirPath) ; err != nil {
-			return err
+		if err := CreatDir(dirPath); err != nil {
+			return nil, err
 		}
 	}
-	file, err := os.Create(path)
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer file.Close()
-	return nil
+	return file, nil
 }

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/mholt/archiver/v3"
 	"io"
 	"io/ioutil"
@@ -63,7 +64,7 @@ func GetCurrentPath() (string, error) {
 	}
 	i := strings.LastIndex(path, "/")
 	if i < 0 {
-		return "", errors.New(`Can't find "/" or "\".`)
+		return "", errors.New(constant.GET_CURRENT_PATH_FAILED)
 	}
 	return string(path[0 : i+1]), nil
 }
