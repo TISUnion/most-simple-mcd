@@ -11,3 +11,4 @@ test.*
 conf/*
 main
 main.go
+run.sh
