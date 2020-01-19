@@ -8,3 +8,6 @@ databases/*
 *.zip
 test.*
 .DS_Store
+conf/*
+main
+main.go
