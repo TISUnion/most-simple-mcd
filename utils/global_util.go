@@ -1,9 +1,9 @@
 package utils
 
+import "github.com/TISUnion/most-simple-mcd/wire"
+
 // 致命错误，退出程序
 func PanicError(msg string) {
-	// todo 写入日志
-
 	panic(msg)
 }
 
@@ -35,6 +35,6 @@ func RemoveRepeatedElement(arr []string) []string {
 }
 
 func WriteLog(msg string, level string) {
-
+	wire.GetLogContainerInstance().WriteLog(msg, level)
 }
 

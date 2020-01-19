@@ -18,10 +18,7 @@ var (
 	_logContainer container.LogContainer
 )
 
-const (
-	DEFAULT_CHANNEL   = "default"
-	EVERYDAY_JOB_NAME = "everyday-add-log"
-)
+
 
 func getIncreateId() int {
 	idLock.Lock()
@@ -55,7 +52,7 @@ func (l *LogContainer) AddLog(name string, params ...interface{}) _interface.Log
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	var (
-		logLevel       = service.LOG_INFO
+		logLevel       = constant.LOG_INFO
 		isShowCodeLine = false
 		path           string
 		dirPath        = l.LogDir
@@ -115,7 +112,7 @@ func (l *LogContainer) AddLogJob() {
 }
 
 func (l *LogContainer) WriteLogOnChannels(msg string, level string, channels []string) {
-	channels = append(channels, DEFAULT_CHANNEL)
+	channels = append(channels, constant.DEFAULT_CHANNEL)
 	channels = utils.RemoveRepeatedElement(channels)
 	for _, v := range channels {
 		if log := l.GetLogByName(v); log != nil {
@@ -129,7 +126,7 @@ func (l *LogContainer) WriteLogOnChannels(msg string, level string, channels []s
 
 // 写入默认日志
 func (l *LogContainer) WriteLog(params ...string) {
-	log := l.GetLogByName(DEFAULT_CHANNEL)
+	log := l.GetLogByName(constant.DEFAULT_CHANNEL)
 	var (
 		msg   string
 		level string
@@ -163,9 +160,9 @@ func GetLogContainerObj(JobContainer container.JobContainer, conf _interface.Con
 
 	_logContainer = _logContainerObj
 	// 注册定时清理日志任务
-	JobContainer.RegisterJob(EVERYDAY_JOB_NAME, conf.GetConfVal(service.LOG_SAVE_INTERVAL), _logContainerObj.AddLogJob)
+	JobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, conf.GetConfVal(service.LOG_SAVE_INTERVAL), _logContainerObj.AddLogJob)
 	// 创建默认日志
-	_logContainerObj.AddLog(DEFAULT_CHANNEL)
+	_logContainerObj.AddLog(constant.DEFAULT_CHANNEL)
 
 	return _logContainerObj
 }

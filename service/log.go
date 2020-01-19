@@ -16,27 +16,18 @@ import (
 )
 
 const (
-	LOG_DEBUG   = "debug"
-	LOG_INFO    = "info"
-	LOG_ERROR   = "error"
-	LOG_WARNING = "warning"
-	LOG_FATAL   = "fatal"
 
-	LOG_FORMAT          = "%s [%s]: %s"
-	LOG_CODELINE_FORMAT = "%s [%s] %s : %s"
-
-	LOG_TIME_FORMAT = "2006-01-02 15:04:05.000000"
 )
 
 var LogLevel map[string]int
 
 func init() {
 	LogLevel = make(map[string]int)
-	LogLevel[LOG_DEBUG] = 1
-	LogLevel[LOG_INFO] = 2
-	LogLevel[LOG_WARNING] = 3
-	LogLevel[LOG_ERROR] = 4
-	LogLevel[LOG_FATAL] = 5
+	LogLevel[constant.LOG_DEBUG] = 1
+	LogLevel[constant.LOG_INFO] = 2
+	LogLevel[constant.LOG_WARNING] = 3
+	LogLevel[constant.LOG_ERROR] = 4
+	LogLevel[constant.LOG_FATAL] = 5
 }
 
 type Log struct {
@@ -109,15 +100,15 @@ func (l *Log) CompressLogs(tpath string) error {
 }
 
 func (l *Log) getLogMsg(level string, msg string) string {
-	timeStr := time.Now().Format(LOG_TIME_FORMAT)
-	logMsg := fmt.Sprintf(LOG_FORMAT, timeStr, level, msg)
+	timeStr := time.Now().Format(constant.LOG_TIME_FORMAT)
+	logMsg := fmt.Sprintf(constant.LOG_FORMAT, timeStr, level, msg)
 	// 展示调用代码位置
 	if l.ShowCodeLine {
 		lineMsg := ""
 		if _, file, line, ok := runtime.Caller(0); ok {
 			lineMsg = fmt.Sprintf("%s:%d", file, line)
 		}
-		logMsg = fmt.Sprintf(LOG_CODELINE_FORMAT, timeStr, level, lineMsg, msg)
+		logMsg = fmt.Sprintf(constant.LOG_CODELINE_FORMAT, timeStr, level, lineMsg, msg)
 	}
 	return logMsg
 }

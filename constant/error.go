@@ -14,4 +14,6 @@ const (
 	GET_CURRENT_PATH_FAILED = "获取当前执行目录失败"
 
 	WRITE_LOG_FAILED = "日志写入失败"
+
+	CREATE_CONF_FAILED_AND_ROLLBACK = "创建配置文件失败，回滚至默认配置"
 )

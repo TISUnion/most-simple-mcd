@@ -37,13 +37,6 @@ const (
 	I18N                    = "i18n"                        // 国际化
 )
 
-const (
-	LOG_SAVE_INTERVAL_EVERYDAY = "59 23 * * *"	// cron每日表达式
-	LOG_SAVE_INTERVAL_TWICEDAY = "59 23 1/2 * ?" // cron每隔2天表达式
-	LOG_SAVE_INTERVAL_EVERYMONDAY = "59 23 * * 0" // cron每周一表达式
-	LOG_SAVE_INTERVAL_EVERYMONTH = "59 23 1 * ?" // cron每月1日表达式
-)
-
 // Conf
 // 首次导入配置优先级： 命令行变量 > 环境变量 > 配置文件 > 默认配置
 // 非首次加载：		 配置文件 > 环境变量 > 默认配置
@@ -80,7 +73,7 @@ func init() {
 		DefaultConfig[LOG_PATH]  = filepath.Join("./", "logs")
 	}
 
-	DefaultConfig[LOG_SAVE_INTERVAL]  = LOG_SAVE_INTERVAL_TWICEDAY
+	DefaultConfig[LOG_SAVE_INTERVAL]  = constant.LOG_SAVE_INTERVAL_TWICEDAY
 
 	if workspace, err := utils.GetCurrentPath(); err == nil {
 		DefaultConfig[WORKSPACE] = workspace
@@ -110,8 +103,8 @@ func (c *Conf) loadFilePath(terminalConfs TerminalType) {
 			err error
 		)
 		if f, err = utils.CreateFile(path); err != nil {
-			// TODO 写入日志
-
+			// 写入日志
+			utils.WriteLog(constant.CREATE_CONF_FAILED_AND_ROLLBACK, constant.LOG_ERROR)
 			if path != DefaultConfig["CONF_PATH"] {
 				// 回退至默认配置
 				c.confs[CONF_PATH] = DefaultConfig["CONF_PATH"]
@@ -141,7 +134,7 @@ func (c *Conf) loadFilePath(terminalConfs TerminalType) {
 }
 
 // loadPluginsConfKeysType
-// todo 加载插件的所有配置键
+// TODO 加载插件的所有配置键
 func (c *Conf) loadPluginsConfKeysType() {
 
 }
