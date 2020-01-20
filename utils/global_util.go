@@ -2,11 +2,22 @@ package utils
 
 import (
 	"fmt"
+	_interface "github.com/TISUnion/most-simple-mcd/interface"
 )
 
 // 致命错误，退出程序
 func PanicError(msg string, err error) {
 	panic(fmt.Sprintf("%s, reason: %v", msg, err))
+}
+
+func NewConfParam(Name, ConfVal, description string, level int) *_interface.ConfParam {
+	return &_interface.ConfParam{
+		ConfVal:        ConfVal,
+		DefaultConfVal: ConfVal,
+		Name:           Name,
+		Level:          level,
+		Description:    description,
+	}
 }
 
 // 去除数组内相同的元素（set化）

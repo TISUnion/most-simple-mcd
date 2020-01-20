@@ -7,15 +7,15 @@ import (
 
 var onceLock *sync.Once
 
-func init()  {
+func init() {
 	onceLock = &sync.Once{}
 }
 
 func InitFlag() (terminalConfs TerminalType) {
 	onceLock.Do(func() {
 		terminalConfs = make(TerminalType)
-		for _, v := range DefaultConfKeys {
-			terminalConfs[v] = flag.String(v,"","")
+		for name, confParam := range DefaultConfParam {
+			terminalConfs[name] = flag.String(name, confParam.DefaultConfVal, confParam.Description)
 		}
 		flag.Parse()
 	})

@@ -14,7 +14,8 @@ import (
 type TerminalType map[string]*string
 
 var (
-	appConf *Conf
+	appConf          *Conf
+	DefaultConfParam map[string]*_interface.ConfParam
 )
 
 // Conf
@@ -34,33 +35,24 @@ type Conf struct {
 	lock *sync.RWMutex
 }
 
-//func init() {
-//	// 初始化变量
-//	DefaultConfKeys = make([]string, 0)
-//	DefaultConfKeys = append(DefaultConfKeys, IS_RELOAD_CONF, RELOAD_CONF_INTERVAL, CONF_PATH, IS_START_MC_GUI, IS_MANAGE_HTTP, MANAGE_HTTP_SERVER_PORT, WORKSPACE, I18N,LOG_SHOW_CODELINE,LOG_SAVE_INTERVAL,LOG_PATH)
-//
-//	// 定义默认配置
-//	DefaultConfig = make(map[string]string)
-//
-//	DefaultConfig[IS_RELOAD_CONF] = "true"
-//	DefaultConfig[RELOAD_CONF_INTERVAL] = "2000"
-//
-//	DefaultConfig[IS_START_MC_GUI] = "false"
-//	DefaultConfig[IS_MANAGE_HTTP] = "true"
-//	DefaultConfig[MANAGE_HTTP_SERVER_PORT] = "80"
-//
-//	DefaultConfig[LOG_SAVE_INTERVAL] = constant.LOG_SAVE_INTERVAL_TWICEDAY
-//	DefaultConfig[LOG_SHOW_CODELINE] = "false"
-//
-//	if workspace, err := utils.GetCurrentPath(); err == nil {
-//		DefaultConfig[WORKSPACE] = workspace
-//	} else {
-//		DefaultConfig[WORKSPACE] = "./"
-//	}
-//	DefaultConfig[LOG_PATH] = filepath.Join(DefaultConfig["workspace"], "logs")
-//	DefaultConfig[CONF_PATH] = filepath.Join(DefaultConfig["workspace"], "conf/mcd.ini")
-//	DefaultConfig[I18N] = "zh"
-//}
+func init() {
+	DefaultConfParam = make(map[string]*_interface.ConfParam)
+	DefaultConfParam[constant.IS_RELOAD_CONF] = utils.NewConfParam(constant.IS_RELOAD_CONF, "true", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	DefaultConfParam[constant.RELOAD_CONF_INTERVAL] = utils.NewConfParam(constant.RELOAD_CONF_INTERVAL, "2000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	DefaultConfParam[constant.IS_START_MC_GUI] = utils.NewConfParam(constant.IS_START_MC_GUI, "false", constant.IS_START_MC_GUI_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	DefaultConfParam[constant.IS_MANAGE_HTTP] = utils.NewConfParam(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	DefaultConfParam[constant.MANAGE_HTTP_SERVER_PORT] = utils.NewConfParam(constant.MANAGE_HTTP_SERVER_PORT, "80", constant.MANAGE_HTTP_SERVER_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	DefaultConfParam[constant.LOG_SAVE_INTERVAL] = utils.NewConfParam(constant.LOG_SAVE_INTERVAL, constant.LOG_SAVE_INTERVAL_TWICEDAY, constant.LOG_SAVE_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	DefaultConfParam[constant.LOG_SHOW_CODELINE] = utils.NewConfParam(constant.LOG_SHOW_CODELINE, "false", constant.LOG_SHOW_CODELINE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	if workspace, err := utils.GetCurrentPath(); err == nil {
+		DefaultConfParam[constant.WORKSPACE] = utils.NewConfParam(constant.WORKSPACE, workspace, constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	} else {
+		DefaultConfParam[constant.WORKSPACE] = utils.NewConfParam(constant.WORKSPACE, "./", constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	}
+	DefaultConfParam[constant.LOG_PATH] = utils.NewConfParam(constant.LOG_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "logs"), constant.LOG_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	DefaultConfParam[constant.CONF_PATH] = utils.NewConfParam(constant.CONF_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "conf/mcd.ini"), constant.CONF_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	DefaultConfParam[constant.I18N] = utils.NewConfParam(constant.I18N, "zh", constant.I18N_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+}
 
 // loadFilePath
 // 获取配置文件目录
@@ -125,21 +117,9 @@ func (c *Conf) ReloadConfig() {
 // loadDefaultConf
 // 加载默认配置
 func (c *Conf) loadDefaultConf() {
-	c.SetConfParam(constant.IS_RELOAD_CONF, "true", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	c.SetConfParam(constant.RELOAD_CONF_INTERVAL, "2000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	c.SetConfParam(constant.IS_START_MC_GUI, "false", constant.IS_START_MC_GUI_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	c.SetConfParam(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	c.SetConfParam(constant.MANAGE_HTTP_SERVER_PORT, "80", constant.MANAGE_HTTP_SERVER_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	c.SetConfParam(constant.LOG_SAVE_INTERVAL, constant.LOG_SAVE_INTERVAL_TWICEDAY, constant.LOG_SAVE_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	c.SetConfParam(constant.LOG_SHOW_CODELINE, "false", constant.LOG_SHOW_CODELINE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	if workspace, err := utils.GetCurrentPath(); err == nil {
-		c.SetConfParam(constant.WORKSPACE, workspace, constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	} else {
-		c.SetConfParam(constant.WORKSPACE, "./", constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	for _, confParam := range DefaultConfParam {
+		c.SetConfParam(confParam.Name, confParam.ConfVal, confParam.Description, confParam.Level)
 	}
-	c.SetConfParam(constant.LOG_PATH, filepath.Join(c.confs[constant.WORKSPACE].ConfVal, "logs"), constant.LOG_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	c.SetConfParam(constant.CONF_PATH, filepath.Join(c.confs[constant.WORKSPACE].ConfVal, "conf/mcd.ini"), constant.CONF_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	c.SetConfParam(constant.I18N, "zh", constant.I18N_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 }
 
 // loadFileConf

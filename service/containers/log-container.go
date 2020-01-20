@@ -153,13 +153,13 @@ func GetLogContainerObj(JobContainer container.JobContainer, conf _interface.Con
 	_logContainerObj := &LogContainer{
 		NameIdMapping: make(map[string]int),
 		Logs:          make(map[int]*service.Log),
-		LogDir:        conf.GetConfVal(service.LOG_PATH),
+		LogDir:        conf.GetConfVal(constant.LOG_PATH),
 		lock:          &sync.Mutex{},
 	}
 
 	_logContainer = _logContainerObj
 	// 注册定时清理日志任务
-	JobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, conf.GetConfVal(service.LOG_SAVE_INTERVAL), _logContainerObj.AddLogJob)
+	JobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, conf.GetConfVal(constant.LOG_SAVE_INTERVAL), _logContainerObj.AddLogJob)
 	// 创建默认日志
 	_logContainerObj.AddLog(constant.DEFAULT_CHANNEL)
 
