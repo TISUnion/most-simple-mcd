@@ -15,7 +15,7 @@ func InitFlag() (terminalConfs TerminalType) {
 	onceLock.Do(func() {
 		terminalConfs = make(TerminalType)
 		for name, confParam := range DefaultConfParam {
-			terminalConfs[name] = flag.String(name, confParam.DefaultConfVal, confParam.Description)
+			terminalConfs[name] = flag.String(name, "", confParam.Description)
 		}
 		flag.Parse()
 	})

@@ -2,15 +2,15 @@ package constant
 
 // 配置名常量
 const (
-	IS_RELOAD_CONF          = "config.auto.reload"          // 自动加载配置文件
-	RELOAD_CONF_INTERVAL    = "config.auto.reload.interval" // 自动加载配置文件间隔，单位：毫秒
-	CONF_PATH               = "config.path"                 // 配置文件地址
-	IS_MANAGE_HTTP          = "http.manage.server"          // 启动管理后台
-	MANAGE_HTTP_SERVER_PORT = "http.manage.server.port"     // 管理后台服务端口
-	LOG_PATH                = "log.path"                    // 日志写入目录
-	LOG_SAVE_INTERVAL       = "log.interval"                // 日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中
-	LOG_SHOW_CODELINE       = "log.show.codeline"           // 日志打印代码位置
-	IS_START_MC_GUI         = "server.gui"                  // 启动gui
+	IS_RELOAD_CONF          = "config_auto_reload"          // 自动加载配置文件
+	RELOAD_CONF_INTERVAL    = "config_auto_reload_interval" // 自动加载配置文件间隔，单位：毫秒
+	CONF_PATH               = "config_path"                 // 配置文件地址
+	IS_MANAGE_HTTP          = "http_manage_server"          // 启动管理后台
+	MANAGE_HTTP_SERVER_PORT = "http_manage_server_port"     // 管理后台服务端口
+	LOG_PATH                = "log_path"                    // 日志写入目录
+	LOG_SAVE_INTERVAL       = "log_interval"                // 日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中
+	LOG_SHOW_CODELINE       = "log_show_codeline"           // 日志打印代码位置
+	IS_START_MC_GUI         = "server_gui"                  // 启动gui
 	WORKSPACE               = "workspace"                   // 工作目录
 	I18N                    = "i18n"                        // 国际化
 )

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -19,8 +20,7 @@ var (
 )
 
 // Conf
-// 首次导入配置优先级： 命令行变量 > 环境变量 > 配置文件 > 默认配置
-// 非首次加载：		 配置文件 > 环境变量 > 默认配置
+// 导入配置优先级： 命令行变量 > 环境变量 > 配置文件 > 默认配置
 type Conf struct {
 	// Confs
 	// 配置
@@ -37,7 +37,7 @@ type Conf struct {
 
 func init() {
 	DefaultConfParam = make(map[string]*_interface.ConfParam)
-	DefaultConfParam[constant.IS_RELOAD_CONF] = utils.NewConfParam(constant.IS_RELOAD_CONF, "true", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	DefaultConfParam[constant.IS_RELOAD_CONF] = utils.NewConfParam(constant.IS_RELOAD_CONF, "false", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.RELOAD_CONF_INTERVAL] = utils.NewConfParam(constant.RELOAD_CONF_INTERVAL, "2000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.IS_START_MC_GUI] = utils.NewConfParam(constant.IS_START_MC_GUI, "false", constant.IS_START_MC_GUI_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.IS_MANAGE_HTTP] = utils.NewConfParam(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
@@ -112,6 +112,14 @@ func (c *Conf) loadPluginsConf() {
 func (c *Conf) ReloadConfig() {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+	// 加载插件配置文件
+	c.loadPluginsConf()
+
+	// 加载配置文件
+	c.loadFileConf()
+
+	// 加载环境变量
+	c.loadEnvConf()
 }
 
 // loadDefaultConf
@@ -143,7 +151,10 @@ func (c *Conf) loadFileConf() {
 func (c *Conf) loadEnvConf() {
 	env := os.Environ()
 	for _, v := range env {
-		c.SetConfParam(v, os.Getenv(v), "", constant.CONF_ENVIRONMENT_LEVEL)
+		envkvAr := strings.Split(v, "=")
+		if len(envkvAr) >= 2  && envkvAr[1] != ""{
+			c.SetConfParam(envkvAr[0], envkvAr[1], "", constant.CONF_ENVIRONMENT_LEVEL)
+		}
 	}
 }
 
@@ -152,7 +163,9 @@ func (c *Conf) loadEnvConf() {
 func (c *Conf) loadTerminalConf(terminalConfs TerminalType) {
 	if terminalConfs != nil {
 		for k, v := range terminalConfs {
-			c.SetConfParam(k, *v, "", constant.CONF_TERMINAL_LEVEL)
+			if *v != "" {
+				c.SetConfParam(k, *v, "", constant.CONF_TERMINAL_LEVEL)
+			}
 		}
 	}
 }
@@ -195,6 +208,8 @@ func (c *Conf) SetConfig(key string, val string) {
 func (c *Conf) Init(terminalConfs TerminalType) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+	// 加载默认配置
+	c.loadDefaultConf()
 
 	// 加载文件配置文件路径
 	c.loadFilePath(terminalConfs)
@@ -210,7 +225,6 @@ func (c *Conf) Init(terminalConfs TerminalType) {
 
 	// 加载命令行参数
 	c.loadTerminalConf(terminalConfs)
-
 }
 
 // 设置配置
