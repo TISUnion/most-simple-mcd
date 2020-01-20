@@ -1,5 +1,13 @@
 package _interface
 
+type ConfParam struct {
+	ConfVal string
+	DefaultConfVal string
+	Name string
+	Level int
+	Description string
+}
+
 type Conf interface {
 	// GetConfig
 	// 获取所有配置

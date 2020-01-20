@@ -11,31 +11,10 @@ import (
 	"sync"
 )
 
-type ConfValType map[string]string
-
 type TerminalType map[string]*string
 
-type ConfKeysType []string
-
 var (
-	DefaultConfKeys ConfKeysType
-	appConf         *Conf
-	DefaultConfig   ConfValType
-)
-
-// 参数名常量
-const (
-	IS_RELOAD_CONF          = "config.auto.reload"          // 自动加载配置文件
-	RELOAD_CONF_INTERVAL    = "config.auto.reload.interval" // 自动加载配置文件间隔，单位：毫秒
-	CONF_PATH               = "config.path"                 // 配置文件地址
-	IS_MANAGE_HTTP          = "http.manage.server"          // 启动管理后台
-	MANAGE_HTTP_SERVER_PORT = "http.manage.server.port"     // 管理后台服务端口
-	LOG_PATH                = "log.path"                    // 日志写入目录
-	LOG_SAVE_INTERVAL       = "log.interval"                // 日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中
-	LOG_SHOW_CODELINE		= "log.show.codeline"			// 日志打印代码位置
-	IS_START_MC_GUI         = "server.gui"                  // 启动gui
-	WORKSPACE               = "workspace"                   // 工作目录
-	I18N                    = "i18n"                        // 国际化
+	appConf *Conf
 )
 
 // Conf
@@ -44,54 +23,56 @@ const (
 type Conf struct {
 	// Confs
 	// 配置
-	confs ConfValType
+	confs map[string]*_interface.ConfParam
 
 	// ConfKeys
 	// 所有配置键值
-	confKeys ConfKeysType
+	ConfKeys []string
 
 	// lock
 	// 读写锁
 	lock *sync.RWMutex
 }
 
-func init() {
-	// 定义默认配置
-	DefaultConfKeys = append(DefaultConfKeys, IS_RELOAD_CONF, RELOAD_CONF_INTERVAL, CONF_PATH, IS_START_MC_GUI, IS_MANAGE_HTTP, MANAGE_HTTP_SERVER_PORT, WORKSPACE, I18N,LOG_SHOW_CODELINE,LOG_SAVE_INTERVAL,LOG_PATH)
-
-	DefaultConfig = make(map[string]string)
-
-	DefaultConfig[IS_RELOAD_CONF] = "true"
-	DefaultConfig[RELOAD_CONF_INTERVAL] = "2000"
-
-	DefaultConfig[IS_START_MC_GUI] = "false"
-	DefaultConfig[IS_MANAGE_HTTP] = "true"
-	DefaultConfig[MANAGE_HTTP_SERVER_PORT] = "80"
-
-	DefaultConfig[LOG_SAVE_INTERVAL] = constant.LOG_SAVE_INTERVAL_TWICEDAY
-	DefaultConfig[LOG_SHOW_CODELINE] = "false"
-
-	if workspace, err := utils.GetCurrentPath(); err == nil {
-		DefaultConfig[WORKSPACE] = workspace
-	} else {
-		DefaultConfig[WORKSPACE] = "./"
-	}
-	DefaultConfig[LOG_PATH] = filepath.Join(DefaultConfig["workspace"], "logs")
-	DefaultConfig[CONF_PATH] = filepath.Join(DefaultConfig["workspace"], "conf/mcd.ini")
-	DefaultConfig[I18N] = "zh"
-}
+//func init() {
+//	// 初始化变量
+//	DefaultConfKeys = make([]string, 0)
+//	DefaultConfKeys = append(DefaultConfKeys, IS_RELOAD_CONF, RELOAD_CONF_INTERVAL, CONF_PATH, IS_START_MC_GUI, IS_MANAGE_HTTP, MANAGE_HTTP_SERVER_PORT, WORKSPACE, I18N,LOG_SHOW_CODELINE,LOG_SAVE_INTERVAL,LOG_PATH)
+//
+//	// 定义默认配置
+//	DefaultConfig = make(map[string]string)
+//
+//	DefaultConfig[IS_RELOAD_CONF] = "true"
+//	DefaultConfig[RELOAD_CONF_INTERVAL] = "2000"
+//
+//	DefaultConfig[IS_START_MC_GUI] = "false"
+//	DefaultConfig[IS_MANAGE_HTTP] = "true"
+//	DefaultConfig[MANAGE_HTTP_SERVER_PORT] = "80"
+//
+//	DefaultConfig[LOG_SAVE_INTERVAL] = constant.LOG_SAVE_INTERVAL_TWICEDAY
+//	DefaultConfig[LOG_SHOW_CODELINE] = "false"
+//
+//	if workspace, err := utils.GetCurrentPath(); err == nil {
+//		DefaultConfig[WORKSPACE] = workspace
+//	} else {
+//		DefaultConfig[WORKSPACE] = "./"
+//	}
+//	DefaultConfig[LOG_PATH] = filepath.Join(DefaultConfig["workspace"], "logs")
+//	DefaultConfig[CONF_PATH] = filepath.Join(DefaultConfig["workspace"], "conf/mcd.ini")
+//	DefaultConfig[I18N] = "zh"
+//}
 
 // loadFilePath
 // 获取配置文件目录
 func (c *Conf) loadFilePath(terminalConfs TerminalType) {
 	// 根据优先级获取配置文件目录
-	if path, ok := terminalConfs[CONF_PATH]; ok && *path != "" {
-		c.confs[CONF_PATH] = *path
-	} else if path := os.Getenv(CONF_PATH); path != "" {
-		c.confs[CONF_PATH] = path
+	if path, ok := terminalConfs[constant.CONF_PATH]; ok && *path != "" {
+		c.SetConfParam(constant.CONF_PATH, *path, constant.CONF_PATH_DESCREPTION, constant.CONF_TERMINAL_LEVEL)
+	} else if path := os.Getenv(constant.CONF_PATH); path != "" {
+		c.SetConfParam(constant.CONF_PATH, path, constant.CONF_PATH_DESCREPTION, constant.CONF_ENVIRONMENT_LEVEL)
 	}
 	// 验证文件是否存在
-	path := c.confs[CONF_PATH]
+	path := c.confs[constant.CONF_PATH].ConfVal
 	// 没有文件就创建文件
 	if !utils.ExistsResource(path) {
 		var (
@@ -99,11 +80,13 @@ func (c *Conf) loadFilePath(terminalConfs TerminalType) {
 			err error
 		)
 		if f, err = utils.CreateFile(path); err != nil {
-			if path != DefaultConfig["CONF_PATH"] {
+			if path != c.confs[constant.CONF_PATH].DefaultConfVal {
+				confParam := c.confs[constant.CONF_PATH]
 				// 回退至默认配置
-				c.confs[CONF_PATH] = DefaultConfig["CONF_PATH"]
-				if !utils.ExistsResource(c.confs[CONF_PATH]) {
-					if f, err = utils.CreateFile(c.confs[CONF_PATH]); err != nil {
+				confParam.ConfVal = confParam.DefaultConfVal
+				confParam.Level = constant.CONF_DEFAULT_LEVEL
+				if !utils.ExistsResource(confParam.ConfVal) {
+					if f, err = utils.CreateFile(confParam.ConfVal); err != nil {
 						utils.PanicError(constant.CREATE_CONF_ERROR, err)
 					}
 				}
@@ -114,13 +97,13 @@ func (c *Conf) loadFilePath(terminalConfs TerminalType) {
 		defer f.Close()
 	}
 	// 配置文件内容为空就写入默认配置
-	data, err := ioutil.ReadFile(c.confs[CONF_PATH])
+	data, err := ioutil.ReadFile(c.confs[constant.CONF_PATH].ConfVal)
 	if err != nil {
 		utils.PanicError(constant.READ_CONF_ERROR, err)
 	}
 	if len(data) == 0 {
-		cfg := setIniCfg(DefaultConfig)
-		if err := cfg.SaveTo(c.confs[CONF_PATH]); err != nil {
+		cfg := setIniCfg(c.confs)
+		if err := cfg.SaveTo(c.confs[constant.CONF_PATH].ConfVal); err != nil {
 			utils.PanicError(constant.WRITE_CONF_ERROR, err)
 		}
 	}
@@ -128,27 +111,41 @@ func (c *Conf) loadFilePath(terminalConfs TerminalType) {
 
 // loadPluginsConfKeysType
 // TODO 加载插件的所有配置键
-func (c *Conf) loadPluginsConfKeysType() {
+func (c *Conf) loadPluginsConf() {
 
 }
 
 // reloadConfig
-// 重载配置
+// TODO 重载配置
 func (c *Conf) ReloadConfig() {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+}
 
-	// 加载环境变量
-	appConf.loadEnvConf()
-
-	// 加载配置文件
-	appConf.loadFileConf()
+// loadDefaultConf
+// 加载默认配置
+func (c *Conf) loadDefaultConf() {
+	c.SetConfParam(constant.IS_RELOAD_CONF, "true", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	c.SetConfParam(constant.RELOAD_CONF_INTERVAL, "2000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	c.SetConfParam(constant.IS_START_MC_GUI, "false", constant.IS_START_MC_GUI_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	c.SetConfParam(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	c.SetConfParam(constant.MANAGE_HTTP_SERVER_PORT, "80", constant.MANAGE_HTTP_SERVER_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	c.SetConfParam(constant.LOG_SAVE_INTERVAL, constant.LOG_SAVE_INTERVAL_TWICEDAY, constant.LOG_SAVE_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	c.SetConfParam(constant.LOG_SHOW_CODELINE, "false", constant.LOG_SHOW_CODELINE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	if workspace, err := utils.GetCurrentPath(); err == nil {
+		c.SetConfParam(constant.WORKSPACE, workspace, constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	} else {
+		c.SetConfParam(constant.WORKSPACE, "./", constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	}
+	c.SetConfParam(constant.LOG_PATH, filepath.Join(c.confs[constant.WORKSPACE].ConfVal, "logs"), constant.LOG_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	c.SetConfParam(constant.CONF_PATH, filepath.Join(c.confs[constant.WORKSPACE].ConfVal, "conf/mcd.ini"), constant.CONF_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	c.SetConfParam(constant.I18N, "zh", constant.I18N_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 }
 
 // loadFileConf
 // 加载文件配置
 func (c *Conf) loadFileConf() {
-	cfg, err := ini.Load(c.confs[CONF_PATH])
+	cfg, err := ini.Load(c.confs[constant.CONF_PATH].ConfVal)
 	if err != nil {
 		// 文件解析错误
 		utils.PanicError(constant.PARSE_INI_CONF_ERROR, err)
@@ -156,7 +153,7 @@ func (c *Conf) loadFileConf() {
 		sec := cfg.Section("")
 		keys := sec.KeyStrings()
 		for _, v := range keys {
-			c.confs[v] = sec.Key(v).String()
+			c.SetConfParam(v, sec.Key(v).String(), "", constant.CONF_FILE_LEVEL)
 		}
 	}
 }
@@ -166,7 +163,7 @@ func (c *Conf) loadFileConf() {
 func (c *Conf) loadEnvConf() {
 	env := os.Environ()
 	for _, v := range env {
-		c.confs[v] = os.Getenv(v)
+		c.SetConfParam(v, os.Getenv(v), "", constant.CONF_ENVIRONMENT_LEVEL)
 	}
 }
 
@@ -175,7 +172,7 @@ func (c *Conf) loadEnvConf() {
 func (c *Conf) loadTerminalConf(terminalConfs TerminalType) {
 	if terminalConfs != nil {
 		for k, v := range terminalConfs {
-			c.confs[k] = *v
+			c.SetConfParam(k, *v, "", constant.CONF_TERMINAL_LEVEL)
 		}
 	}
 }
@@ -183,20 +180,26 @@ func (c *Conf) loadTerminalConf(terminalConfs TerminalType) {
 func (c *Conf) GetConfig() map[string]string {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-	return c.confs
+	result := make(map[string]string)
+	for k, v := range c.confs {
+		result[k] = v.ConfVal
+	}
+	return result
 }
 
+// 获取配置键
 func (c *Conf) GetConfigKeys() []string {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-	return c.confKeys
+	return c.ConfKeys
 }
 
+// 获取单个配置值
 func (c *Conf) GetConfVal(key string) string {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	if val, ok := c.confs[key]; ok {
-		return val
+		return val.ConfVal
 	}
 	return ""
 }
@@ -205,7 +208,52 @@ func (c *Conf) SetConfig(key string, val string) {
 	if key != "" {
 		c.lock.Lock()
 		defer c.lock.Unlock()
-		c.confs[key] = val
+		c.confs[key].ConfVal = val
+	}
+}
+
+func (c *Conf) Init(terminalConfs TerminalType) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	// 加载文件配置文件路径
+	c.loadFilePath(terminalConfs)
+
+	// 加载插件配置文件
+	c.loadPluginsConf()
+
+	// 加载配置文件
+	c.loadFileConf()
+
+	// 加载环境变量
+	c.loadEnvConf()
+
+	// 加载命令行参数
+	c.loadTerminalConf(terminalConfs)
+
+}
+
+// 设置配置
+func (c *Conf) SetConfParam(Name, ConfVal, description string, level int) {
+	if confParam, ok := c.confs[Name]; ok {
+		// 如果配置优先级不低于与存在配置，就修改
+		if confParam.Level <= level {
+			confParam.Level = level
+			confParam.ConfVal = ConfVal
+			if description != "" {
+				confParam.Description = description
+			}
+		}
+	} else {
+		// 如果不存在配置，就记录配置名并新建配置对象
+		c.ConfKeys = append(c.ConfKeys, Name)
+		c.confs[Name] = &_interface.ConfParam{
+			ConfVal:        ConfVal,
+			Name:           Name,
+			Level:          level,
+			Description:    description,
+			DefaultConfVal: ConfVal,
+		}
 	}
 }
 
@@ -216,35 +264,21 @@ func GetConfObj(terminalConfs TerminalType) _interface.Conf {
 	}
 	rwLock := &sync.RWMutex{}
 	appConf = &Conf{
-		confs:    DefaultConfig,
-		confKeys: DefaultConfKeys,
 		lock:     rwLock,
+		ConfKeys: make([]string, 0),
+		confs:    make(map[string]*_interface.ConfParam),
 	}
-
-	rwLock.Lock()
-	defer rwLock.Unlock()
-	// 加载文件配置文件路径
-	appConf.loadFilePath(terminalConfs)
-
-	// 加载配置文件
-	appConf.loadFileConf()
-
-	// 加载环境变量
-	appConf.loadEnvConf()
-
-	// 加载命令行参数
-	appConf.loadTerminalConf(terminalConfs)
-
+	appConf.Init(terminalConfs)
 	return appConf
 }
 
 // 这是ini配置对象
-func setIniCfg(data map[string]string) *ini.File {
+func setIniCfg(data map[string]*_interface.ConfParam) *ini.File {
 	cfg := ini.Empty()
 	sec, _ := cfg.NewSection("DEFAULT")
 	for k, v := range data {
-		v = "\"" + v + "\""
-		_, _ = sec.NewKey(k, v)
+		confVal := "\"" + v.ConfVal + "\""
+		_, _ = sec.NewKey(k, confVal)
 	}
 	return cfg
 }
