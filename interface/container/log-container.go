@@ -31,4 +31,8 @@ type LogContainer interface {
 	// 第一个参数为要写日志名称
 	// 第二个参数为日志等级
 	WriteLog(...string)
+
+	// ChangeConfCallBack
+	// 配置变更回调
+	ChangeConfCallBack()
 }

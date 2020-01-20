@@ -12,4 +12,6 @@ type JobContainer interface {
 
 	StopJob(string)
 	StopJobs(...string)
+
+	HasJob(string) bool
 }

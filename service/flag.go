@@ -5,11 +5,7 @@ import (
 	"sync"
 )
 
-var onceLock *sync.Once
-
-func init() {
-	onceLock = &sync.Once{}
-}
+var onceLock = &sync.Once{}
 
 func InitFlag() (terminalConfs TerminalType) {
 	onceLock.Do(func() {

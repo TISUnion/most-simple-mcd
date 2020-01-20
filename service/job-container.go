@@ -1,4 +1,4 @@
-package containers
+package service
 
 import (
 	"github.com/TISUnion/most-simple-mcd/interface/container"
@@ -30,7 +30,7 @@ func (jc *JobContainer) RegisterJob(name string, interval string, handle func())
 	// 已经存在任务则覆盖
 	if tmpjob, ok := jc.jobs[name]; ok {
 		if tmpjob.EntryId != 0 {
-			jc.StopJob(name)
+			jc._stopJob(name)
 		}
 	}
 
@@ -43,6 +43,11 @@ func (jc *JobContainer) RegisterJob(name string, interval string, handle func())
 	jc.jobNames = append(jc.jobNames, name)
 }
 
+func (jc *JobContainer) HasJob(name string) bool{
+	_, ok := jc.jobs[name]
+	return ok
+}
+
 func (jc *JobContainer) StartJob(name string) error {
 	jc.lock.Lock()
 	defer jc.lock.Unlock()
@@ -53,7 +58,7 @@ func (jc *JobContainer) StartJob(name string) error {
 		} else {
 			// 设置开始任务的参数
 			tjob.EntryId = id
-			tjob.IsStop = true
+			tjob.IsStop = false
 		}
 	}
 	return nil
@@ -76,12 +81,17 @@ func (jc *JobContainer) StartAll() map[string]error {
 func (jc *JobContainer) StopJob(name string) {
 	jc.lock.Lock()
 	defer jc.lock.Unlock()
+	jc._stopJob(name)
+}
+
+func (jc *JobContainer) _stopJob(name string) {
 	tjob, ok := jc.jobs[name]
-	if !ok || !tjob.IsStop {
+	if !ok || tjob.IsStop {
 		return
 	}
 	if tjob.EntryId != 0 {
 		jc.cron.Remove(tjob.EntryId)
+		tjob.IsStop = true
 	}
 }
 

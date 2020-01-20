@@ -1,11 +1,10 @@
-package containers
+package service
 
 import (
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/container"
-	"github.com/TISUnion/most-simple-mcd/service"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"path/filepath"
 	"sync"
@@ -26,10 +25,11 @@ func getIncreateId() int {
 }
 
 type LogContainer struct {
-	NameIdMapping map[string]int
-	Logs          map[int]*service.Log
-	LogDir        string
-	lock          *sync.Mutex
+	NameIdMapping   map[string]int
+	Logs            map[int]*Log
+	LogDir          string
+	lock            *sync.Mutex
+	logSaveInterval string
 }
 
 func (l *LogContainer) GetLogByName(name string) _interface.Log {
@@ -76,11 +76,11 @@ func (l *LogContainer) AddLog(name string, params ...interface{}) _interface.Log
 	dirPath = filepath.Join(dirPath, name)
 	path = fmt.Sprintf("%s/%s.log", dirPath, time.Now().Format("2006-01-02"))
 	id := getIncreateId()
-	logItem := &service.Log{
+	logItem := &Log{
 		Name:         name,
 		Path:         path,
 		Id:           id,
-		Level:        service.LogLevel[logLevel],
+		Level:        LogLevel[logLevel],
 		ShowCodeLine: isShowCodeLine,
 		WriteChan:    make(chan *_interface.LogMsgType),
 	}
@@ -101,6 +101,7 @@ func (l *LogContainer) AddLogJob() {
 		if fileObj, err := utils.CreateFile(logPath); err != nil {
 			utils.PanicError(constant.CREATE_LOG_FAILED, err)
 		} else {
+			_ = k.CompressLogs("")
 			fileObj.Close()
 			k.Path = logPath
 			// 重载file对象，调函数是为了加锁
@@ -145,23 +146,37 @@ func (l *LogContainer) WriteLog(params ...string) {
 	})
 }
 
-func GetLogContainerObj(JobContainer container.JobContainer, conf _interface.Conf) container.LogContainer {
+// 配置修改回调
+func (l *LogContainer) ChangeConfCallBack() {
+	conf := GetConfInstance()
+	jobContainer := GetJobContainerInstance()
+	if conf.GetConfVal(constant.LOG_SAVE_INTERVAL) != l.logSaveInterval {
+		l.logSaveInterval = conf.GetConfVal(constant.LOG_SAVE_INTERVAL)
+		jobContainer.StopJob(constant.EVERYDAY_JOB_NAME)
+		// 重新注册定时清理日志任务
+		jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, conf.GetConfVal(constant.LOG_SAVE_INTERVAL), l.AddLogJob)
+		_ = jobContainer.StartJob(constant.EVERYDAY_JOB_NAME)
+	}
+}
+
+func GetLogContainerObj() container.LogContainer {
 	if _logContainer != nil {
 		return _logContainer
 	}
-
+	conf := GetConfInstance()
+	jobContainer := GetJobContainerInstance()
 	_logContainerObj := &LogContainer{
-		NameIdMapping: make(map[string]int),
-		Logs:          make(map[int]*service.Log),
-		LogDir:        conf.GetConfVal(constant.LOG_PATH),
-		lock:          &sync.Mutex{},
+		NameIdMapping:   make(map[string]int),
+		Logs:            make(map[int]*Log),
+		LogDir:          conf.GetConfVal(constant.LOG_PATH),
+		lock:            &sync.Mutex{},
+		logSaveInterval: conf.GetConfVal(constant.LOG_SAVE_INTERVAL),
 	}
-
-	_logContainer = _logContainerObj
-	// 注册定时清理日志任务
-	JobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, conf.GetConfVal(constant.LOG_SAVE_INTERVAL), _logContainerObj.AddLogJob)
 	// 创建默认日志
 	_logContainerObj.AddLog(constant.DEFAULT_CHANNEL)
-
+	_logContainer = _logContainerObj
+	// 初始化定时清理日志任务
+	jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, conf.GetConfVal(constant.LOG_SAVE_INTERVAL), _logContainerObj.AddLogJob)
+	_ = jobContainer.StartJob(constant.EVERYDAY_JOB_NAME)
 	return _logContainerObj
 }

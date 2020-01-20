@@ -30,14 +30,18 @@ const (
 	I18N_DESCREPTION                    = "国际化"
 )
 
+// 配置常量
+const (
+	RELOAD_CONF_JOB_NAME = "reload-conf"
+)
 // 日志常量
 const (
 	DEFAULT_CHANNEL               = "default"
 	EVERYDAY_JOB_NAME             = "everyday-add-log"
-	LOG_SAVE_INTERVAL_EVERYDAY    = "59 23 * * *"   // cron每日表达式
-	LOG_SAVE_INTERVAL_TWICEDAY    = "59 23 1/2 * ?" // cron每隔2天表达式
-	LOG_SAVE_INTERVAL_EVERYMONDAY = "59 23 * * 0"   // cron每周一表达式
-	LOG_SAVE_INTERVAL_EVERYMONTH  = "59 23 1 * ?"   // cron每月1日表达式
+	LOG_SAVE_INTERVAL_EVERYDAY    = "0 0 * * *"   // cron每日表达式
+	LOG_SAVE_INTERVAL_TWICEDAY    = "0 0 1/2 * ?" // cron每隔2天表达式
+	LOG_SAVE_INTERVAL_EVERYMONDAY = "0 0 * * 0"   // cron每周一表达式
+	LOG_SAVE_INTERVAL_EVERYMONTH  = "0 0 1 * ?"   // cron每月1日表达式
 	LOG_DEBUG                     = "debug"
 	LOG_INFO                      = "info"
 	LOG_ERROR                     = "error"

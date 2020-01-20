@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/utils"
@@ -8,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -15,7 +17,7 @@ import (
 type TerminalType map[string]*string
 
 var (
-	appConf          *Conf
+	_appConf         *Conf
 	DefaultConfParam map[string]*_interface.ConfParam
 )
 
@@ -32,13 +34,14 @@ type Conf struct {
 
 	// lock
 	// 读写锁
-	lock *sync.RWMutex
+	lock *sync.Mutex
 }
 
-func init() {
+func ConfInit() {
+	// 加载默认配置
 	DefaultConfParam = make(map[string]*_interface.ConfParam)
 	DefaultConfParam[constant.IS_RELOAD_CONF] = utils.NewConfParam(constant.IS_RELOAD_CONF, "false", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	DefaultConfParam[constant.RELOAD_CONF_INTERVAL] = utils.NewConfParam(constant.RELOAD_CONF_INTERVAL, "2000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	DefaultConfParam[constant.RELOAD_CONF_INTERVAL] = utils.NewConfParam(constant.RELOAD_CONF_INTERVAL, "5000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.IS_START_MC_GUI] = utils.NewConfParam(constant.IS_START_MC_GUI, "false", constant.IS_START_MC_GUI_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.IS_MANAGE_HTTP] = utils.NewConfParam(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.MANAGE_HTTP_SERVER_PORT] = utils.NewConfParam(constant.MANAGE_HTTP_SERVER_PORT, "80", constant.MANAGE_HTTP_SERVER_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
@@ -108,18 +111,20 @@ func (c *Conf) loadPluginsConf() {
 }
 
 // reloadConfig
-// TODO 重载配置
+// 重新再加配置
 func (c *Conf) ReloadConfig() {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	// 加载插件配置文件
 	c.loadPluginsConf()
-
 	// 加载配置文件
 	c.loadFileConf()
-
 	// 加载环境变量
 	c.loadEnvConf()
+	// 执行配置更改回调
+	for _, callback := range ChangeConfCallBacks{
+		callback()
+	}
 }
 
 // loadDefaultConf
@@ -171,8 +176,6 @@ func (c *Conf) loadTerminalConf(terminalConfs TerminalType) {
 }
 
 func (c *Conf) GetConfig() map[string]string {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
 	result := make(map[string]string)
 	for k, v := range c.confs {
 		result[k] = v.ConfVal
@@ -182,15 +185,11 @@ func (c *Conf) GetConfig() map[string]string {
 
 // 获取配置键
 func (c *Conf) GetConfigKeys() []string {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
 	return c.ConfKeys
 }
 
 // 获取单个配置值
 func (c *Conf) GetConfVal(key string) string {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
 	if val, ok := c.confs[key]; ok {
 		return val.ConfVal
 	}
@@ -251,22 +250,41 @@ func (c *Conf) SetConfParam(Name, ConfVal, description string, level int) {
 	}
 }
 
+func (c *Conf) ChangeConfCallBack() {
+	_switch, err := strconv.ParseBool(c.GetConfVal(constant.IS_RELOAD_CONF))
+	if err != nil {
+		_switch = false
+	}
+	// 启动自动加载配置任务
+	jobContainer := GetJobContainerInstance()
+	if _switch {
+		interval := fmt.Sprintf("@every %sms", c.GetConfVal(constant.RELOAD_CONF_INTERVAL))
+		if !jobContainer.HasJob(constant.RELOAD_CONF_JOB_NAME) {
+			jobContainer.RegisterJob(constant.RELOAD_CONF_JOB_NAME, interval, c.ReloadConfig)
+		}
+		_ = jobContainer.StartJob(constant.RELOAD_CONF_JOB_NAME)
+	} else {
+		jobContainer.StopJob(constant.RELOAD_CONF_JOB_NAME)
+	}
+}
+
 // 获取配置实例
 func GetConfObj(terminalConfs TerminalType) _interface.Conf {
-	if appConf != nil {
-		return appConf
+	if _appConf != nil {
+		return _appConf
 	}
-	rwLock := &sync.RWMutex{}
-	appConf = &Conf{
-		lock:     rwLock,
+	_appConf = &Conf{
+		lock:     &sync.Mutex{},
 		ConfKeys: make([]string, 0),
 		confs:    make(map[string]*_interface.ConfParam),
 	}
-	appConf.Init(terminalConfs)
-	return appConf
+	_appConf.Init(terminalConfs)
+	// 第一次执行配置更改回调
+	_appConf.ChangeConfCallBack()
+	return _appConf
 }
 
-// 这是ini配置对象
+// 设置ini配置对象
 func setIniCfg(data map[string]*_interface.ConfParam) *ini.File {
 	cfg := ini.Empty()
 	sec, _ := cfg.NewSection("DEFAULT")

@@ -3,31 +3,27 @@
 //go:generate wire
 //+build !wireinject
 
-package wire
+package service
 
 import (
 	"github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/container"
-	"github.com/TISUnion/most-simple-mcd/service"
-	"github.com/TISUnion/most-simple-mcd/service/containers"
 )
 
 // Injectors from wire.go:
 
 func GetConfInstance() _interface.Conf {
-	terminalType := service.InitFlag()
-	conf := service.GetConfObj(terminalType)
+	terminalType := InitFlag()
+	conf := GetConfObj(terminalType)
 	return conf
 }
 
 func GetJobContainerInstance() container.JobContainer {
-	jobContainer := containers.GetJobContainerObj()
+	jobContainer := GetJobContainerObj()
 	return jobContainer
 }
 
 func GetLogContainerInstance() container.LogContainer {
-	jobContainer := GetJobContainerInstance()
-	conf := GetConfInstance()
-	logContainer := containers.GetLogContainerObj(jobContainer, conf)
+	logContainer := GetLogContainerObj()
 	return logContainer
 }

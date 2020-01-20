@@ -21,7 +21,7 @@ const (
 
 var LogLevel map[string]int
 
-func init() {
+func LogInit() {
 	LogLevel = make(map[string]int)
 	LogLevel[constant.LOG_DEBUG] = 1
 	LogLevel[constant.LOG_INFO] = 2
