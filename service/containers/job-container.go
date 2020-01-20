@@ -1,4 +1,4 @@
-package container
+package containers
 
 import (
 	"github.com/TISUnion/most-simple-mcd/interface/container"

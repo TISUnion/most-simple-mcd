@@ -32,6 +32,7 @@ const (
 	MANAGE_HTTP_SERVER_PORT = "http.manage.server.port"     // 管理后台服务端口
 	LOG_PATH                = "log.path"                    // 日志写入目录
 	LOG_SAVE_INTERVAL       = "log.interval"                // 日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中
+	LOG_SHOW_CODELINE		= "log.show.codeline"			// 日志打印代码位置
 	IS_START_MC_GUI         = "server.gui"                  // 启动gui
 	WORKSPACE               = "workspace"                   // 工作目录
 	I18N                    = "i18n"                        // 国际化
@@ -56,7 +57,7 @@ type Conf struct {
 
 func init() {
 	// 定义默认配置
-	DefaultConfKeys = append(DefaultConfKeys, IS_RELOAD_CONF, RELOAD_CONF_INTERVAL, CONF_PATH, IS_START_MC_GUI, IS_MANAGE_HTTP, MANAGE_HTTP_SERVER_PORT, WORKSPACE, I18N)
+	DefaultConfKeys = append(DefaultConfKeys, IS_RELOAD_CONF, RELOAD_CONF_INTERVAL, CONF_PATH, IS_START_MC_GUI, IS_MANAGE_HTTP, MANAGE_HTTP_SERVER_PORT, WORKSPACE, I18N,LOG_SHOW_CODELINE,LOG_SAVE_INTERVAL,LOG_PATH)
 
 	DefaultConfig = make(map[string]string)
 
@@ -68,6 +69,7 @@ func init() {
 	DefaultConfig[MANAGE_HTTP_SERVER_PORT] = "80"
 
 	DefaultConfig[LOG_SAVE_INTERVAL] = constant.LOG_SAVE_INTERVAL_TWICEDAY
+	DefaultConfig[LOG_SHOW_CODELINE] = "false"
 
 	if workspace, err := utils.GetCurrentPath(); err == nil {
 		DefaultConfig[WORKSPACE] = workspace

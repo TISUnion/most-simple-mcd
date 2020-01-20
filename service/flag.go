@@ -1,12 +1,23 @@
 package service
 
-import "flag"
+import (
+	"flag"
+	"sync"
+)
+
+var onceLock *sync.Once
+
+func init()  {
+	onceLock = &sync.Once{}
+}
 
 func InitFlag() (terminalConfs TerminalType) {
-	terminalConfs = make(TerminalType)
-	for _, v := range DefaultConfKeys {
-		terminalConfs[v] = flag.String(v,"","")
-	}
-	flag.Parse()
+	onceLock.Do(func() {
+		terminalConfs = make(TerminalType)
+		for _, v := range DefaultConfKeys {
+			terminalConfs[v] = flag.String(v,"","")
+		}
+		flag.Parse()
+	})
 	return
 }

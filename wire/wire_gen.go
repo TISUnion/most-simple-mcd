@@ -9,7 +9,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/container"
 	"github.com/TISUnion/most-simple-mcd/service"
-	container2 "github.com/TISUnion/most-simple-mcd/service/container"
+	"github.com/TISUnion/most-simple-mcd/service/containers"
 )
 
 // Injectors from wire.go:
@@ -21,13 +21,13 @@ func GetConfInstance() _interface.Conf {
 }
 
 func GetJobContainerInstance() container.JobContainer {
-	jobContainer := container2.GetJobContainerObj()
+	jobContainer := containers.GetJobContainerObj()
 	return jobContainer
 }
 
 func GetLogContainerInstance() container.LogContainer {
 	jobContainer := GetJobContainerInstance()
 	conf := GetConfInstance()
-	logContainer := container2.GetLogContainerObj(jobContainer, conf)
+	logContainer := containers.GetLogContainerObj(jobContainer, conf)
 	return logContainer
 }

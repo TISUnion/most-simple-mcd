@@ -7,7 +7,7 @@ import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/container"
 	"github.com/TISUnion/most-simple-mcd/service"
-	container2 "github.com/TISUnion/most-simple-mcd/service/container"
+	"github.com/TISUnion/most-simple-mcd/service/containers"
 	"github.com/google/wire"
 )
 
@@ -17,11 +17,11 @@ func GetConfInstance() _interface.Conf {
 }
 
 func GetJobContainerInstance() container.JobContainer {
-	wire.Build(container2.GetJobContainerObj)
-	return &container2.JobContainer{}
+	wire.Build(containers.GetJobContainerObj)
+	return &containers.JobContainer{}
 }
 
 func GetLogContainerInstance() container.LogContainer {
-	wire.Build(GetConfInstance, GetJobContainerInstance, container2.GetLogContainerObj)
-	return &container2.LogContainer{}
+	wire.Build(GetConfInstance, GetJobContainerInstance, containers.GetLogContainerObj)
+	return &containers.LogContainer{}
 }
