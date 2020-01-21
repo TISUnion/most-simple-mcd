@@ -14,7 +14,7 @@ type CmdStrType string
 type PortType string
 
 // MinecraftServer
-// mc服务器
+// mc服务器子进程对象
 type MinecraftServer struct {
 	// Name
 	// 服务器名称
@@ -39,6 +39,7 @@ type MinecraftServer struct {
 	Port PortType
 }
 
-func (*MinecraftServer) init(serverName NameType, CmdStr CmdStrType, Port PortType) {
+// 初始化
+func (*MinecraftServer) init() {
 
 }

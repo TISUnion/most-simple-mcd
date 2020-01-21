@@ -23,3 +23,8 @@ func GetLogContainerInstance() container.LogContainer {
 	wire.Build(GetLogContainerObj)
 	return &LogContainer{}
 }
+
+func GetDataBaseInstance(dbname DataBaseNameType) _interface.Database {
+	wire.Build(GetDataBase)
+	return &DataBase{}
+}

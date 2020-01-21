@@ -121,9 +121,7 @@ func (c *Conf) ReloadConfig() {
 	// 加载环境变量
 	c.loadEnvConf()
 	// 执行配置更改回调
-	for _, callback := range ChangeConfCallBacks{
-		callback()
-	}
+	RunChangeConfCallBacks()
 }
 
 // loadDefaultConf
@@ -267,6 +265,10 @@ func (c *Conf) ChangeConfCallBack() {
 	}
 }
 
+func (c *Conf) DestructCallBack() {
+
+}
+
 // 获取配置实例
 func GetConfObj(terminalConfs TerminalType) _interface.Conf {
 	if _appConf != nil {
@@ -280,6 +282,10 @@ func GetConfObj(terminalConfs TerminalType) _interface.Conf {
 	_appConf.Init(terminalConfs)
 	// 第一次执行配置更改回调
 	_appConf.ChangeConfCallBack()
+
+	// 注册回调
+	RegisterCallBack(_appConf)
+
 	return _appConf
 }
 

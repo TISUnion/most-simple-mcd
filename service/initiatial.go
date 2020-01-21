@@ -4,5 +4,4 @@ package service
 func Init() {
 	ConfInit()
 	LogInit()
-	CallBackInit()
 }

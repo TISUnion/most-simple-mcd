@@ -5,6 +5,8 @@ import _interface "github.com/TISUnion/most-simple-mcd/interface"
 // log
 // 日志接口
 type LogContainer interface {
+	_interface.CallBack
+
 	// GetLogByName
 	// 根据名称获取log结构体
 	GetLogByName(string) _interface.Log
@@ -30,8 +32,4 @@ type LogContainer interface {
 	// 第一个参数为要写日志名称
 	// 第二个参数为日志等级
 	WriteLog(...string)
-
-	// ChangeConfCallBack
-	// 配置变更回调
-	ChangeConfCallBack()
 }

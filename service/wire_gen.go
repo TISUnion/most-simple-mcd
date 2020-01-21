@@ -27,3 +27,8 @@ func GetLogContainerInstance() container.LogContainer {
 	logContainer := GetLogContainerObj()
 	return logContainer
 }
+
+func GetDataBaseInstance(dbname DataBaseNameType) _interface.Database {
+	database := GetDataBase(dbname)
+	return database
+}

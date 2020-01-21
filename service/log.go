@@ -26,13 +26,47 @@ func LogInit() {
 }
 
 type Log struct {
-	Name         string
-	Path         string
-	Id           int
-	Level        int
-	WriteChan    chan *_interface.LogMsgType
-	FileObj      *os.File
-	lock         *sync.Mutex // 文件锁：用于防止重新载入*os.file时，正在写入日志
+	Name      string
+	Path      string
+	Id        int
+	Level     int
+	WriteChan chan *_interface.LogMsgType
+	FileObj   *os.File
+	lock      *sync.Mutex // 文件锁：用于防止重新载入*os.file时，正在写入日志
+}
+
+func (l *Log) Errorf(f string, v ...interface{}) {
+	l.Write(&_interface.LogMsgType{
+		Message: fmt.Sprintf(f, v),
+		Level:   constant.LOG_ERROR,
+	})
+}
+
+func (l *Log) Warningf(f string, v ...interface{}) {
+	l.Write(&_interface.LogMsgType{
+		Message: fmt.Sprintf(f, v),
+		Level:   constant.LOG_WARNING,
+	})
+}
+
+func (l *Log) Infof(f string, v ...interface{}) {
+	l.Write(&_interface.LogMsgType{
+		Message: fmt.Sprintf(f, v),
+		Level:   constant.LOG_INFO,
+	})
+}
+
+func (l *Log) Debugf(f string, v ...interface{}) {
+	l.Write(&_interface.LogMsgType{
+		Message: fmt.Sprintf(f, v),
+		Level:   constant.LOG_DEBUG,
+	})
+}
+
+func (l *Log) ChangeConfCallBack() {}
+
+func (l *Log) DestructCallBack() {
+	l.FileObj.Close()
 }
 
 func (l *Log) Write(logMsg *_interface.LogMsgType) {
@@ -45,13 +79,11 @@ func (l *Log) Write(logMsg *_interface.LogMsgType) {
 func (l *Log) writeToFile() {
 	select {
 	case msg := <-l.WriteChan:
-		if l.Level <= LogLevel[msg.Level] {
-			l.lock.Lock()
-			if _, err := l.FileObj.WriteString(l.getLogMsg(msg.Level, msg.Message)); err != nil {
-				utils.PanicError(constant.WRITE_LOG_FAILED, err)
-			}
-			l.lock.Unlock()
+		l.lock.Lock()
+		if _, err := l.FileObj.WriteString(l.getLogMsg(msg.Level, msg.Message)); err != nil {
+			utils.PanicError(constant.WRITE_LOG_FAILED, err)
 		}
+		l.lock.Unlock()
 	}
 }
 

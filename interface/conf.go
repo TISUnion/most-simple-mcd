@@ -9,6 +9,8 @@ type ConfParam struct {
 }
 
 type Conf interface {
+	CallBack
+
 	// GetConfig
 	// 获取所有配置
 	GetConfig() map[string]string

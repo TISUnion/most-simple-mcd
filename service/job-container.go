@@ -43,7 +43,7 @@ func (jc *JobContainer) RegisterJob(name string, interval string, handle func())
 	jc.jobNames = append(jc.jobNames, name)
 }
 
-func (jc *JobContainer) HasJob(name string) bool{
+func (jc *JobContainer) HasJob(name string) bool {
 	_, ok := jc.jobs[name]
 	return ok
 }
@@ -101,6 +101,12 @@ func (jc *JobContainer) StopJobs(names ...string) {
 	}
 }
 
+func (jc *JobContainer) ChangeConfCallBack() {
+}
+
+func (jc *JobContainer) DestructCallBack() {
+}
+
 func GetJobContainerObj() container.JobContainer {
 	if JobContainerObj != nil {
 		return JobContainerObj
@@ -113,5 +119,7 @@ func GetJobContainerObj() container.JobContainer {
 		lock:     &sync.Mutex{},
 		jobNames: make([]string, 0),
 	}
+	// 注册回调
+	RegisterCallBack(JobContainerObj)
 	return JobContainerObj
 }

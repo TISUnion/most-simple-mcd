@@ -2,6 +2,8 @@
 // 接口库
 package _interface
 
+import "github.com/dgraph-io/badger"
+
 type LogMsgType struct {
 	Message string
 	Level string
@@ -10,7 +12,10 @@ type LogMsgType struct {
 // log
 // 日志接口
 type Log interface {
+	// 兼容badger数据库日志接口
+	badger.Logger
 
+	CallBack
 	// Write
 	// 写入日志
 	// 第一个string为日志等级分为：debug、info、warn、error、fatal，依次递增

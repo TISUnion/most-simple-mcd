@@ -51,9 +51,9 @@ func (l *LogContainer) AddLog(name string, params ...string) _interface.Log {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	var (
-		logLevel       = constant.LOG_INFO
-		path           string
-		dirPath        = l.LogDir
+		logLevel = constant.LOG_INFO
+		path     string
+		dirPath  = l.LogDir
 	)
 	// dirPath 为写入日志目录
 	// 优先使用传入的目录，再使用容器配置目录，最后使用默认目录
@@ -74,11 +74,11 @@ func (l *LogContainer) AddLog(name string, params ...string) _interface.Log {
 	path = fmt.Sprintf("%s/%s.log", dirPath, time.Now().Format("2006-01-02"))
 	id := getIncreateId()
 	logItem := &Log{
-		Name:         name,
-		Path:         path,
-		Id:           id,
-		Level:        LogLevel[logLevel],
-		WriteChan:    make(chan *_interface.LogMsgType),
+		Name:      name,
+		Path:      path,
+		Id:        id,
+		Level:     LogLevel[logLevel],
+		WriteChan: make(chan *_interface.LogMsgType, 10),
 	}
 
 	if err := logItem.Init(); err != nil {
@@ -155,6 +155,12 @@ func (l *LogContainer) ChangeConfCallBack() {
 	}
 }
 
+func (l *LogContainer) DestructCallBack() {
+	for _, log := range l.Logs {
+		log.DestructCallBack()
+	}
+}
+
 func GetLogContainerObj() container.LogContainer {
 	if _logContainer != nil {
 		return _logContainer
@@ -174,5 +180,8 @@ func GetLogContainerObj() container.LogContainer {
 	// 初始化定时清理日志任务
 	jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, conf.GetConfVal(constant.LOG_SAVE_INTERVAL), _logContainerObj.AddLogJob)
 	_ = jobContainer.StartJob(constant.EVERYDAY_JOB_NAME)
+
+	// 注册回调
+	RegisterCallBack(_logContainerObj)
 	return _logContainerObj
 }
