@@ -9,14 +9,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
-)
-
-const (
-
 )
 
 var LogLevel map[string]int
@@ -36,7 +31,6 @@ type Log struct {
 	Id           int
 	Level        int
 	WriteChan    chan *_interface.LogMsgType
-	ShowCodeLine bool
 	FileObj      *os.File
 	lock         *sync.Mutex // 文件锁：用于防止重新载入*os.file时，正在写入日志
 }
@@ -65,10 +59,6 @@ func (l *Log) SetLogLevel(level string) {
 	if le, ok := LogLevel[level]; ok {
 		l.Level = le
 	}
-}
-
-func (l *Log) IsShowCodeLine(isShow bool) {
-	l.ShowCodeLine = isShow
 }
 
 func (l *Log) GetLines(page int, pageSize int) []string {
@@ -102,14 +92,6 @@ func (l *Log) CompressLogs(tpath string) error {
 func (l *Log) getLogMsg(level string, msg string) string {
 	timeStr := time.Now().Format(constant.LOG_TIME_FORMAT)
 	logMsg := fmt.Sprintf(constant.LOG_FORMAT, timeStr, level, msg)
-	// 展示调用代码位置
-	if l.ShowCodeLine {
-		lineMsg := ""
-		if _, file, line, ok := runtime.Caller(0); ok {
-			lineMsg = fmt.Sprintf("%s:%d", file, line)
-		}
-		logMsg = fmt.Sprintf(constant.LOG_CODELINE_FORMAT, timeStr, level, lineMsg, msg)
-	}
 	return logMsg
 }
 

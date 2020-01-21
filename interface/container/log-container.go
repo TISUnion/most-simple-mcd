@@ -17,9 +17,8 @@ type LogContainer interface {
 	// 新建一个日志
 	// 第一个参数为日志名称
 	// 第二个参数为写入日志等级 不传为info
-	// 第三个参数为是否显示 不传为false
-	// 第四个参数为日志路径默认在log文件夹下
-	AddLog(string, ...interface{}) _interface.Log
+	// 第三个参数为日志路径默认在log文件夹下
+	AddLog(string, ...string) _interface.Log
 
 	// WriteLogOnChannels
 	// 第一个参数为日志信息

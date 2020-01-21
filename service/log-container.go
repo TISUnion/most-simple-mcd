@@ -46,12 +46,12 @@ func (l *LogContainer) GetLogById(id int) _interface.Log {
 	return l.Logs[id]
 }
 
-func (l *LogContainer) AddLog(name string, params ...interface{}) _interface.Log {
+// 添加日志实例
+func (l *LogContainer) AddLog(name string, params ...string) _interface.Log {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	var (
 		logLevel       = constant.LOG_INFO
-		isShowCodeLine = false
 		path           string
 		dirPath        = l.LogDir
 	)
@@ -65,13 +65,10 @@ func (l *LogContainer) AddLog(name string, params ...interface{}) _interface.Log
 		}
 	}
 	if len(params) > 0 {
-		logLevel = params[0].(string)
+		logLevel = params[0]
 	}
 	if len(params) > 1 {
-		isShowCodeLine = params[1].(bool)
-	}
-	if len(params) > 2 {
-		dirPath = filepath.Join(params[2].(string))
+		dirPath = filepath.Join(params[1])
 	}
 	dirPath = filepath.Join(dirPath, name)
 	path = fmt.Sprintf("%s/%s.log", dirPath, time.Now().Format("2006-01-02"))
@@ -81,7 +78,6 @@ func (l *LogContainer) AddLog(name string, params ...interface{}) _interface.Log
 		Path:         path,
 		Id:           id,
 		Level:        LogLevel[logLevel],
-		ShowCodeLine: isShowCodeLine,
 		WriteChan:    make(chan *_interface.LogMsgType),
 	}
 
@@ -173,7 +169,7 @@ func GetLogContainerObj() container.LogContainer {
 		logSaveInterval: conf.GetConfVal(constant.LOG_SAVE_INTERVAL),
 	}
 	// 创建默认日志
-	_logContainerObj.AddLog(constant.DEFAULT_CHANNEL)
+	_logContainerObj.AddLog(constant.DEFAULT_CHANNEL, constant.LOG_INFO)
 	_logContainer = _logContainerObj
 	// 初始化定时清理日志任务
 	jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, conf.GetConfVal(constant.LOG_SAVE_INTERVAL), _logContainerObj.AddLogJob)

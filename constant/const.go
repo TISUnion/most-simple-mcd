@@ -9,7 +9,6 @@ const (
 	MANAGE_HTTP_SERVER_PORT = "http_manage_server_port"     // 管理后台服务端口
 	LOG_PATH                = "log_path"                    // 日志写入目录
 	LOG_SAVE_INTERVAL       = "log_interval"                // 日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中
-	LOG_SHOW_CODELINE       = "log_show_codeline"           // 日志打印代码位置
 	IS_START_MC_GUI         = "server_gui"                  // 启动gui
 	WORKSPACE               = "workspace"                   // 工作目录
 	I18N                    = "i18n"                        // 国际化

@@ -46,7 +46,6 @@ func ConfInit() {
 	DefaultConfParam[constant.IS_MANAGE_HTTP] = utils.NewConfParam(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.MANAGE_HTTP_SERVER_PORT] = utils.NewConfParam(constant.MANAGE_HTTP_SERVER_PORT, "80", constant.MANAGE_HTTP_SERVER_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.LOG_SAVE_INTERVAL] = utils.NewConfParam(constant.LOG_SAVE_INTERVAL, constant.LOG_SAVE_INTERVAL_TWICEDAY, constant.LOG_SAVE_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	DefaultConfParam[constant.LOG_SHOW_CODELINE] = utils.NewConfParam(constant.LOG_SHOW_CODELINE, "false", constant.LOG_SHOW_CODELINE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	if workspace, err := utils.GetCurrentPath(); err == nil {
 		DefaultConfParam[constant.WORKSPACE] = utils.NewConfParam(constant.WORKSPACE, workspace, constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	} else {
