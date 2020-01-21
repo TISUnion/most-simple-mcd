@@ -69,6 +69,22 @@ func GetCurrentPath() (string, error) {
 	return string(path[0 : i+1]), nil
 }
 
+// 获取指定目录下所有文件（去除目录）
+func GetFilesFromDir(dirPath string) []string {
+	fileList , err := ioutil.ReadDir(dirPath)
+	result := make([]string, 0)
+	if err != nil {
+		return nil
+	}
+	for _, fileinfo := range fileList {
+		if fileinfo.IsDir() {
+			continue
+		}
+		result = append(result, fileinfo.Name())
+	}
+	return result
+}
+
 /* --------------内部方法---------------*/
 // 复制文件夹主方法
 func copyDir(src, dest string, info os.FileInfo) error {

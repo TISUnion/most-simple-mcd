@@ -58,11 +58,7 @@ func (l *LogContainer) AddLog(name string, params ...string) _interface.Log {
 	// dirPath 为写入日志目录
 	// 优先使用传入的目录，再使用容器配置目录，最后使用默认目录
 	if dirPath == "" {
-		if currentPath, err := utils.GetCurrentPath(); err == nil {
-			dirPath = filepath.Join(currentPath, "logs")
-		} else {
-			dirPath = filepath.Join("./", "logs")
-		}
+		dirPath = filepath.Join(GetConfInstance().GetConfVal(constant.WORKSPACE), "logs")
 	}
 	if len(params) > 0 {
 		logLevel = params[0]
