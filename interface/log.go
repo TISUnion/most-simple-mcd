@@ -6,7 +6,7 @@ import "github.com/dgraph-io/badger"
 
 type LogMsgType struct {
 	Message string
-	Level string
+	Level   string
 }
 
 // log
@@ -28,7 +28,7 @@ type Log interface {
 
 	// GetLines
 	// 按行分页获取日志， 第一个int为页码，第二个为一页的有多少行
-	GetLines(int, int)[]string
+	GetLines(int, int) []string
 
 	// CompressLogs
 	// 压缩日志 传空字符串就表是压缩在当前文件夹内

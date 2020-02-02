@@ -71,7 +71,7 @@ func GetCurrentPath() (string, error) {
 
 // 获取指定目录下所有文件（去除目录）
 func GetFilesFromDir(dirPath string) []string {
-	fileList , err := ioutil.ReadDir(dirPath)
+	fileList, err := ioutil.ReadDir(dirPath)
 	result := make([]string, 0)
 	if err != nil {
 		return nil

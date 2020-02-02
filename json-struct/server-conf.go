@@ -7,7 +7,9 @@ type ServerConf struct {
 
 	// CmdStr
 	// 执行的完整命令
-	CmdStr string
+	// 下标为0： 命令名称
+	// 大于0为命令参数
+	CmdStr []string
 
 	// Port
 	// 启动服务器端口
@@ -28,6 +30,4 @@ type ServerConf struct {
 	// IsStartGui
 	// 是否启用gui
 	IsStartGui bool
-
-
 }

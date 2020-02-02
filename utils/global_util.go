@@ -4,6 +4,7 @@ import (
 	"fmt"
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"golang.org/x/text/encoding/simplifiedchinese"
+	"net"
 )
 
 // 致命错误，退出程序
@@ -41,9 +42,9 @@ func RemoveRepeatedElement(arr []string) []string {
 }
 
 // 判断字符编码是否不是UTF8， 如果不是，尝试转成UTF8
-func ParseCharacter(data []byte) ([]byte, error){
+func ParseCharacter(data []byte) ([]byte, error) {
 	if !IsUTF8(data) {
-		if result, err := simplifiedchinese.GBK.NewDecoder().Bytes(data);err !=nil {
+		if result, err := simplifiedchinese.GBK.NewDecoder().Bytes(data); err != nil {
 			return nil, err
 		} else {
 			return result, nil
@@ -52,10 +53,27 @@ func ParseCharacter(data []byte) ([]byte, error){
 	return data, nil
 }
 
+// GetFreePort
+// 获取系统空闲端口
+// 如果port为0，则表示随机获取一个空闲端口，不为0则为指定端口
+func GetFreePort(port int) (int, error) {
+	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("localhost:%d", port))
+	if err != nil {
+		return 0, err
+	}
+
+	l, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		return 0, err
+	}
+	defer l.Close()
+	return l.Addr().(*net.TCPAddr).Port, nil
+}
+
 // 是否是UTF8编码
 func IsUTF8(data []byte) bool {
 	i := 0
-	for i < len(data)  {
+	for i < len(data) {
 		if (data[i] & 0x80) == 0x00 {
 			// 0XXX_XXXX
 			i++
@@ -68,14 +86,14 @@ func IsUTF8(data []byte) bool {
 			// 1111_110X 10XX_XXXX 10XX_XXXX 10XX_XXXX 10XX_XXXX 10XX_XXXX
 			// preNUm() 返回首个字节的8个bits中首个0bit前面1bit的个数，该数量也是该字符所使用的字节数
 			i++
-			for j := 0; j < num - 1; j++ {
+			for j := 0; j < num-1; j++ {
 				//判断后面的 num - 1 个字节是不是都是10开头
 				if (data[i] & 0xc0) != 0x80 {
 					return false
 				}
 				i++
 			}
-		} else  {
+		} else {
 			//其他情况说明不是utf-8
 			return false
 		}
@@ -88,7 +106,7 @@ func preNUm(data byte) int {
 	var mask byte = 0x80
 	var num int = 0
 	//8bit中首个0bit前有多少个1bits
-	for i:=0; i < 8; i++ {
+	for i := 0; i < 8; i++ {
 		if (data & mask) == mask {
 			num++
 			mask = mask >> 1

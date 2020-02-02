@@ -154,7 +154,7 @@ func (c *Conf) loadEnvConf() {
 	env := os.Environ()
 	for _, v := range env {
 		envkvAr := strings.Split(v, "=")
-		if len(envkvAr) >= 2  && envkvAr[1] != ""{
+		if len(envkvAr) >= 2 && envkvAr[1] != "" {
 			c.SetConfParam(envkvAr[0], envkvAr[1], "", constant.CONF_ENVIRONMENT_LEVEL)
 		}
 	}

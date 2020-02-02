@@ -1,11 +1,11 @@
 package _interface
 
 type ConfParam struct {
-	ConfVal string
+	ConfVal        string
 	DefaultConfVal string
-	Name string
-	Level int
-	Description string
+	Name           string
+	Level          int
+	Description    string
 }
 
 type Conf interface {

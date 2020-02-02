@@ -1,20 +1,16 @@
 package service
 
 import (
-	"github.com/TISUnion/most-simple-mcd/interface/server"
+	"fmt"
+	"github.com/TISUnion/most-simple-mcd/constant"
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
 	"io"
+	"io/ioutil"
 	"os/exec"
 	"path/filepath"
 	"sync"
-)
-
-const (
-	EULA_FILE_NAME = "eula.txt"
-	EULA           = "eula"
-	TRUE_STR       = "true"
 )
 
 // MinecraftServer
@@ -34,6 +30,10 @@ type MinecraftServer struct {
 	// 子进程输出
 	stdout io.ReadCloser
 
+	// Pid
+	// 进程pid
+	Pid int
+
 	// lock
 	// 输入管道同步锁
 	lock *sync.Mutex
@@ -49,6 +49,17 @@ func (m *MinecraftServer) ChangeConfCallBack() {
 func (m *MinecraftServer) DestructCallBack() {
 	_ = m.stdin.Close()
 	_ = m.stdout.Close()
+}
+
+func (m *MinecraftServer) runProcess() error {
+	if err := m.validateEula(); err != nil {
+		return err
+	}
+	m.CmdObj.Dir = m.RunPath
+	if err := m.CmdObj.Start(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (m *MinecraftServer) Start() error {
@@ -67,14 +78,47 @@ func (m *MinecraftServer) Command(string, ...interface{}) error {
 	panic("implement me")
 }
 
-func (m *MinecraftServer) validatePort() int {
-	return 0
+// validatePort
+// 校验mc的端口 TODO
+func (m *MinecraftServer) ValidatePort() (int, error) {
+	path := filepath.Join(m.RunPath, constant.MC_CONF_NAME)
+	cfg, err := ini.Load(path)
+	// 没有配置文件
+	if err != nil || !cfg.Section("").HasKey(constant.MAX_PLAYER_PARAM) {
+		// 开启进程，自动创建
+		if err := m.runProcess(); err != nil {
+			return 0, err
+		}
+
+		// 接收进程信息
+		for {
+			data, err := ioutil.ReadAll(m.stdout)
+			if len(data) > 0 {
+				fmt.Println(string(data))
+				break
+			}
+
+			if err != nil {
+				fmt.Println(err)
+				break
+			}
+		}
+	} else {
+		port, _ := cfg.Section("").Key(constant.PORT).Int()
+		// 开启的服务端的端口已被占用
+		if p, _ := utils.GetFreePort(port); p == 0 {
+
+		}
+	}
+	return 0, nil
 }
 
+// validateEula
+// 校验mc的eula文件
 func (m *MinecraftServer) validateEula() error {
-	path := filepath.Join(m.RunPath, EULA_FILE_NAME)
+	path := filepath.Join(m.RunPath, constant.EULA_FILE_NAME)
 	f, _ := utils.CreateFile(path)
-	f.Close()
+	_ = f.Close()
 	cfg, err := ini.Load(path)
 	if err != nil {
 		return err
@@ -83,25 +127,26 @@ func (m *MinecraftServer) validateEula() error {
 	if err != nil {
 		return err
 	}
-	if sec.HasKey(EULA) {
-		eula, err := sec.Key(EULA).Bool()
+	if sec.HasKey(constant.EULA) {
+		eula, err := sec.Key(constant.EULA).Bool()
 		if err != nil {
 			eula = false
 		}
 		if !eula {
-			sec.Key(EULA).SetValue(TRUE_STR)
+			sec.Key(constant.EULA).SetValue(constant.TRUE_STR)
 			_ = cfg.SaveTo(path)
 		}
 	} else {
-		_, _ = sec.NewKey(EULA, TRUE_STR)
-		_ = cfg.SaveTo(path)
+		_, _ = sec.NewKey(constant.EULA, constant.TRUE_STR)
+		_ = cfg.SaveToIndent(path, "\t")
 	}
 	return nil
 }
 
-func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServer {
-	cmdObj := exec.Command(serverConf.CmdStr)
-	cmdObj.Dir = serverConf.RunPath
+// NewMinecraftServer
+// 新建一个mc服务端进程
+func NewMinecraftServer(serverConf *json_struct.ServerConf) *MinecraftServer {
+	cmdObj := exec.Command(serverConf.CmdStr[0], serverConf.CmdStr[1:]...)
 	stdin, err := cmdObj.StdinPipe()
 	if err != nil {
 		return nil
