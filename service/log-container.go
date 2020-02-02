@@ -121,7 +121,7 @@ func (l *LogContainer) WriteLog(params ...string) {
 	log := l.GetLogByName(constant.DEFAULT_CHANNEL)
 	var (
 		msg   string
-		level string
+		level = constant.LOG_INFO
 	)
 	if len(params) > 0 {
 		msg = params[0]

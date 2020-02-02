@@ -29,7 +29,7 @@ type LogContainer interface {
 	WriteLogOnChannels(string, string, []string)
 
 	// WriteLog
-	// 第一个参数为要写日志名称
-	// 第二个参数为日志等级
+	// 第一个参数为要写的日志内容
+	// 第二个参数为日志等级（可选，默认info）
 	WriteLog(...string)
 }

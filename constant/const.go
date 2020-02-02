@@ -60,10 +60,10 @@ const (
 
 // mc服务端常量
 const (
-	EULA_FILE_NAME   = "eula.txt"
-	EULA             = "eula"
-	TRUE_STR         = "true"
-	MC_CONF_NAME     = "server.properties"
-	MAX_PLAYER_PARAM = "max-players"
-	PORT             = "server-port"
+	EULA_FILE_NAME = "eula.txt"
+	EULA           = "eula"
+	TRUE_STR       = "true"
+	MC_CONF_NAME   = "server.properties"
+	PORT_TEXT      = "server-port"
+	DEFAULT_PORT   = 25565
 )

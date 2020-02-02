@@ -1,17 +1,22 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
+	"github.com/TISUnion/most-simple-mcd/interface/server"
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
 	"io"
-	"io/ioutil"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"sync"
+)
+
+var (
+	PORT_REPEAT_ERROR = errors.New("服务器端口已被其他程序占用，请更换端口或者开启自动更换端口")
 )
 
 // MinecraftServer
@@ -55,69 +60,114 @@ func (m *MinecraftServer) DestructCallBack() {
 	_ = m.stdout.Close()
 }
 
+// 启动进程
 func (m *MinecraftServer) runProcess() error {
+	// 校验eula
 	if err := m.validateEula(); err != nil {
 		return err
 	}
-	m.CmdObj.Dir = m.RunPath
+	if port, err := m.validatePort(); err != nil {
+		m.Port = port
+		return err
+	}
 	if err := m.CmdObj.Start(); err != nil {
 		return err
 	}
+	m.Pid = m.CmdObj.Process.Pid
 	return nil
 }
 
-func (m *MinecraftServer) Start() error {
-	return nil
+func (m *MinecraftServer) Start() {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	if m.isStart {
+		GetLogContainerInstance().WriteLog(fmt.Sprintf("服务器: %s,重复启动", m.Name), constant.LOG_WARNING)
+		return
+	}
+	if err := m.runProcess(); err != nil {
+		return
+	}
+	m.isStart = true
+	// TODO 加载插件
+	return
 }
 
 func (m *MinecraftServer) Stop() error {
-	panic("implement me")
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	if !m.isStart {
+		GetLogContainerInstance().WriteLog(fmt.Sprintf("服务器: %s,重复关闭", m.Name), constant.LOG_WARNING)
+		return nil
+	}
+	m.isStart = false
+	if err := m.Command("/stop"); err != nil {
+		// windows下还是无法杀死进程，TODO 后期优化
+		_ = m.CmdObj.Process.Kill()
+	}
+	return nil
 }
 
-func (m *MinecraftServer) Restart() error {
-	panic("implement me")
+func (m *MinecraftServer) Restart() {
+	return
 }
 
-func (m *MinecraftServer) Command(string, ...interface{}) error {
-	panic("implement me")
+func (m *MinecraftServer) Command(c string) error {
+	_, err := m.stdin.Write([]byte(c))
+	return err
 }
 
 // validatePort
-// 校验mc的端口 TODO
-func (m *MinecraftServer) ValidatePort() (int, error) {
-	path := filepath.Join(m.RunPath, constant.MC_CONF_NAME)
-	cfg, err := ini.Load(path)
-	// 没有配置文件
-	if err != nil || !cfg.Section("").HasKey(constant.MAX_PLAYER_PARAM) {
-		// 开启进程，自动创建
-		if err := m.runProcess(); err != nil {
+// 校验mc的端口
+func (m *MinecraftServer) validatePort() (int, error) {
+	mcConfPath := filepath.Join(m.RunPath, constant.MC_CONF_NAME)
+	if f, e := utils.CreateFile(mcConfPath); e == nil {
+		f.Close()
+	}
+	cfg, err := ini.Load(mcConfPath)
+	var realPort int
+	// 没有配置文件或者配置不完整
+	if err != nil || !cfg.Section("").HasKey(constant.PORT_TEXT) {
+		realPort = constant.DEFAULT_PORT
+	} else {
+		realPort, _ = cfg.Section("").Key(constant.PORT_TEXT).Int()
+	}
+	// 开启的服务端的端口已被占用,修修改
+	if p, _ := utils.GetFreePort(realPort); p == 0 {
+		p, err := m.changePort(cfg, mcConfPath, 0)
+		if err != nil {
 			return 0, err
 		}
-
-		// 接收进程信息
-		for {
-			data, err := ioutil.ReadAll(m.stdout)
-			if len(data) > 0 {
-				fmt.Println(string(data))
-				break
-			}
-
-			if err != nil {
-				fmt.Println(err)
-				break
-			}
-		}
-	} else {
-		port, _ := cfg.Section("").Key(constant.PORT).Int()
-		// 开启的服务端的端口已被占用
-		if p, _ := utils.GetFreePort(port); p == 0 {
-			// 如果可以自动更换端口就自动更换端口
-			if isChange, _ := strconv.ParseBool(GetConfInstance().GetConfVal(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT)) ; isChange {
-
-			}
-		}
+		realPort = p
 	}
-	return 0, nil
+	return realPort, nil
+}
+
+// changePort
+// 更换mc服务端端口
+func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int) (int, error) {
+	// 如果可以自动更换端口就自动更换端口
+	if isChange, _ := strconv.ParseBool(GetConfInstance().GetConfVal(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT)); isChange {
+		unusedPort, _ := utils.GetFreePort(port)
+		sec, err := cfg.GetSection(ini.DefaultSection)
+		if err != nil {
+			return 0, err
+		}
+		unusedPortStr := strconv.Itoa(unusedPort)
+		// 重新配置文件
+		if sec.HasKey(constant.PORT_TEXT) {
+			sec.Key(constant.PORT_TEXT).SetValue(unusedPortStr)
+		} else {
+			_, _ = sec.NewKey(constant.PORT_TEXT, unusedPortStr)
+		}
+		if err := cfg.SaveTo(path); err != nil {
+			return 0, err
+		}
+		return unusedPort, nil
+	} else {
+		msg := fmt.Sprintf("服务端：%s，对应的服务器端口已被其他程序占用，请更换端口或者开启自动更换端口", m.Name)
+		GetLogContainerInstance().WriteLog(msg)
+		return 0, PORT_REPEAT_ERROR
+	}
 }
 
 // validateEula
@@ -130,7 +180,7 @@ func (m *MinecraftServer) validateEula() error {
 	if err != nil {
 		return err
 	}
-	sec, err := cfg.GetSection("")
+	sec, err := cfg.GetSection(ini.DefaultSection)
 	if err != nil {
 		return err
 	}
@@ -145,14 +195,24 @@ func (m *MinecraftServer) validateEula() error {
 		}
 	} else {
 		_, _ = sec.NewKey(constant.EULA, constant.TRUE_STR)
-		_ = cfg.SaveToIndent(path, "\t")
+		_ = cfg.SaveTo(path)
 	}
 	return nil
 }
 
+func (m *MinecraftServer) resetCmdObj() {
+	_ = m.stdin.Close()
+	_ = m.stdout.Close()
+	m.CmdObj = exec.Command(m.CmdStr[0], m.CmdStr[1:]...)
+	m.stdin, _ = m.CmdObj.StdinPipe()
+	m.stdout, _ = m.CmdObj.StdoutPipe()
+	m.isStart = false
+	m.CmdObj.Dir = m.RunPath
+}
+
 // NewMinecraftServer
 // 新建一个mc服务端进程
-func NewMinecraftServer(serverConf *json_struct.ServerConf) *MinecraftServer {
+func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServer {
 	cmdObj := exec.Command(serverConf.CmdStr[0], serverConf.CmdStr[1:]...)
 	stdin, err := cmdObj.StdinPipe()
 	if err != nil {
