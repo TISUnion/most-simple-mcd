@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"sync"
 )
 
@@ -44,6 +45,9 @@ type MinecraftServer struct {
 }
 
 func (m *MinecraftServer) ChangeConfCallBack() {
+}
+
+func (m *MinecraftServer) InitCallBack() {
 }
 
 func (m *MinecraftServer) DestructCallBack() {
@@ -107,7 +111,10 @@ func (m *MinecraftServer) ValidatePort() (int, error) {
 		port, _ := cfg.Section("").Key(constant.PORT).Int()
 		// 开启的服务端的端口已被占用
 		if p, _ := utils.GetFreePort(port); p == 0 {
+			// 如果可以自动更换端口就自动更换端口
+			if isChange, _ := strconv.ParseBool(GetConfInstance().GetConfVal(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT)) ; isChange {
 
+			}
 		}
 	}
 	return 0, nil

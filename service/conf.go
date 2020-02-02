@@ -53,6 +53,7 @@ func ConfInit() {
 	}
 	DefaultConfParam[constant.LOG_PATH] = utils.NewConfParam(constant.LOG_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "logs"), constant.LOG_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.CONF_PATH] = utils.NewConfParam(constant.CONF_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "conf/mcd.ini"), constant.CONF_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	DefaultConfParam[constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT] = utils.NewConfParam(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT, "true", constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.I18N] = utils.NewConfParam(constant.I18N, "zh", constant.I18N_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 }
 
@@ -267,6 +268,10 @@ func (c *Conf) ChangeConfCallBack() {
 
 func (c *Conf) DestructCallBack() {
 
+}
+
+func (c *Conf) InitCallBack() {
+	ConfInit()
 }
 
 // 获取配置实例

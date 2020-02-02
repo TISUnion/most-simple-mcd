@@ -12,22 +12,22 @@ const (
 	IS_START_MC_GUI                      = "server_gui"                  // 启动gui
 	WORKSPACE                            = "workspace"                   // 工作目录
 	I18N                                 = "i18n"                        // 国际化
-	IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT = "mc_server_port_auto_change"  // 自动更换mc服务器重复使用的端口
+	IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT = "mc_server_port_auto_change"  // 是否自动更换mc服务器重复使用的端口
 )
 
 // 配置说明
 const (
-	IS_RELOAD_CONF_DESCREPTION          = "自动加载配置文件"
-	RELOAD_CONF_INTERVAL_DESCREPTION    = "自动加载配置文件间隔，单位：毫秒"
-	CONF_PATH_DESCREPTION               = "配置文件地址"
-	IS_MANAGE_HTTP_DESCREPTION          = "启动管理后台"
-	MANAGE_HTTP_SERVER_PORT_DESCREPTION = "管理后台服务端口"
-	LOG_PATH_DESCREPTION                = "日志写入目录"
-	LOG_SAVE_INTERVAL_DESCREPTION       = "日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中"
-	LOG_SHOW_CODELINE_DESCREPTION       = "日志打印代码位置"
-	IS_START_MC_GUI_DESCREPTION         = "启动gui"
-	WORKSPACE_DESCREPTION               = "工作目录"
-	I18N_DESCREPTION                    = "国际化"
+	IS_RELOAD_CONF_DESCREPTION                       = "自动加载配置文件"
+	RELOAD_CONF_INTERVAL_DESCREPTION                 = "自动加载配置文件间隔，单位：毫秒"
+	CONF_PATH_DESCREPTION                            = "配置文件地址"
+	IS_MANAGE_HTTP_DESCREPTION                       = "启动管理后台"
+	MANAGE_HTTP_SERVER_PORT_DESCREPTION              = "管理后台服务端口"
+	LOG_PATH_DESCREPTION                             = "日志写入目录"
+	LOG_SAVE_INTERVAL_DESCREPTION                    = "日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中"
+	IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT_DESCREPTION = "是否自动更换mc服务器重复使用的端口"
+	IS_START_MC_GUI_DESCREPTION                      = "启动gui"
+	WORKSPACE_DESCREPTION                            = "工作目录"
+	I18N_DESCREPTION                                 = "国际化"
 )
 
 // 配置常量

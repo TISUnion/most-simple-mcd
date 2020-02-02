@@ -22,16 +22,19 @@ type DataBase struct {
 	name     string
 }
 
-func (d DataBase) ChangeConfCallBack() {
+func (d *DataBase) InitCallBack() {
 }
 
-func (d DataBase) DestructCallBack() {
+func (d *DataBase) ChangeConfCallBack() {
+}
+
+func (d *DataBase) DestructCallBack() {
 	if d.badgerDb != nil {
-		d.badgerDb.Close()
+		_ = d.badgerDb.Close()
 	}
 }
 
-func (d DataBase) Get(k string) string {
+func (d *DataBase) Get(k string) string {
 	var result string
 	if d.badgerDb == nil {
 		return result
@@ -53,7 +56,7 @@ func (d DataBase) Get(k string) string {
 	return result
 }
 
-func (d DataBase) Set(k string, v string) {
+func (d *DataBase) Set(k string, v string) {
 	if d.badgerDb == nil {
 		return
 	}
@@ -63,7 +66,7 @@ func (d DataBase) Set(k string, v string) {
 	})
 }
 
-func (d DataBase) SetWiteTTL(k string, v string, t time.Duration) {
+func (d *DataBase) SetWiteTTL(k string, v string, t time.Duration) {
 	if d.badgerDb == nil {
 		return
 	}

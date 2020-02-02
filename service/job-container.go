@@ -105,6 +105,10 @@ func (jc *JobContainer) ChangeConfCallBack() {
 }
 
 func (jc *JobContainer) DestructCallBack() {
+
+}
+
+func (jc *JobContainer) InitCallBack() {
 }
 
 func GetJobContainerObj() container.JobContainer {

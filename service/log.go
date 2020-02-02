@@ -69,6 +69,9 @@ func (l *Log) DestructCallBack() {
 	l.FileObj.Close()
 }
 
+func (l *Log) InitCallBack() {
+}
+
 func (l *Log) Write(logMsg *_interface.LogMsgType) {
 	if l.Level > LogLevel[logMsg.Level] {
 		return

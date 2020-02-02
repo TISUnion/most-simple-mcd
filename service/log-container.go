@@ -157,6 +157,10 @@ func (l *LogContainer) DestructCallBack() {
 	}
 }
 
+func (l *LogContainer) InitCallBack() {
+	LogInit()
+}
+
 func GetLogContainerObj() container.LogContainer {
 	if _logContainer != nil {
 		return _logContainer
