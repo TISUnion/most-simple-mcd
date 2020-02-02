@@ -56,6 +56,7 @@ func (m *MinecraftServer) InitCallBack() {
 }
 
 func (m *MinecraftServer) DestructCallBack() {
+	_ = m.Stop()
 	_ = m.stdin.Close()
 	_ = m.stdout.Close()
 }
@@ -231,5 +232,6 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 		lock:       &sync.Mutex{},
 		isStart:    false,
 	}
+	RegisterCallBack(minecraftServer)
 	return minecraftServer
 }

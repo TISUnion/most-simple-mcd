@@ -17,7 +17,7 @@ func RegisterCallBack(callback _interface.CallBack) {
 	changeConfCallBacks = append(changeConfCallBacks, callback.ChangeConfCallBack)
 
 	// 释放资源回调
-	destructCallBacks = append(destructCallBacks, callback.ChangeConfCallBack)
+	destructCallBacks = append(destructCallBacks, callback.DestructCallBack)
 
 	// 运行初始化回调
 	callback.InitCallBack()
