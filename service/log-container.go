@@ -174,14 +174,16 @@ func GetLogContainerObj() container.LogContainer {
 		lock:            &sync.Mutex{},
 		logSaveInterval: conf.GetConfVal(constant.LOG_SAVE_INTERVAL),
 	}
+	// 注册回调
+	RegisterCallBack(_logContainerObj)
+
 	// 创建默认日志
 	_logContainerObj.AddLog(constant.DEFAULT_CHANNEL, constant.LOG_INFO)
 	_logContainer = _logContainerObj
+
 	// 初始化定时清理日志任务
 	jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, conf.GetConfVal(constant.LOG_SAVE_INTERVAL), _logContainerObj.AddLogJob)
 	_ = jobContainer.StartJob(constant.EVERYDAY_JOB_NAME)
 
-	// 注册回调
-	RegisterCallBack(_logContainerObj)
 	return _logContainerObj
 }

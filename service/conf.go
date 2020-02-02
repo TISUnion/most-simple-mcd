@@ -284,13 +284,13 @@ func GetConfObj(terminalConfs TerminalType) _interface.Conf {
 		ConfKeys: make([]string, 0),
 		confs:    make(map[string]*_interface.ConfParam),
 	}
-	_appConf.Init(terminalConfs)
-	// 第一次执行配置更改回调
-	_appConf.ChangeConfCallBack()
-
 	// 注册回调
 	RegisterCallBack(_appConf)
 
+	_appConf.Init(terminalConfs)
+
+	// 第一次执行配置更改回调
+	_appConf.ChangeConfCallBack()
 	return _appConf
 }
 
