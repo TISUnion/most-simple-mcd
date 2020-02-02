@@ -222,6 +222,7 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 	if err != nil {
 		return nil
 	}
+	cmdObj.Dir = serverConf.RunPath
 	minecraftServer := &MinecraftServer{
 		ServerConf: serverConf,
 		CmdObj:     cmdObj,
