@@ -1,5 +1,5 @@
 package server
 
 type MonitorServer interface {
-	MinecraftServer
+	BasicServer
 }

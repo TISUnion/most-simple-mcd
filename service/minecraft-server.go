@@ -53,8 +53,12 @@ type MinecraftServer struct {
 	messageChan chan *server.ReciveMessageType
 
 	// EntryId
-	// 服务器唯一id
+	// 实例唯一id
 	entryId int
+}
+
+func (m *MinecraftServer) GetServerConf() *json_struct.ServerConf {
+	return m.ServerConf
 }
 
 func (m *MinecraftServer) SetMaxMinMemory(max int, min int) {
@@ -129,15 +133,18 @@ func (m *MinecraftServer) Stop() error {
 		// windows下还是无法杀死进程，TODO 后期优化
 		_ = m.CmdObj.Process.Kill()
 	}
+
+	// 重置cmd对象
+	m.resetCmdObj()
 	return nil
 }
 
 func (m *MinecraftServer) Restart() error {
-	if err := m.Stop(); err != nil {
-		return err
+	if m.isStart {
+		if err := m.Stop(); err != nil {
+			return err
+		}
 	}
-	// 重置cmd对象
-	m.resetCmdObj()
 	if err := m.Start(); err != nil {
 		return err
 	}
@@ -184,6 +191,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 		}
 		m.messageChan <- &server.ReciveMessageType{
 			OriginData: everyBuff,
+			ServerId:   m.entryId,
 		}
 	}
 }
@@ -191,7 +199,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 // TODO 处理消息
 func (m *MinecraftServer) handleMessage() {
 	for {
-		msg := <- m.messageChan
+		msg := <-m.messageChan
 		// TODO 分发给各插件
 
 		fmt.Print(string(msg.OriginData))
@@ -325,7 +333,7 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 		lock:        &sync.Mutex{},
 		isStart:     false,
 		messageChan: make(chan *server.ReciveMessageType, 10),
-		entryId: GetIncreateId(),
+		entryId:     GetIncreateId(),
 	}
 	RegisterCallBack(minecraftServer)
 	// 开启发送和接受消息

@@ -3,19 +3,23 @@ package container
 import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
+	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 )
 
 // MinecraftContainer
 // minecraft服务容器接口
 type MinecraftContainer interface {
 	_interface.CallBack
-	GetById(int) (server.MinecraftServer, error)
-	GetByName(string) (server.MinecraftServer, error)
-	Add(string, server.MinecraftServer) error
-	DelById(int) error
-	DelByName(int) error
+	GetServerById(int) (server.MinecraftServer, bool)
+	GetMirrorServerById(int) (server.MinecraftServer, bool)
+	StartById(int) error
+	StopById(int) error
+	RestartById(int) error
+	GetAllServerConf() []*json_struct.ServerConf
 
-	// Clear
-	// 清除所有mc服务器
-	Clear() error
+	Add(string, server.MinecraftServer) error
+
+	// StopAll
+	// 关闭所有mc服务器
+	StopAll() error
 }

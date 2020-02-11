@@ -19,6 +19,10 @@ type ServerConf struct {
 	// 运行所在工作区间
 	RunPath string
 
+	// isMirror
+	// 是否是镜像服务器
+	IsMirror bool
+
 	// MaxMemory
 	// 最大运行内存单位M
 	MaxMemory int

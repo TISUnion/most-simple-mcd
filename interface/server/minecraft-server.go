@@ -1,10 +1,13 @@
 package server
 
+import json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+
 type ReciveMessageType struct {
-	Player string
-	Time string
-	Speak string
+	Player     string
+	Time       string
+	Speak      string
 	OriginData []byte
+	ServerId   int
 }
 
 type MinecraftServer interface {
@@ -16,8 +19,11 @@ type MinecraftServer interface {
 	// 第一个参数为最大值
 	// 第二个参数为最小值
 	// 为0表示不修改
-	SetMaxMinMemory(int ,int)
+	SetMaxMinMemory(int, int)
 
 	// 修改服务器名称
 	Rename(string)
+
+	// 获取服务配置
+	GetServerConf() *json_struct.ServerConf
 }
