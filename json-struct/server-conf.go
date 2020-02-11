@@ -26,8 +26,4 @@ type ServerConf struct {
 	// MinMemory
 	// 最小运行内存单位M
 	MinMemory int
-
-	// IsStartGui
-	// 是否启用gui
-	IsStartGui bool
 }
