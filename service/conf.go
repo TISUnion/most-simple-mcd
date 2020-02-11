@@ -42,7 +42,6 @@ func ConfInit() {
 	DefaultConfParam = make(map[string]*_interface.ConfParam)
 	DefaultConfParam[constant.IS_RELOAD_CONF] = utils.NewConfParam(constant.IS_RELOAD_CONF, "false", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.RELOAD_CONF_INTERVAL] = utils.NewConfParam(constant.RELOAD_CONF_INTERVAL, "5000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	DefaultConfParam[constant.IS_START_MC_GUI] = utils.NewConfParam(constant.IS_START_MC_GUI, "false", constant.IS_START_MC_GUI_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.IS_MANAGE_HTTP] = utils.NewConfParam(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.MANAGE_HTTP_SERVER_PORT] = utils.NewConfParam(constant.MANAGE_HTTP_SERVER_PORT, "80", constant.MANAGE_HTTP_SERVER_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	DefaultConfParam[constant.LOG_SAVE_INTERVAL] = utils.NewConfParam(constant.LOG_SAVE_INTERVAL, constant.LOG_SAVE_INTERVAL_TWICEDAY, constant.LOG_SAVE_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
