@@ -55,6 +55,13 @@ type MinecraftServer struct {
 	// EntryId
 	// 实例唯一id
 	entryId int
+
+	// MonitorServer
+	monitorServer server.MonitorServer
+}
+
+func (m *MinecraftServer) GetServerMonitor() server.MonitorServer {
+	return m.monitorServer
 }
 
 func (m *MinecraftServer) GetServerConf() *json_struct.ServerConf {
@@ -95,6 +102,7 @@ func (m *MinecraftServer) runProcess() error {
 	if err := m.validateEula(); err != nil {
 		return err
 	}
+	// 校验端口
 	if port, err := m.validatePort(); err != nil {
 		m.Port = port
 		return err
@@ -102,7 +110,9 @@ func (m *MinecraftServer) runProcess() error {
 	if err := m.CmdObj.Start(); err != nil {
 		return err
 	}
+
 	m.Pid = m.CmdObj.Process.Pid
+	m.monitorServer = NewMonitorServer(m.entryId, m.Pid)
 	return nil
 }
 
@@ -135,7 +145,7 @@ func (m *MinecraftServer) Stop() error {
 	}
 
 	// 重置cmd对象
-	m.resetCmdObj()
+	m.resetParams()
 	return nil
 }
 
@@ -301,7 +311,7 @@ func (m *MinecraftServer) validateEula() error {
 	return nil
 }
 
-func (m *MinecraftServer) resetCmdObj() {
+func (m *MinecraftServer) resetParams() {
 	_ = m.stdin.Close()
 	_ = m.stdout.Close()
 	m.CmdObj = exec.Command(m.CmdStr[0], m.CmdStr[1:]...)
@@ -309,6 +319,9 @@ func (m *MinecraftServer) resetCmdObj() {
 	m.stdout, _ = m.CmdObj.StdoutPipe()
 	m.isStart = false
 	m.CmdObj.Dir = m.RunPath
+	// 关闭这个监控器
+	m.monitorServer.DestructCallBack()
+	m.monitorServer = nil
 }
 
 // NewMinecraftServer

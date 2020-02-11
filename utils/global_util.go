@@ -5,6 +5,7 @@ import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"net"
+	"strconv"
 )
 
 // 致命错误，退出程序
@@ -68,6 +69,20 @@ func GetFreePort(port int) (int, error) {
 	}
 	defer l.Close()
 	return l.Addr().(*net.TCPAddr).Port, nil
+}
+
+// IntToint32
+func IntToint32(i int) int32 {
+	iStr := strconv.Itoa(i)
+	i64, _ := strconv.ParseInt(iStr, 10, 32)
+	return int32(i64)
+}
+
+// Uint64Tofloat64
+func Uint64Tofloat64(ui uint64) float64 {
+	uiStr := strconv.FormatUint(ui, 10)
+	f64, _ := strconv.ParseFloat(uiStr, 64)
+	return f64
 }
 
 // 是否是UTF8编码

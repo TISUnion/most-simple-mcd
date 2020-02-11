@@ -12,6 +12,7 @@ const (
 	WORKSPACE                            = "workspace"                   // 工作目录
 	I18N                                 = "i18n"                        // 国际化
 	IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT = "mc_server_port_auto_change"  // 是否自动更换mc服务器重复使用的端口
+	MONITOR_INTERVAL                     = "monitor_interval"            // 进程资源读取间隔，单位为秒
 )
 
 // 配置说明
@@ -26,6 +27,7 @@ const (
 	IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT_DESCREPTION = "是否自动更换mc服务器重复使用的端口"
 	WORKSPACE_DESCREPTION                            = "工作目录"
 	I18N_DESCREPTION                                 = "国际化"
+	MONITOR_INTERVAL_DESCREPTION                     = "进程资源读取间隔，单位: 为秒"
 )
 
 // 配置常量
