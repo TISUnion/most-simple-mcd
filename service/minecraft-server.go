@@ -51,6 +51,26 @@ type MinecraftServer struct {
 	// messageChan
 	// 玩家发言存储chan
 	messageChan chan *server.ReciveMessageType
+
+	// EntryId
+	// 服务器唯一id
+	entryId int
+}
+
+func (m *MinecraftServer) SetMaxMinMemory(max int, min int) {
+	if max > 0 {
+		m.MaxMemory = max
+	}
+
+	if min > 0 {
+		m.MinMemory = min
+	}
+}
+
+func (m *MinecraftServer) Rename(name string) {
+	if name != "" {
+		m.Name = name
+	}
 }
 
 func (m *MinecraftServer) ChangeConfCallBack() {
@@ -305,6 +325,7 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 		lock:        &sync.Mutex{},
 		isStart:     false,
 		messageChan: make(chan *server.ReciveMessageType, 10),
+		entryId: GetIncreateId(),
 	}
 	RegisterCallBack(minecraftServer)
 	// 开启发送和接受消息

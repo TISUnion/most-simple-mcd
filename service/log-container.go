@@ -12,17 +12,8 @@ import (
 )
 
 var (
-	increateId    int         = 0
-	idLock        *sync.Mutex = &sync.Mutex{}
 	_logContainer container.LogContainer
 )
-
-func getIncreateId() int {
-	idLock.Lock()
-	defer idLock.Unlock()
-	increateId++
-	return increateId
-}
 
 type LogContainer struct {
 	NameIdMapping   map[string]int
@@ -68,7 +59,7 @@ func (l *LogContainer) AddLog(name string, params ...string) _interface.Log {
 	}
 	dirPath = filepath.Join(dirPath, name)
 	path = fmt.Sprintf("%s/%s.log", dirPath, time.Now().Format("2006-01-02"))
-	id := getIncreateId()
+	id := GetIncreateId()
 	logItem := &Log{
 		Name:      name,
 		Path:      path,
