@@ -47,6 +47,10 @@ type MinecraftServer struct {
 	// isStart
 	// 是否启动
 	isStart bool
+
+	// messageChan
+	// 玩家发言存储chan
+	messageChan chan *server.ReciveMessageType
 }
 
 func (m *MinecraftServer) ChangeConfCallBack() {
@@ -78,19 +82,19 @@ func (m *MinecraftServer) runProcess() error {
 	return nil
 }
 
-func (m *MinecraftServer) Start() {
+func (m *MinecraftServer) Start() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	if m.isStart {
 		GetLogContainerInstance().WriteLog(fmt.Sprintf("服务器: %s,重复启动", m.Name), constant.LOG_WARNING)
-		return
+		return nil
 	}
 	if err := m.runProcess(); err != nil {
-		return
+		return err
 	}
 	m.isStart = true
 	// TODO 加载插件
-	return
+	return nil
 }
 
 func (m *MinecraftServer) Stop() error {
@@ -101,18 +105,86 @@ func (m *MinecraftServer) Stop() error {
 		return nil
 	}
 	m.isStart = false
-	if err := m.Command("/stop"); err != nil {
+	if err := m._command("/stop"); err != nil {
 		// windows下还是无法杀死进程，TODO 后期优化
 		_ = m.CmdObj.Process.Kill()
 	}
 	return nil
 }
 
-func (m *MinecraftServer) Restart() {
-	return
+func (m *MinecraftServer) Restart() error {
+	if err := m.Stop(); err != nil {
+		return err
+	}
+	// 重置cmd对象
+	m.resetCmdObj()
+	if err := m.Start(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// 获取一条消息
+func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
+	const MAX_SIZE = 1024
+	buff := make([]byte, MAX_SIZE)
+	n, err := m.stdout.Read(buff)
+	buff = buff[:n]
+	if err != nil {
+		errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
+		GetLogContainerInstance().WriteLog(errMsg)
+		return []byte{}, errors.New(errMsg)
+	}
+	// 如果一次的数据为1024，就多次获取
+	if n == MAX_SIZE {
+		for {
+			subBuff := make([]byte, MAX_SIZE)
+			subN, subErr := m.stdout.Read(buff)
+			if subErr != nil {
+				errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
+				GetLogContainerInstance().WriteLog(errMsg)
+				return []byte{}, errors.New(errMsg)
+			}
+			subBuff = subBuff[:subN]
+			buff = append(buff, subBuff...)
+			if subN != MAX_SIZE {
+				break
+			}
+		}
+	}
+	return buff, nil
+}
+
+// 获取消息，并写入到管道中
+func (m *MinecraftServer) reciveMessageToChan() {
+	for {
+		everyBuff, err := m.resiveOneMessage()
+		if err != nil {
+			return
+		}
+		m.messageChan <- &server.ReciveMessageType{
+			OriginData: everyBuff,
+		}
+	}
+}
+
+// TODO 处理消息
+func (m *MinecraftServer) handleMessage() {
+	for {
+		msg := <- m.messageChan
+		// TODO 分发给各插件
+
+		fmt.Print(string(msg.OriginData))
+	}
 }
 
 func (m *MinecraftServer) Command(c string) error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	return m._command(c)
+}
+
+func (m *MinecraftServer) _command(c string) error {
 	_, err := m.stdin.Write([]byte(c))
 	return err
 }
@@ -223,15 +295,20 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 	if err != nil {
 		return nil
 	}
+	// 设置工作区间
 	cmdObj.Dir = serverConf.RunPath
 	minecraftServer := &MinecraftServer{
-		ServerConf: serverConf,
-		CmdObj:     cmdObj,
-		stdin:      stdin,
-		stdout:     stdout,
-		lock:       &sync.Mutex{},
-		isStart:    false,
+		ServerConf:  serverConf,
+		CmdObj:      cmdObj,
+		stdin:       stdin,
+		stdout:      stdout,
+		lock:        &sync.Mutex{},
+		isStart:     false,
+		messageChan: make(chan *server.ReciveMessageType, 10),
 	}
 	RegisterCallBack(minecraftServer)
+	// 开启发送和接受消息
+	go minecraftServer.reciveMessageToChan()
+	go minecraftServer.handleMessage()
 	return minecraftServer
 }

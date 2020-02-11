@@ -8,7 +8,7 @@ import _interface "github.com/TISUnion/most-simple-mcd/interface"
 // 服务器基础接口
 type BasicServer interface {
 	_interface.CallBack
-	Start()
+	Start() error
 	Stop() error
-	Restart()
+	Restart() error
 }
