@@ -179,6 +179,11 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 	}
 }
 
+// 读取数据库中mc配置
+func (m *MinecraftServerContainer) loadDbServer() {
+
+}
+
 // 停止所有服务端
 func (m *MinecraftServerContainer) StopAll() error {
 	m.lock.Lock()

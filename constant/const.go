@@ -60,12 +60,13 @@ const (
 
 // mc服务端常量
 const (
-	EULA_FILE_NAME = "eula.txt"
-	EULA           = "eula"
-	TRUE_STR       = "true"
-	MC_CONF_NAME   = "server.properties"
-	PORT_TEXT      = "server-port"
-	MC_SERVER_DIR  = "minecraft-servers"
-	MC_SERVER_BACK = "minecraft-servers-back"
-	DEFAULT_PORT   = 25565
+	EULA_FILE_NAME   = "eula.txt"
+	EULA             = "eula"
+	TRUE_STR         = "true"
+	MC_CONF_NAME     = "server.properties"
+	PORT_TEXT        = "server-port"
+	MC_SERVER_DIR    = "minecraft-servers"
+	MC_SERVER_BACK   = "minecraft-servers-back"
+	MC_SERVER_DB_KEY = "minecraft:server:configs"
+	DEFAULT_PORT     = 25565
 )

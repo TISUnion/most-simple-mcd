@@ -5,6 +5,7 @@ logs/*
 minecraft-servers/*
 minecraft-contains/*
 databases/*
+db-resource/*
 *.zip
 test.*
 .DS_Store
