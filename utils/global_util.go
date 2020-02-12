@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"golang.org/x/text/encoding/simplifiedchinese"
@@ -71,14 +73,14 @@ func GetFreePort(port int) (int, error) {
 	return l.Addr().(*net.TCPAddr).Port, nil
 }
 
-// IntToint32
+// Int转int32
 func IntToint32(i int) int32 {
 	iStr := strconv.Itoa(i)
 	i64, _ := strconv.ParseInt(iStr, 10, 32)
 	return int32(i64)
 }
 
-// Uint64Tofloat64
+// Uint64转float64
 func Uint64Tofloat64(ui uint64) float64 {
 	uiStr := strconv.FormatUint(ui, 10)
 	f64, _ := strconv.ParseFloat(uiStr, 64)
@@ -116,6 +118,26 @@ func IsUTF8(data []byte) bool {
 	return true
 }
 
+// 获取cmd命令数组
+func GetCommandArr(memory int, runPath string) []string{
+	return []string{
+		"java",
+		"-jar",
+		fmt.Sprintf("-Xmx%dM", memory),
+		fmt.Sprintf("-Xms%dM", memory),
+		runPath,
+		"nogui",
+	}
+}
+
+// md5加密
+func Md5(str string) string  {
+	h := md5.New()
+	h.Write([]byte(str))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+// --------------private-----------------
 // 判断 UTF8首位
 func preNUm(data byte) int {
 	var mask byte = 0x80

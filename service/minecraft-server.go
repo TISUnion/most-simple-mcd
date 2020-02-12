@@ -60,6 +60,10 @@ type MinecraftServer struct {
 	monitorServer server.MonitorServer
 }
 
+func (m *MinecraftServer) GetServerEntryId() int {
+	return m.entryId
+}
+
 func (m *MinecraftServer) StartMonitorServer() {
 	if !m.IsStartMonitor {
 		m.IsStartMonitor = true
@@ -76,13 +80,9 @@ func (m *MinecraftServer) GetServerConf() *json_struct.ServerConf {
 	return m.ServerConf
 }
 
-func (m *MinecraftServer) SetMaxMinMemory(max int, min int) {
-	if max > 0 {
-		m.MaxMemory = max
-	}
-
-	if min > 0 {
-		m.MinMemory = min
+func (m *MinecraftServer) SetMemory(memory int) {
+	if memory > 0 {
+		m.Memory = memory
 	}
 }
 
@@ -327,6 +327,8 @@ func (m *MinecraftServer) validateEula() error {
 func (m *MinecraftServer) resetParams() {
 	_ = m.stdin.Close()
 	_ = m.stdout.Close()
+	// 重新拼接运行命令
+	m.CmdStr = utils.GetCommandArr(m.Memory, m.RunPath)
 	m.CmdObj = exec.Command(m.CmdStr[0], m.CmdStr[1:]...)
 	m.stdin, _ = m.CmdObj.StdinPipe()
 	m.stdout, _ = m.CmdObj.StdoutPipe()

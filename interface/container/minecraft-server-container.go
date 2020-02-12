@@ -17,7 +17,7 @@ type MinecraftContainer interface {
 	RestartById(int) error
 	GetAllServerConf() []*json_struct.ServerConf
 
-	Add(string, server.MinecraftServer) error
+	Add(*json_struct.ServerConf)
 
 	// StopAll
 	// 关闭所有mc服务器

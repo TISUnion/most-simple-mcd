@@ -27,11 +27,7 @@ type ServerConf struct {
 	// 是否启动资源监听器
 	IsStartMonitor bool
 
-	// MaxMemory
-	// 最大运行内存单位M
-	MaxMemory int
-
-	// MinMemory
-	// 最小运行内存单位M
-	MinMemory int
+	// Memory
+	// 使用内存大小，单位M
+	Memory int
 }

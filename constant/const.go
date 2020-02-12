@@ -65,5 +65,7 @@ const (
 	TRUE_STR       = "true"
 	MC_CONF_NAME   = "server.properties"
 	PORT_TEXT      = "server-port"
+	MC_SERVER_DIR  = "minecraft-servers"
+	MC_SERVER_BACK = "minecraft-servers-back"
 	DEFAULT_PORT   = 25565
 )
