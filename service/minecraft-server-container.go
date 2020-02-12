@@ -52,7 +52,6 @@ func (m *MinecraftServerContainer) InitCallBack() {
 	m.loadLocalServer()
 }
 
-
 func (m *MinecraftServerContainer) GetServerById(id int) (server.MinecraftServer, bool) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
@@ -158,6 +157,8 @@ func (m *MinecraftServerContainer) GetAllServerObj() map[int]server.MinecraftSer
 
 // 读取本地的mc服务端文件
 func (m *MinecraftServerContainer) loadLocalServer() {
+	m.lock.Lock()
+	defer m.lock.Unlock()
 	path, _ := utils.GetCurrentPath()
 	jarspath, _ := filepath.Glob(fmt.Sprintf("%s/*.jar", path))
 	// 读取当前目录下的所有jar文件
@@ -180,13 +181,13 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 		}
 		// 生成config
 		config := &json_struct.ServerConf{
-			Name:    filename,
-			RunPath: serverDir,
+			Name:     filename,
+			RunPath:  serverDir,
 			HashName: filemd5,
 		}
 		m.AddServer(config)
 	}
-	m.saveToDb()
+	m._saveToDb()
 }
 
 // 读取数据库中mc配置
@@ -198,7 +199,7 @@ func (m *MinecraftServerContainer) loadDbServer() {
 }
 
 // 读取数据库中的服务端配置
-func (m *MinecraftServerContainer) getServerConfFromDb() []*json_struct.ServerConf{
+func (m *MinecraftServerContainer) getServerConfFromDb() []*json_struct.ServerConf {
 	serversConfStr := GetFromDatabase(constant.MC_SERVER_DB_KEY)
 	var serversConf []*json_struct.ServerConf
 	_ = json.Unmarshal([]byte(serversConfStr), &serversConf)
@@ -206,7 +207,14 @@ func (m *MinecraftServerContainer) getServerConfFromDb() []*json_struct.ServerCo
 }
 
 // 持久化服务器配置
-func (m *MinecraftServerContainer) saveToDb() {
+func (m *MinecraftServerContainer) SaveToDb() {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	m._saveToDb()
+}
+
+// 持久化服务器配置
+func (m *MinecraftServerContainer) _saveToDb() {
 	config := m.GetAllServerConf()
 	data, _ := json.Marshal(config)
 	SetFromDatabase(constant.MC_SERVER_DB_KEY, string(data))

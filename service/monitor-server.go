@@ -96,10 +96,10 @@ func (m *MonitorServer) _stop() error {
 func (m *MonitorServer) Restart() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	if err := m._stop() ; err != nil {
+	if err := m._stop(); err != nil {
 		return err
 	}
-	if err := m._start() ; err != nil {
+	if err := m._start(); err != nil {
 		return err
 	}
 

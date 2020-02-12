@@ -231,7 +231,7 @@ func (m *MinecraftServer) handleMessage() {
 	for {
 		msg := <-m.messageChan
 		// TODO 分发给各插件
-
+		m.WriteLog(string(msg.OriginData), constant.LOG_INFO)
 		fmt.Print(string(msg.OriginData))
 	}
 }

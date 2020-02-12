@@ -305,6 +305,6 @@ func setIniCfg(data map[string]*_interface.ConfParam) *ini.File {
 }
 
 // 获取配置值帮助函数
-func GetConfVal(confKey string)  string{
+func GetConfVal(confKey string) string {
 	return GetConfInstance().GetConfVal(confKey)
 }

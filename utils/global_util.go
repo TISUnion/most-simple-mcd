@@ -119,7 +119,7 @@ func IsUTF8(data []byte) bool {
 }
 
 // 获取cmd命令数组
-func GetCommandArr(memory int, runPath string) []string{
+func GetCommandArr(memory int, runPath string) []string {
 	return []string{
 		"java",
 		"-jar",
@@ -131,7 +131,7 @@ func GetCommandArr(memory int, runPath string) []string{
 }
 
 // md5加密
-func Md5(str string) string  {
+func Md5(str string) string {
 	h := md5.New()
 	h.Write([]byte(str))
 	return hex.EncodeToString(h.Sum(nil))

@@ -36,5 +36,9 @@ type MinecraftContainer interface {
 	// 关闭所有mc服务器
 	StopAll() error
 
+	// 获取所有服务端对象实例
 	GetAllServerObj() map[int]server.MinecraftServer
+
+	// 所有服务端配置保存到数据库中
+	SaveToDb()
 }

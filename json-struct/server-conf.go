@@ -34,4 +34,8 @@ type ServerConf struct {
 	// HashName
 	// 服务端hash名称
 	HashName string `json:"hashName"`
+
+	// Version
+	// 服务端版本
+	Version string `json:"version"`
 }
