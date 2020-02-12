@@ -48,7 +48,8 @@ func (m *MinecraftServerContainer) DestructCallBack() {
 }
 
 func (m *MinecraftServerContainer) InitCallBack() {
-
+	m.loadDbServer()
+	m.loadLocalServer()
 }
 
 func (m *MinecraftServerContainer) GetServerById(id int) (server.MinecraftServer, bool) {
