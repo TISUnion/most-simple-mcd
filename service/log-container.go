@@ -13,6 +13,7 @@ import (
 
 var (
 	_logContainer container.LogContainer
+	LogLevel      map[string]int
 )
 
 type LogContainer struct {
@@ -49,7 +50,7 @@ func (l *LogContainer) AddLog(name string, params ...string) _interface.Log {
 	// dirPath 为写入日志目录
 	// 优先使用传入的目录，再使用容器配置目录，最后使用默认目录
 	if dirPath == "" {
-		dirPath = filepath.Join(GetConfInstance().GetConfVal(constant.WORKSPACE), "logs")
+		dirPath = filepath.Join(GetConfVal(constant.WORKSPACE), "logs")
 	}
 	if len(params) > 0 {
 		logLevel = params[0]
@@ -94,8 +95,9 @@ func (l *LogContainer) AddLogJob() {
 	}
 }
 
+// 把日志写到不用管道中
 func (l *LogContainer) WriteLogOnChannels(msg string, level string, channels []string) {
-	channels = append(channels, constant.DEFAULT_CHANNEL)
+	channels = append(channels, constant.DEFAULT_LOG_NAME)
 	channels = utils.RemoveRepeatedElement(channels)
 	for _, v := range channels {
 		if log := l.GetLogByName(v); log != nil {
@@ -109,7 +111,7 @@ func (l *LogContainer) WriteLogOnChannels(msg string, level string, channels []s
 
 // 写入默认日志
 func (l *LogContainer) WriteLog(params ...string) {
-	log := l.GetLogByName(constant.DEFAULT_CHANNEL)
+	log := l.GetLogByName(constant.DEFAULT_LOG_NAME)
 	var (
 		msg   string
 		level = constant.LOG_INFO
@@ -131,13 +133,13 @@ func (l *LogContainer) WriteLog(params ...string) {
 
 // 配置修改回调
 func (l *LogContainer) ChangeConfCallBack() {
-	conf := GetConfInstance()
 	jobContainer := GetJobContainerInstance()
-	if conf.GetConfVal(constant.LOG_SAVE_INTERVAL) != l.logSaveInterval {
-		l.logSaveInterval = conf.GetConfVal(constant.LOG_SAVE_INTERVAL)
+	logSaveInterval := GetConfVal(constant.LOG_SAVE_INTERVAL)
+	if logSaveInterval != l.logSaveInterval {
+		l.logSaveInterval = logSaveInterval
 		jobContainer.StopJob(constant.EVERYDAY_JOB_NAME)
 		// 重新注册定时清理日志任务
-		jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, conf.GetConfVal(constant.LOG_SAVE_INTERVAL), l.AddLogJob)
+		jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, logSaveInterval, l.AddLogJob)
 		_ = jobContainer.StartJob(constant.EVERYDAY_JOB_NAME)
 	}
 }
@@ -149,32 +151,47 @@ func (l *LogContainer) DestructCallBack() {
 }
 
 func (l *LogContainer) InitCallBack() {
-	LogInit()
+	// 初始化日志map
+	LogLevel = make(map[string]int)
+	LogLevel[constant.LOG_DEBUG] = 1
+	LogLevel[constant.LOG_INFO] = 2
+	LogLevel[constant.LOG_WARNING] = 3
+	LogLevel[constant.LOG_ERROR] = 4
+	LogLevel[constant.LOG_FATAL] = 5
+
+	jobContainer := GetJobContainerInstance()
+	// 创建默认日志
+	l.AddLog(constant.DEFAULT_LOG_NAME, constant.LOG_INFO)
+
+	// 初始化定时清理日志任务
+	jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, GetConfVal(constant.LOG_SAVE_INTERVAL), l.AddLogJob)
+	_ = jobContainer.StartJob(constant.EVERYDAY_JOB_NAME)
 }
 
 func GetLogContainerInstance() container.LogContainer {
 	if _logContainer != nil {
 		return _logContainer
 	}
-	conf := GetConfInstance()
-	jobContainer := GetJobContainerInstance()
 	_logContainerObj := &LogContainer{
 		NameIdMapping:   make(map[string]int),
 		Logs:            make(map[int]*Log),
-		LogDir:          conf.GetConfVal(constant.LOG_PATH),
+		LogDir:          GetConfVal(constant.LOG_PATH),
 		lock:            &sync.Mutex{},
-		logSaveInterval: conf.GetConfVal(constant.LOG_SAVE_INTERVAL),
+		logSaveInterval: GetConfVal(constant.LOG_SAVE_INTERVAL),
 	}
 	// 注册回调
 	RegisterCallBack(_logContainerObj)
 
-	// 创建默认日志
-	_logContainerObj.AddLog(constant.DEFAULT_CHANNEL, constant.LOG_INFO)
 	_logContainer = _logContainerObj
-
-	// 初始化定时清理日志任务
-	jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, conf.GetConfVal(constant.LOG_SAVE_INTERVAL), _logContainerObj.AddLogJob)
-	_ = jobContainer.StartJob(constant.EVERYDAY_JOB_NAME)
-
 	return _logContainerObj
+}
+
+// 写入默认日志帮助函数
+func WriteLogToDefault(params ...string) {
+	GetLogContainerInstance().WriteLog(params...)
+}
+
+// 写入默认自定义管道日志帮助函数
+func WriteLogToChannels(msg string, level string, channels []string) {
+	GetLogContainerInstance().WriteLogOnChannels(msg, level, channels)
 }

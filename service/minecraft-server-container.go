@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
@@ -163,25 +164,45 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 		backCopyErr := utils.CopyDir(v, serverBackDir)
 		deleteErr := os.Remove(v)
 		if deleteErr != nil {
-			GetLogContainerInstance().WriteLog(fmt.Sprintf("服务端：%s, 删除失败"), constant.LOG_WARNING)
+			WriteLogToDefault(fmt.Sprintf("服务端：%s, 删除失败"), constant.LOG_WARNING)
 			continue
 		}
 		if copyErr != nil || backCopyErr != nil {
-			GetLogContainerInstance().WriteLog(fmt.Sprintf("服务端：%s, 复制失败"), constant.LOG_WARNING)
+			WriteLogToDefault(fmt.Sprintf("服务端：%s, 复制失败"), constant.LOG_WARNING)
 			continue
 		}
 		// 生成config
 		config := &json_struct.ServerConf{
 			Name:    filename,
 			RunPath: serverDir,
+			HashName: filemd5,
 		}
 		m.Add(config)
 	}
+	m.saveToDb()
 }
 
 // 读取数据库中mc配置
 func (m *MinecraftServerContainer) loadDbServer() {
-	GetDataBaseInstance()
+	serversConf := m.getServerConfFromDb()
+	for _, v := range serversConf {
+		m.Add(v)
+	}
+}
+
+// 读取数据库中的服务端配置
+func (m *MinecraftServerContainer) getServerConfFromDb() []*json_struct.ServerConf{
+	serversConfStr := GetFromDefault(constant.MC_SERVER_DB_KEY)
+	var serversConf []*json_struct.ServerConf
+	_ = json.Unmarshal([]byte(serversConfStr), &serversConf)
+	return serversConf
+}
+
+// 持久化服务器配置
+func (m *MinecraftServerContainer) saveToDb() {
+	config := m.GetAllServerConf()
+	data, _ := json.Marshal(config)
+	SetFromDefault(constant.MC_SERVER_DB_KEY, string(data))
 }
 
 // 停止所有服务端
@@ -197,7 +218,7 @@ func (m *MinecraftServerContainer) StopAll() error {
 	return nil
 }
 
-func GetMinecraftServerContainerObj() container.MinecraftContainer {
+func GetMinecraftServerContainerInstance() container.MinecraftContainer {
 	if minecraftServerContainer != nil {
 		return minecraftServerContainer
 	}

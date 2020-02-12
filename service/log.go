@@ -14,17 +14,6 @@ import (
 	"time"
 )
 
-var LogLevel map[string]int
-
-func LogInit() {
-	LogLevel = make(map[string]int)
-	LogLevel[constant.LOG_DEBUG] = 1
-	LogLevel[constant.LOG_INFO] = 2
-	LogLevel[constant.LOG_WARNING] = 3
-	LogLevel[constant.LOG_ERROR] = 4
-	LogLevel[constant.LOG_FATAL] = 5
-}
-
 type Log struct {
 	Name      string
 	Path      string

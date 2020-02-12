@@ -33,4 +33,7 @@ type MinecraftServer interface {
 
 	// 启动资源监控服务(只有关闭后才会启动)
 	StartMonitorServer()
+
+	// 写入服务器的日志
+	WriteLog(string, string)
 }

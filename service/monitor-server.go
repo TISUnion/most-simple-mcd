@@ -57,7 +57,7 @@ func (m *MonitorServer) _start() error {
 		m.processObj, _ = process.NewProcess(pid)
 	}
 
-	interval := GetConfInstance().GetConfVal(constant.MONITOR_INTERVAL)
+	interval := GetConfVal(constant.MONITOR_INTERVAL)
 	cronStr := fmt.Sprintf("@every %s", interval)
 	jobC := GetJobContainerInstance()
 	jobC.RegisterJob(m.jobName, cronStr, m.GetMonitorMessage)

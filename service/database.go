@@ -75,7 +75,7 @@ func (d *DataBase) SetWiteTTL(k string, v string, t time.Duration) {
 	})
 }
 
-func GetDataBase(dbname string) _interface.Database {
+func GetDataBaseInstance(dbname string) _interface.Database {
 	name := string(dbname)
 	if db, ok := dataBases[name]; ok {
 		return db
@@ -90,6 +90,16 @@ func GetDataBase(dbname string) _interface.Database {
 	return db
 }
 
+func GetFromDefault(key string) string{
+	db := GetDataBaseInstance(constant.DEFAULT_DATABASE_NAME)
+	return db.Get(key)
+}
+
+func SetFromDefault(key string, value string) {
+	db := GetDataBaseInstance(constant.DEFAULT_DATABASE_NAME)
+	db.Set(key, value)
+}
+
 func newDataBase(name string) _interface.Database {
 
 	if badgerDb, err := badger.Open(newDataBaseOptions(name)); err != nil {
@@ -102,7 +112,7 @@ func newDataBase(name string) _interface.Database {
 }
 
 func newDataBaseOptions(name string) badger.Options {
-	path := filepath.Join(GetConfInstance().GetConfVal(constant.WORKSPACE), "db-resource", name)
+	path := filepath.Join(GetConfVal(constant.WORKSPACE), "db-resource", name)
 	_ = utils.CreatDir(path)
 	return badger.Options{
 		Dir:                     path,

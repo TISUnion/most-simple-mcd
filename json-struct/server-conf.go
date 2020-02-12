@@ -30,4 +30,8 @@ type ServerConf struct {
 	// Memory
 	// 使用内存大小，单位M
 	Memory int `json:"memory"`
+
+	// HashName
+	// 服务端hash名称
+	HashName string `json:"hashName"`
 }

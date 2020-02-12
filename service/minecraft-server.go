@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
+	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"github.com/TISUnion/most-simple-mcd/utils"
@@ -57,7 +58,12 @@ type MinecraftServer struct {
 	entryId int
 
 	// MonitorServer
+	// 资源监听器
 	monitorServer server.MonitorServer
+
+	// Logger
+	// 服务端对应日志
+	logger _interface.Log
 }
 
 func (m *MinecraftServer) GetServerEntryId() int {
@@ -96,6 +102,9 @@ func (m *MinecraftServer) ChangeConfCallBack() {
 }
 
 func (m *MinecraftServer) InitCallBack() {
+	// 开启发送和接受消息
+	go m.reciveMessageToChan()
+	go m.handleMessage()
 }
 
 func (m *MinecraftServer) DestructCallBack() {
@@ -132,7 +141,7 @@ func (m *MinecraftServer) Start() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	if m.isStart {
-		GetLogContainerInstance().WriteLog(fmt.Sprintf("服务器: %s,重复启动", m.Name), constant.LOG_WARNING)
+		WriteLogToDefault(fmt.Sprintf("服务器: %s,重复启动", m.Name), constant.LOG_WARNING)
 		return nil
 	}
 	if err := m.runProcess(); err != nil {
@@ -147,7 +156,7 @@ func (m *MinecraftServer) Stop() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	if !m.isStart {
-		GetLogContainerInstance().WriteLog(fmt.Sprintf("服务器: %s,重复关闭", m.Name), constant.LOG_WARNING)
+		WriteLogToDefault(fmt.Sprintf("服务器: %s,重复关闭", m.Name), constant.LOG_WARNING)
 		return nil
 	}
 	m.isStart = false
@@ -181,7 +190,7 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 	buff = buff[:n]
 	if err != nil {
 		errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
-		GetLogContainerInstance().WriteLog(errMsg)
+		WriteLogToDefault(errMsg, constant.LOG_ERROR)
 		return []byte{}, errors.New(errMsg)
 	}
 	// 如果一次的数据为1024，就多次获取
@@ -191,7 +200,7 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 			subN, subErr := m.stdout.Read(buff)
 			if subErr != nil {
 				errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
-				GetLogContainerInstance().WriteLog(errMsg)
+				WriteLogToDefault(errMsg, constant.LOG_ERROR)
 				return []byte{}, errors.New(errMsg)
 			}
 			subBuff = subBuff[:subN]
@@ -270,7 +279,7 @@ func (m *MinecraftServer) validatePort() (int, error) {
 // 更换mc服务端端口
 func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int) (int, error) {
 	// 如果可以自动更换端口就自动更换端口
-	if isChange, _ := strconv.ParseBool(GetConfInstance().GetConfVal(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT)); isChange {
+	if isChange, _ := strconv.ParseBool(GetConfVal(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT)); isChange {
 		unusedPort, _ := utils.GetFreePort(port)
 		sec, err := cfg.GetSection(ini.DefaultSection)
 		if err != nil {
@@ -289,7 +298,7 @@ func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int) (int,
 		return unusedPort, nil
 	} else {
 		msg := fmt.Sprintf("服务端：%s，对应的服务器端口已被其他程序占用，请更换端口或者开启自动更换端口", m.Name)
-		GetLogContainerInstance().WriteLog(msg)
+		WriteLogToDefault(msg)
 		return 0, PORT_REPEAT_ERROR
 	}
 }
@@ -339,6 +348,17 @@ func (m *MinecraftServer) resetParams() {
 	m.monitorServer = nil
 }
 
+func (m *MinecraftServer) WriteLog(msg string, level string) {
+	// 写入自己的日志
+	m.logger.Write(&_interface.LogMsgType{
+		Message: msg,
+		Level:   level,
+	})
+
+	// 写入全局默认日志
+	WriteLogToDefault(msg, level)
+}
+
 // NewMinecraftServer
 // 新建一个mc服务端进程
 func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServer {
@@ -362,10 +382,8 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 		isStart:     false,
 		messageChan: make(chan *server.ReciveMessageType, 10),
 		entryId:     GetIncreateId(),
+		logger:      GetLogContainerInstance().AddLog(serverConf.HashName),
 	}
 	RegisterCallBack(minecraftServer)
-	// 开启发送和接受消息
-	go minecraftServer.reciveMessageToChan()
-	go minecraftServer.handleMessage()
 	return minecraftServer
 }

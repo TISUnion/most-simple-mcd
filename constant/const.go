@@ -37,7 +37,7 @@ const (
 
 // 日志常量
 const (
-	DEFAULT_CHANNEL               = "default"
+	DEFAULT_LOG_NAME              = "default"
 	EVERYDAY_JOB_NAME             = "everyday-add-log"
 	LOG_SAVE_INTERVAL_EVERYDAY    = "0 0 * * *"   // cron每日表达式
 	LOG_SAVE_INTERVAL_TWICEDAY    = "0 0 1/2 * ?" // cron每隔2天表达式
