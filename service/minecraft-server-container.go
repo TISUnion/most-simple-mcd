@@ -181,7 +181,7 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 
 // 读取数据库中mc配置
 func (m *MinecraftServerContainer) loadDbServer() {
-
+	GetDataBaseInstance()
 }
 
 // 停止所有服务端

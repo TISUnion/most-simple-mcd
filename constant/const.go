@@ -70,3 +70,8 @@ const (
 	MC_SERVER_DB_KEY = "minecraft:server:configs"
 	DEFAULT_PORT     = 25565
 )
+
+// DB常量
+const (
+	DEFAULT_DATABASE_NAME = "default-db"
+)

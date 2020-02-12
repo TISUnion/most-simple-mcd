@@ -7,9 +7,9 @@ import (
 
 var onceLock = &sync.Once{}
 
-func InitFlag() (terminalConfs TerminalType) {
+func InitFlag() (terminalConfs map[string]*string) {
 	onceLock.Do(func() {
-		terminalConfs = make(TerminalType)
+		terminalConfs = make(map[string]*string)
 		for name, confParam := range DefaultConfParam {
 			terminalConfs[name] = flag.String(name, "", confParam.Description)
 		}

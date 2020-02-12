@@ -15,8 +15,6 @@ var (
 	dataBases = make(map[string]_interface.Database)
 )
 
-type DataBaseNameType string
-
 type DataBase struct {
 	badgerDb *badger.DB
 	name     string
@@ -77,7 +75,7 @@ func (d *DataBase) SetWiteTTL(k string, v string, t time.Duration) {
 	})
 }
 
-func GetDataBase(dbname DataBaseNameType) _interface.Database {
+func GetDataBase(dbname string) _interface.Database {
 	name := string(dbname)
 	if db, ok := dataBases[name]; ok {
 		return db

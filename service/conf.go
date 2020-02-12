@@ -14,8 +14,6 @@ import (
 	"sync"
 )
 
-type TerminalType map[string]*string
-
 var (
 	_appConf         *Conf
 	DefaultConfParam map[string]*_interface.ConfParam
@@ -59,7 +57,7 @@ func ConfInit() {
 
 // loadFilePath
 // 获取配置文件目录
-func (c *Conf) loadFilePath(terminalConfs TerminalType) {
+func (c *Conf) loadFilePath(terminalConfs map[string]*string) {
 	// 根据优先级获取配置文件目录
 	if path, ok := terminalConfs[constant.CONF_PATH]; ok && *path != "" {
 		c.SetConfParam(constant.CONF_PATH, *path, constant.CONF_PATH_DESCREPTION, constant.CONF_TERMINAL_LEVEL)
@@ -163,7 +161,7 @@ func (c *Conf) loadEnvConf() {
 
 // loadTerminalConf
 // 加载命令行配置
-func (c *Conf) loadTerminalConf(terminalConfs TerminalType) {
+func (c *Conf) loadTerminalConf(terminalConfs map[string]*string) {
 	if terminalConfs != nil {
 		for k, v := range terminalConfs {
 			if *v != "" {
@@ -202,7 +200,7 @@ func (c *Conf) SetConfig(key string, val string) {
 	}
 }
 
-func (c *Conf) Init(terminalConfs TerminalType) {
+func (c *Conf) Init(terminalConfs map[string]*string) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	// 加载默认配置
@@ -275,7 +273,8 @@ func (c *Conf) InitCallBack() {
 }
 
 // 获取配置实例
-func GetConfObj(terminalConfs TerminalType) _interface.Conf {
+func GetConfInstance() _interface.Conf {
+	terminalConfs := InitFlag()
 	if _appConf != nil {
 		return _appConf
 	}
@@ -297,7 +296,7 @@ func GetConfObj(terminalConfs TerminalType) _interface.Conf {
 // 设置ini配置对象
 func setIniCfg(data map[string]*_interface.ConfParam) *ini.File {
 	cfg := ini.Empty()
-	sec, _ := cfg.NewSection("DEFAULT")
+	sec, _ := cfg.NewSection(ini.DefaultSection)
 	for k, v := range data {
 		confVal := "\"" + v.ConfVal + "\""
 		_, _ = sec.NewKey(k, confVal)

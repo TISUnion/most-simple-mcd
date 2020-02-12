@@ -152,7 +152,7 @@ func (l *LogContainer) InitCallBack() {
 	LogInit()
 }
 
-func GetLogContainerObj() container.LogContainer {
+func GetLogContainerInstance() container.LogContainer {
 	if _logContainer != nil {
 		return _logContainer
 	}

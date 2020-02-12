@@ -111,7 +111,7 @@ func (jc *JobContainer) DestructCallBack() {
 func (jc *JobContainer) InitCallBack() {
 }
 
-func GetJobContainerObj() container.JobContainer {
+func GetJobContainerInstance() container.JobContainer {
 	if JobContainerObj != nil {
 		return JobContainerObj
 	}

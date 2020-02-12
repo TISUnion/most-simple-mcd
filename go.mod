@@ -7,7 +7,6 @@ require (
 	github.com/dgraph-io/badger v1.6.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/google/go-cmp v0.4.0 // indirect
-	github.com/google/wire v0.4.0
 	github.com/mholt/archiver/v3 v3.3.0
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/shirou/gopsutil v2.20.1+incompatible
