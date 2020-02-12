@@ -140,6 +140,7 @@ func (m *MinecraftServer) runProcess() error {
 func (m *MinecraftServer) Start() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
+
 	if m.isStart {
 		WriteLogToDefault(fmt.Sprintf("服务器: %s,重复启动", m.Name), constant.LOG_WARNING)
 		return nil
@@ -156,7 +157,6 @@ func (m *MinecraftServer) Stop() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	if !m.isStart {
-		WriteLogToDefault(fmt.Sprintf("服务器: %s,重复关闭", m.Name), constant.LOG_WARNING)
 		return nil
 	}
 	m.isStart = false
@@ -190,7 +190,6 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 	buff = buff[:n]
 	if err != nil {
 		errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
-		WriteLogToDefault(errMsg, constant.LOG_ERROR)
 		return []byte{}, errors.New(errMsg)
 	}
 	// 如果一次的数据为1024，就多次获取
@@ -200,7 +199,6 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 			subN, subErr := m.stdout.Read(buff)
 			if subErr != nil {
 				errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
-				WriteLogToDefault(errMsg, constant.LOG_ERROR)
 				return []byte{}, errors.New(errMsg)
 			}
 			subBuff = subBuff[:subN]
@@ -252,7 +250,8 @@ func (m *MinecraftServer) _command(c string) error {
 // validatePort
 // 校验mc的端口
 func (m *MinecraftServer) validatePort() (int, error) {
-	mcConfPath := filepath.Join(m.RunPath, constant.MC_CONF_NAME)
+	runDir := filepath.Dir(m.RunPath)
+	mcConfPath := filepath.Join(runDir, constant.MC_CONF_NAME)
 	if f, e := utils.CreateFile(mcConfPath); e == nil {
 		f.Close()
 	}
@@ -306,7 +305,8 @@ func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int) (int,
 // validateEula
 // 校验mc的eula文件
 func (m *MinecraftServer) validateEula() error {
-	path := filepath.Join(m.RunPath, constant.EULA_FILE_NAME)
+	runDir := filepath.Dir(m.RunPath)
+	path := filepath.Join(runDir, constant.EULA_FILE_NAME)
 	f, _ := utils.CreateFile(path)
 	_ = f.Close()
 	cfg, err := ini.Load(path)
@@ -343,9 +343,11 @@ func (m *MinecraftServer) resetParams() {
 	m.stdout, _ = m.CmdObj.StdoutPipe()
 	m.isStart = false
 	m.CmdObj.Dir = m.RunPath
-	// 关闭这个监控器
-	m.monitorServer.DestructCallBack()
-	m.monitorServer = nil
+	if m.monitorServer != nil {
+		// 关闭这个监控器
+		m.monitorServer.DestructCallBack()
+		m.monitorServer = nil
+	}
 }
 
 func (m *MinecraftServer) WriteLog(msg string, level string) {
@@ -372,7 +374,7 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 		return nil
 	}
 	// 设置工作区间
-	cmdObj.Dir = serverConf.RunPath
+	cmdObj.Dir = filepath.Dir(serverConf.RunPath)
 	minecraftServer := &MinecraftServer{
 		ServerConf:  serverConf,
 		CmdObj:      cmdObj,

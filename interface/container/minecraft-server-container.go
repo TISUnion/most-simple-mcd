@@ -9,17 +9,32 @@ import (
 // MinecraftContainer
 // minecraft服务容器接口
 type MinecraftContainer interface {
+	// 回调
 	_interface.CallBack
+	// 根据id获取服务端实例
 	GetServerById(int) (server.MinecraftServer, bool)
+
+	// 根据id获取镜像服务端实例 TODO 镜像插件
 	GetMirrorServerById(int) (server.MinecraftServer, bool)
+
+	// 根据id开启服务端
 	StartById(int) error
+
+	// 根据id停止服务端
 	StopById(int) error
+
+	// 根据id重启服务端
 	RestartById(int) error
+
+	// 获取所有服务端配置
 	GetAllServerConf() []*json_struct.ServerConf
 
-	Add(*json_struct.ServerConf)
+	// 添加服务端
+	AddServer(*json_struct.ServerConf)
 
 	// StopAll
 	// 关闭所有mc服务器
 	StopAll() error
+
+	GetAllServerObj() map[int]server.MinecraftServer
 }

@@ -69,13 +69,15 @@ func (l *Log) Write(logMsg *_interface.LogMsgType) {
 }
 
 func (l *Log) writeToFile() {
-	select {
-	case msg := <-l.WriteChan:
-		l.lock.Lock()
-		if _, err := l.FileObj.WriteString(l.getLogMsg(msg.Level, msg.Message)); err != nil {
-			utils.PanicError(constant.WRITE_LOG_FAILED, err)
+	for {
+		select {
+		case msg := <-l.WriteChan:
+			l.lock.Lock()
+			if _, err := l.FileObj.WriteString(l.getLogMsg(msg.Level, msg.Message)); err != nil {
+				utils.PanicError(constant.WRITE_LOG_FAILED, err)
+			}
+			l.lock.Unlock()
 		}
-		l.lock.Unlock()
 	}
 }
 

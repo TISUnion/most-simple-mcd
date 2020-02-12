@@ -52,6 +52,7 @@ func (m *MinecraftServerContainer) InitCallBack() {
 	m.loadLocalServer()
 }
 
+
 func (m *MinecraftServerContainer) GetServerById(id int) (server.MinecraftServer, bool) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
@@ -135,7 +136,7 @@ func (m *MinecraftServerContainer) GetAllServerConf() []*json_struct.ServerConf 
 }
 
 // 把根据配置添加服务
-func (m *MinecraftServerContainer) Add(config *json_struct.ServerConf) {
+func (m *MinecraftServerContainer) AddServer(config *json_struct.ServerConf) {
 	if config.Memory <= 0 {
 		config.Memory = 1024
 	}
@@ -148,6 +149,11 @@ func (m *MinecraftServerContainer) Add(config *json_struct.ServerConf) {
 	m.minecraftServers[entryId] = mcServer
 	m.stopServers[entryId] = mcServer
 
+}
+
+// 获取所有服务端对象实例
+func (m *MinecraftServerContainer) GetAllServerObj() map[int]server.MinecraftServer {
+	return m.minecraftServers
 }
 
 // 读取本地的mc服务端文件
@@ -178,7 +184,7 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 			RunPath: serverDir,
 			HashName: filemd5,
 		}
-		m.Add(config)
+		m.AddServer(config)
 	}
 	m.saveToDb()
 }
@@ -187,13 +193,13 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 func (m *MinecraftServerContainer) loadDbServer() {
 	serversConf := m.getServerConfFromDb()
 	for _, v := range serversConf {
-		m.Add(v)
+		m.AddServer(v)
 	}
 }
 
 // 读取数据库中的服务端配置
 func (m *MinecraftServerContainer) getServerConfFromDb() []*json_struct.ServerConf{
-	serversConfStr := GetFromDefault(constant.MC_SERVER_DB_KEY)
+	serversConfStr := GetFromDatabase(constant.MC_SERVER_DB_KEY)
 	var serversConf []*json_struct.ServerConf
 	_ = json.Unmarshal([]byte(serversConfStr), &serversConf)
 	return serversConf
@@ -203,7 +209,7 @@ func (m *MinecraftServerContainer) getServerConfFromDb() []*json_struct.ServerCo
 func (m *MinecraftServerContainer) saveToDb() {
 	config := m.GetAllServerConf()
 	data, _ := json.Marshal(config)
-	SetFromDefault(constant.MC_SERVER_DB_KEY, string(data))
+	SetFromDatabase(constant.MC_SERVER_DB_KEY, string(data))
 }
 
 // 停止所有服务端

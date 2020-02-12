@@ -13,6 +13,7 @@ var (
 )
 
 func RegisterCallBack(callback _interface.CallBack) {
+
 	// 日志配置回调
 	changeConfCallBacks = append(changeConfCallBacks, callback.ChangeConfCallBack)
 
@@ -30,6 +31,15 @@ func RunChangeConfCallBacks() {
 }
 
 func RunDestructCallBacks() {
+	// 反转数组
+	// 这里的销毁回调，必须倒序执行，否则依赖销毁，会报错
+	length := len(destructCallBacks)
+	for i := 0; i < length/2; i++ {
+		temp := destructCallBacks[length-1-i]
+		destructCallBacks[length-1-i] = destructCallBacks[i]
+		destructCallBacks[i] = temp
+	}
+
 	for _, callback := range destructCallBacks {
 		callback()
 	}

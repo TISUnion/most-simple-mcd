@@ -11,22 +11,12 @@ import (
 	"time"
 )
 
-var (
-	dataBases = make(map[string]_interface.Database)
-)
-
 type DataBase struct {
 	badgerDb *badger.DB
 	name     string
 }
 
-func (d *DataBase) InitCallBack() {
-}
-
-func (d *DataBase) ChangeConfCallBack() {
-}
-
-func (d *DataBase) DestructCallBack() {
+func (d *DataBase) destruct() {
 	if d.badgerDb != nil {
 		_ = d.badgerDb.Close()
 	}
@@ -51,6 +41,7 @@ func (d *DataBase) Get(k string) string {
 		}
 		return nil
 	})
+	d.destruct()
 	return result
 }
 
@@ -62,6 +53,7 @@ func (d *DataBase) Set(k string, v string) {
 		err := txn.Set([]byte(k), []byte(v))
 		return err
 	})
+	d.destruct()
 }
 
 func (d *DataBase) SetWiteTTL(k string, v string, t time.Duration) {
@@ -73,36 +65,35 @@ func (d *DataBase) SetWiteTTL(k string, v string, t time.Duration) {
 		err := txn.SetEntry(e)
 		return err
 	})
+	d.destruct()
 }
 
-func GetDataBaseInstance(dbname string) _interface.Database {
-	name := string(dbname)
-	if db, ok := dataBases[name]; ok {
-		return db
-	}
+func getDataBaseObj(name string) _interface.Database {
 	db := newDataBase(name)
 	if db == nil {
 		return nil
 	}
-	// 注册回调
-	RegisterCallBack(db)
-	dataBases[name] = db
 	return db
 }
 
-func GetFromDefault(key string) string{
-	db := GetDataBaseInstance(constant.DEFAULT_DATABASE_NAME)
+func GetFromDatabase(key string) string {
+	db := getDataBaseObj(constant.DEFAULT_DATABASE_NAME)
 	return db.Get(key)
 }
 
-func SetFromDefault(key string, value string) {
-	db := GetDataBaseInstance(constant.DEFAULT_DATABASE_NAME)
+func SetFromDatabase(key string, value string) {
+	db := getDataBaseObj(constant.DEFAULT_DATABASE_NAME)
 	db.Set(key, value)
 }
 
-func newDataBase(name string) _interface.Database {
+func SetWiteTTLFromDatabase(key string, value string, t time.Duration) {
+	db := getDataBaseObj(constant.DEFAULT_DATABASE_NAME)
+	db.SetWiteTTL(key, value, t)
+}
 
+func newDataBase(name string) _interface.Database {
 	if badgerDb, err := badger.Open(newDataBaseOptions(name)); err != nil {
+		WriteLogToDefault(fmt.Sprintf("打开数据库失败，因为：%v", err))
 		fmt.Println(err)
 		return nil
 	} else {
@@ -127,7 +118,7 @@ func newDataBaseOptions(name string) badger.Options {
 		NumLevelZeroTables:      5,
 		NumLevelZeroTablesStall: 10,
 		NumMemtables:            5,
-		SyncWrites:              false,
+		SyncWrites:              true,
 		NumVersionsToKeep:       1,
 		CompactL0OnClose:        true,
 		ValueLogFileSize:        1<<30 - 1,

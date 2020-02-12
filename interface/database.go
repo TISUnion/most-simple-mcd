@@ -5,8 +5,6 @@ import "time"
 // Database
 // 数据库, 对github.com/dgraph-io/badger包的二次封装
 type Database interface {
-	CallBack
-
 	// Get
 	// 获取值
 	Get(string) string
