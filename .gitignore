@@ -3,6 +3,7 @@
 go.sum
 logs/*
 minecraft-servers/*
+minecraft-servers-back/*
 minecraft-contains/*
 databases/*
 db-resource/*
@@ -13,5 +14,4 @@ conf/*
 main
 main.exe
 main.go
-run.sh
 *.jar
