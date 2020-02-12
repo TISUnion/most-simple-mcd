@@ -46,7 +46,7 @@ func RemoveRepeatedElement(arr []string) []string {
 func ParseCharacter(data []byte) ([]byte, error) {
 	if !IsUTF8(data) {
 		if result, err := simplifiedchinese.GBK.NewDecoder().Bytes(data); err != nil {
-			return nil, err
+			return data, err
 		} else {
 			return result, nil
 		}

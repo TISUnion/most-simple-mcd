@@ -60,6 +60,14 @@ type MinecraftServer struct {
 	monitorServer server.MonitorServer
 }
 
+func (m *MinecraftServer) StartMonitorServer() {
+	if !m.IsStartMonitor {
+		m.IsStartMonitor = true
+		m.monitorServer = NewMonitorServer(m.entryId, m.Pid)
+		_ = m.monitorServer.Start()
+	}
+}
+
 func (m *MinecraftServer) GetServerMonitor() server.MonitorServer {
 	return m.monitorServer
 }
@@ -112,7 +120,11 @@ func (m *MinecraftServer) runProcess() error {
 	}
 
 	m.Pid = m.CmdObj.Process.Pid
-	m.monitorServer = NewMonitorServer(m.entryId, m.Pid)
+
+	if m.IsStartMonitor {
+		m.monitorServer = NewMonitorServer(m.entryId, m.Pid)
+		_ = m.monitorServer.Start()
+	}
 	return nil
 }
 
@@ -189,6 +201,7 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 			}
 		}
 	}
+	buff, _ = utils.ParseCharacter(buff)
 	return buff, nil
 }
 

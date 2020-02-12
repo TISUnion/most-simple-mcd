@@ -29,4 +29,7 @@ type MinecraftServer interface {
 
 	// 获取资源监控服务
 	GetServerMonitor() MonitorServer
+
+	// 启动资源监控服务(只有关闭后才会启动)
+	StartMonitorServer()
 }

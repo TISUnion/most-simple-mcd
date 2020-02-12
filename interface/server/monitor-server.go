@@ -10,7 +10,7 @@ type MonitorMessage struct {
 
 	// 内存使用量
 	MemoryUsed uint64
-	// 物理内存使用量
+	// 虚拟内存使用量
 	VirtualMemoryUsed uint64
 }
 

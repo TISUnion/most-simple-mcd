@@ -58,8 +58,9 @@ func (m *MonitorServer) _start() error {
 	}
 
 	interval := GetConfInstance().GetConfVal(constant.MONITOR_INTERVAL)
+	cronStr := fmt.Sprintf("@every %s", interval)
 	jobC := GetJobContainerInstance()
-	jobC.RegisterJob(m.jobName, interval, m.GetMonitorMessage)
+	jobC.RegisterJob(m.jobName, cronStr, m.GetMonitorMessage)
 	_ = jobC.StartJob(m.jobName)
 	return nil
 }
@@ -73,7 +74,7 @@ func (m *MonitorServer) GetMonitorMessage() {
 	msg := &server.MonitorMessage{
 		CpuUsedPercent:           cpuPercent,
 		MemoryUsedPercent:        memoryPercent,
-		VirtualMemoryUsedPercent: utils.Uint64Tofloat64(memoryInfo.VMS) / utils.Uint64Tofloat64(virtualMem.Total),
+		VirtualMemoryUsedPercent: utils.Uint64Tofloat64(memoryInfo.VMS) / utils.Uint64Tofloat64(virtualMem.Total) * 100,
 		MemoryUsed:               memoryInfo.RSS,
 		VirtualMemoryUsed:        memoryInfo.VMS,
 	}
