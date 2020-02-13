@@ -1,0 +1,3 @@
+[submodule "web-admin"]
+	path = web-admin
+	url = https://github.com/TISUnion/most-simple-mcd.git
