@@ -75,3 +75,9 @@ const (
 const (
 	DEFAULT_DATABASE_NAME = "default-db"
 )
+
+// web后台常量
+const (
+	COMPRESS_FILE_NAME = "webfile.zip"
+	Web_FILE_DIR_NAME  = "web-static-file"
+)

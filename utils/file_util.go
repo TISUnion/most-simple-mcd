@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/klauspost/compress/flate"
 	"github.com/mholt/archiver/v3"
 	"os"
 	"path/filepath"
@@ -27,9 +28,17 @@ func IsFile(path string) bool {
 	return false
 }
 
-// 压缩多个文件
+// 压缩多个文件， 相同则覆盖
 func CompressFiles(sources []string, destination string) error {
-	return archiver.Archive(sources, destination)
+	z := archiver.Zip{
+		CompressionLevel:       flate.DefaultCompression,
+		MkdirAll:               true,
+		SelectiveCompression:   true,
+		ContinueOnError:        false,
+		OverwriteExisting:      true,
+		ImplicitTopLevelFolder: false,
+	}
+	return z.Archive(sources, destination)
 }
 
 // 压缩单个文件
