@@ -17,3 +17,14 @@ const (
 
 	CREATE_CONF_FAILED_AND_ROLLBACK = "创建配置文件失败，回滚至默认配置"
 )
+
+// http错误码
+const (
+	HTTP_OK                   = 0
+	HTTP_PARAMS_ERROR         = 2009190000 // 参数错误
+	HTTP_PARAMS_ERROR_MESSAGE = "参数错误"
+	PASSWORD_ERROR            = 2009190001
+	PASSWORD_ERROR_MESSAGE    = "账号或密码错误"
+	TOKEN_FAILED              = 2009190002
+	TOKEN_FAILED_MESSAGE      = "token过期"
+)

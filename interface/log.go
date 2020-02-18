@@ -2,11 +2,15 @@
 // 接口库
 package _interface
 
-import "github.com/dgraph-io/badger"
+import (
+	"github.com/dgraph-io/badger"
+	"io"
+)
 
 type LogMsgType struct {
-	Message string
-	Level   string
+	Message     string
+	Level       string
+	IsNotFormat bool
 }
 
 // log
@@ -16,11 +20,11 @@ type Log interface {
 	badger.Logger
 
 	CallBack
-	// Write
+	// WriteLog
 	// 写入日志
 	// 第一个string为日志等级分为：debug、info、warn、error、fatal，依次递增
 	// 第二个string为写入日志内容，无需加入日志格式
-	Write(*LogMsgType)
+	WriteLog(*LogMsgType)
 
 	// SetLogLevel
 	// 修改日志等级, 如果日志等级比传入的等级低则不会写入该日志
@@ -33,4 +37,6 @@ type Log interface {
 	// CompressLogs
 	// 压缩日志 传空字符串就表是压缩在当前文件夹内
 	CompressLogs(path string) error
+
+	io.Writer
 }

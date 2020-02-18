@@ -352,7 +352,7 @@ func (m *MinecraftServer) resetParams() {
 
 func (m *MinecraftServer) WriteLog(msg string, level string) {
 	// 写入自己的日志
-	m.logger.Write(&_interface.LogMsgType{
+	m.logger.WriteLog(&_interface.LogMsgType{
 		Message: msg,
 		Level:   level,
 	})

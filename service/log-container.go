@@ -101,7 +101,7 @@ func (l *LogContainer) WriteLogOnChannels(msg string, level string, channels []s
 	channels = utils.RemoveRepeatedElement(channels)
 	for _, v := range channels {
 		if log := l.GetLogByName(v); log != nil {
-			log.Write(&_interface.LogMsgType{
+			log.WriteLog(&_interface.LogMsgType{
 				Message: msg,
 				Level:   level,
 			})
@@ -125,7 +125,7 @@ func (l *LogContainer) WriteLog(params ...string) {
 	if len(params) > 1 {
 		level = params[1]
 	}
-	log.Write(&_interface.LogMsgType{
+	log.WriteLog(&_interface.LogMsgType{
 		Message: msg,
 		Level:   level,
 	})

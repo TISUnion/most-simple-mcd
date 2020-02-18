@@ -24,29 +24,39 @@ type Log struct {
 	lock      *sync.Mutex // 文件锁：用于防止重新载入*os.file时，正在写入日志
 }
 
+// 直接写入日志，不进行格式化
+func (l *Log) Write(p []byte) (n int, err error) {
+	l.WriteLog(&_interface.LogMsgType{
+		Message:     string(p),
+		Level:       constant.LOG_INFO,
+		IsNotFormat: true,
+	})
+	return 0, nil
+}
+
 func (l *Log) Errorf(f string, v ...interface{}) {
-	l.Write(&_interface.LogMsgType{
+	l.WriteLog(&_interface.LogMsgType{
 		Message: fmt.Sprintf(f, v),
 		Level:   constant.LOG_ERROR,
 	})
 }
 
 func (l *Log) Warningf(f string, v ...interface{}) {
-	l.Write(&_interface.LogMsgType{
+	l.WriteLog(&_interface.LogMsgType{
 		Message: fmt.Sprintf(f, v),
 		Level:   constant.LOG_WARNING,
 	})
 }
 
 func (l *Log) Infof(f string, v ...interface{}) {
-	l.Write(&_interface.LogMsgType{
+	l.WriteLog(&_interface.LogMsgType{
 		Message: fmt.Sprintf(f, v),
 		Level:   constant.LOG_INFO,
 	})
 }
 
 func (l *Log) Debugf(f string, v ...interface{}) {
-	l.Write(&_interface.LogMsgType{
+	l.WriteLog(&_interface.LogMsgType{
 		Message: fmt.Sprintf(f, v),
 		Level:   constant.LOG_DEBUG,
 	})
@@ -61,7 +71,7 @@ func (l *Log) DestructCallBack() {
 func (l *Log) InitCallBack() {
 }
 
-func (l *Log) Write(logMsg *_interface.LogMsgType) {
+func (l *Log) WriteLog(logMsg *_interface.LogMsgType) {
 	if l.Level > LogLevel[logMsg.Level] {
 		return
 	}
@@ -73,7 +83,14 @@ func (l *Log) writeToFile() {
 		select {
 		case msg := <-l.WriteChan:
 			l.lock.Lock()
-			if _, err := l.FileObj.WriteString(l.getLogMsg(msg.Level, msg.Message)); err != nil {
+			var data string
+			// 如果是否不需要格式化
+			if msg.IsNotFormat {
+				data = msg.Message
+			} else {
+				data = l.getLogMsg(msg.Level, msg.Message)
+			}
+			if _, err := l.FileObj.WriteString(data); err != nil {
 				utils.PanicError(constant.WRITE_LOG_FAILED, err)
 			}
 			l.lock.Unlock()

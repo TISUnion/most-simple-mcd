@@ -1,5 +1,7 @@
 package constant
 
+import "time"
+
 // 配置名常量
 const (
 	IS_RELOAD_CONF                       = "config_auto_reload"          // 自动加载配置文件
@@ -78,6 +80,11 @@ const (
 
 // web后台常量
 const (
-	COMPRESS_FILE_NAME = "webfile.zip"
-	Web_FILE_DIR_NAME  = "web-static-file"
+	COMPRESS_FILE_NAME          = "webfile.zip"
+	Web_FILE_DIR_NAME           = "web-static-file"
+	DEFAULT_ACCOUNT_DB_KEY      = "web:admin:account"
+	DEFAULT_TOKEN_DB_KEY        = "web:admin:token"
+	DEFAULT_TOKEN_DB_KEY_EXPIRE = 4 * time.Hour
+	DEFAULT_ACCOUNT             = "admin"
+	DEFAULT_PASSWORD            = "123456"
 )
