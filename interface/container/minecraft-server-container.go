@@ -12,19 +12,19 @@ type MinecraftContainer interface {
 	// 回调
 	_interface.CallBack
 	// 根据id获取服务端实例
-	GetServerById(int) (server.MinecraftServer, bool)
+	GetServerById(string) (server.MinecraftServer, bool)
 
 	// 根据id获取镜像服务端实例 TODO 镜像插件
-	GetMirrorServerById(int) (server.MinecraftServer, bool)
+	GetMirrorServerById(string) (server.MinecraftServer, bool)
 
 	// 根据id开启服务端
-	StartById(int) error
+	StartById(string) error
 
 	// 根据id停止服务端
-	StopById(int) error
+	StopById(string) error
 
 	// 根据id重启服务端
-	RestartById(int) error
+	RestartById(string) error
 
 	// 获取所有服务端配置
 	GetAllServerConf() []*json_struct.ServerConf
@@ -37,7 +37,7 @@ type MinecraftContainer interface {
 	StopAll() error
 
 	// 获取所有服务端对象实例
-	GetAllServerObj() map[int]server.MinecraftServer
+	GetAllServerObj() map[string]server.MinecraftServer
 
 	// 所有服务端配置保存到数据库中
 	SaveToDb()

@@ -17,7 +17,7 @@ var (
 
 type MonitorServer struct {
 	messageChan chan *server.MonitorMessage
-	serverId    int
+	serverId    string
 	serverPid   int
 	processObj  *process.Process
 	jobName     string
@@ -33,6 +33,7 @@ func (m *MonitorServer) ChangeConfCallBack() {
 }
 
 func (m *MonitorServer) DestructCallBack() {
+	fmt.Println(123)
 	_ = m._stop()
 	m.messageChan = nil
 }
@@ -106,7 +107,7 @@ func (m *MonitorServer) Restart() error {
 	return nil
 }
 
-func NewMonitorServer(id int, pid int) server.MonitorServer {
+func NewMonitorServer(id string, pid int) server.MonitorServer {
 	ms := &MonitorServer{
 		messageChan: make(chan *server.MonitorMessage, 10),
 		serverId:    id,

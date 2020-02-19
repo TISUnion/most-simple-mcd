@@ -53,10 +53,6 @@ type MinecraftServer struct {
 	// 玩家发言存储chan
 	messageChan chan *server.ReciveMessageType
 
-	// EntryId
-	// 实例唯一id
-	entryId int
-
 	// MonitorServer
 	// 资源监听器
 	monitorServer server.MonitorServer
@@ -66,14 +62,14 @@ type MinecraftServer struct {
 	logger _interface.Log
 }
 
-func (m *MinecraftServer) GetServerEntryId() int {
-	return m.entryId
+func (m *MinecraftServer) GetServerEntryId() string {
+	return m.EntryId
 }
 
 func (m *MinecraftServer) StartMonitorServer() {
 	if !m.IsStartMonitor {
 		m.IsStartMonitor = true
-		m.monitorServer = NewMonitorServer(m.entryId, m.Pid)
+		m.monitorServer = NewMonitorServer(m.EntryId, m.Pid)
 		_ = m.monitorServer.Start()
 	}
 }
@@ -109,8 +105,6 @@ func (m *MinecraftServer) InitCallBack() {
 
 func (m *MinecraftServer) DestructCallBack() {
 	_ = m.Stop()
-	_ = m.stdin.Close()
-	_ = m.stdout.Close()
 }
 
 // 启动进程
@@ -131,7 +125,7 @@ func (m *MinecraftServer) runProcess() error {
 	m.Pid = m.CmdObj.Process.Pid
 
 	if m.IsStartMonitor {
-		m.monitorServer = NewMonitorServer(m.entryId, m.Pid)
+		m.monitorServer = NewMonitorServer(m.EntryId, m.Pid)
 		_ = m.monitorServer.Start()
 	}
 	return nil
@@ -221,7 +215,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 		}
 		m.messageChan <- &server.ReciveMessageType{
 			OriginData: everyBuff,
-			ServerId:   m.entryId,
+			ServerId:   m.EntryId,
 		}
 	}
 }
@@ -383,8 +377,7 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 		lock:        &sync.Mutex{},
 		isStart:     false,
 		messageChan: make(chan *server.ReciveMessageType, 10),
-		entryId:     GetIncreateId(),
-		logger:      GetLogContainerInstance().AddLog(serverConf.HashName),
+		logger:      GetLogContainerInstance().AddLog(serverConf.EntryId),
 	}
 	RegisterCallBack(minecraftServer)
 	return minecraftServer

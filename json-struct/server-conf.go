@@ -1,6 +1,10 @@
 package json_struct
 
 type ServerConf struct {
+	// EntryId
+	// 实例唯一id
+	EntryId string
+
 	// Name
 	// 服务器名称
 	Name string `json:"name"`
@@ -30,10 +34,6 @@ type ServerConf struct {
 	// Memory
 	// 使用内存大小，单位M
 	Memory int `json:"memory"`
-
-	// HashName
-	// 服务端hash名称
-	HashName string `json:"hashName"`
 
 	// Version
 	// 服务端版本

@@ -7,7 +7,7 @@ type ReciveMessageType struct {
 	Time       string
 	Speak      string
 	OriginData []byte
-	ServerId   int
+	ServerId   string
 }
 
 type MinecraftServer interface {
@@ -29,7 +29,7 @@ type MinecraftServer interface {
 	GetServerMonitor() MonitorServer
 
 	// 获取当前全局id,每次启动id不一定相同 TODO 后期优化
-	GetServerEntryId() int
+	GetServerEntryId() string
 
 	// 启动资源监控服务(只有关闭后才会启动)
 	StartMonitorServer()

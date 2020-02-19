@@ -36,23 +36,23 @@ type Conf struct {
 }
 
 func ConfInit() {
-	// 加载默认配置
+	// 注册默认配置
 	DefaultConfParam = make(map[string]*_interface.ConfParam)
-	DefaultConfParam[constant.IS_RELOAD_CONF] = utils.NewConfParam(constant.IS_RELOAD_CONF, "false", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	DefaultConfParam[constant.RELOAD_CONF_INTERVAL] = utils.NewConfParam(constant.RELOAD_CONF_INTERVAL, "5000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	DefaultConfParam[constant.IS_MANAGE_HTTP] = utils.NewConfParam(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	DefaultConfParam[constant.MANAGE_HTTP_SERVER_PORT] = utils.NewConfParam(constant.MANAGE_HTTP_SERVER_PORT, "80", constant.MANAGE_HTTP_SERVER_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	DefaultConfParam[constant.LOG_SAVE_INTERVAL] = utils.NewConfParam(constant.LOG_SAVE_INTERVAL, constant.LOG_SAVE_INTERVAL_TWICEDAY, constant.LOG_SAVE_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.IS_RELOAD_CONF, "false", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.RELOAD_CONF_INTERVAL, "5000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.MANAGE_HTTP_SERVER_PORT, "80", constant.MANAGE_HTTP_SERVER_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.LOG_SAVE_INTERVAL, constant.LOG_SAVE_INTERVAL_TWICEDAY, constant.LOG_SAVE_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	if workspace, err := utils.GetCurrentPath(); err == nil {
-		DefaultConfParam[constant.WORKSPACE] = utils.NewConfParam(constant.WORKSPACE, workspace, constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+		RegisterConfig(constant.WORKSPACE, workspace, constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	} else {
-		DefaultConfParam[constant.WORKSPACE] = utils.NewConfParam(constant.WORKSPACE, "./", constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+		RegisterConfig(constant.WORKSPACE, "./", constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	}
-	DefaultConfParam[constant.LOG_PATH] = utils.NewConfParam(constant.LOG_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "logs"), constant.LOG_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	DefaultConfParam[constant.CONF_PATH] = utils.NewConfParam(constant.CONF_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "conf/mcd.ini"), constant.CONF_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	DefaultConfParam[constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT] = utils.NewConfParam(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT, "true", constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	DefaultConfParam[constant.MONITOR_INTERVAL] = utils.NewConfParam(constant.MONITOR_INTERVAL, "2s", constant.MONITOR_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	DefaultConfParam[constant.I18N] = utils.NewConfParam(constant.I18N, "zh", constant.I18N_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.LOG_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "logs"), constant.LOG_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.CONF_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "conf/mcd.ini"), constant.CONF_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT, "true", constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.MONITOR_INTERVAL, "2s", constant.MONITOR_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.I18N, "zh", constant.I18N_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 }
 
 // loadFilePath
@@ -121,14 +121,6 @@ func (c *Conf) ReloadConfig() {
 	c.loadEnvConf()
 	// 执行配置更改回调
 	RunChangeConfCallBacks()
-}
-
-// loadDefaultConf
-// 加载默认配置
-func (c *Conf) loadDefaultConf() {
-	for _, confParam := range DefaultConfParam {
-		c.SetConfParam(confParam.Name, confParam.ConfVal, confParam.Description, confParam.Level)
-	}
 }
 
 // loadFileConf
@@ -203,8 +195,6 @@ func (c *Conf) SetConfig(key string, val string) {
 func (c *Conf) Init(terminalConfs map[string]*string) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	// 加载默认配置
-	c.loadDefaultConf()
 
 	// 加载文件配置文件路径
 	c.loadFilePath(terminalConfs)
@@ -229,12 +219,14 @@ func (c *Conf) SetConfParam(Name, ConfVal, description string, level int) {
 		if confParam.Level <= level {
 			confParam.Level = level
 			confParam.ConfVal = ConfVal
-			if description != "" {
-				confParam.Description = description
-			}
+			confParam.Description = description
 		}
-	} else {
-		// 如果不存在配置，就记录配置名并新建配置对象
+	}
+}
+
+// 注册配置
+func (c *Conf) RegisterConfParam(Name, ConfVal, description string, level int) {
+	if _, ok := c.confs[Name]; !ok {
 		c.ConfKeys = append(c.ConfKeys, Name)
 		c.confs[Name] = &_interface.ConfParam{
 			ConfVal:        ConfVal,
@@ -270,11 +262,13 @@ func (c *Conf) DestructCallBack() {
 
 func (c *Conf) InitCallBack() {
 	ConfInit()
+	terminalConfs := InitFlag()
+	c.Init(terminalConfs)
+	c.ChangeConfCallBack()
 }
 
 // 获取配置实例
 func GetConfInstance() _interface.Conf {
-	terminalConfs := InitFlag()
 	if _appConf != nil {
 		return _appConf
 	}
@@ -285,11 +279,6 @@ func GetConfInstance() _interface.Conf {
 	}
 	// 注册回调
 	RegisterCallBack(_appConf)
-
-	_appConf.Init(terminalConfs)
-
-	// 第一次执行配置更改回调
-	_appConf.ChangeConfCallBack()
 	return _appConf
 }
 
@@ -307,4 +296,10 @@ func setIniCfg(data map[string]*_interface.ConfParam) *ini.File {
 // 获取配置值帮助函数
 func GetConfVal(confKey string) string {
 	return GetConfInstance().GetConfVal(confKey)
+}
+
+func RegisterConfig(Name, ConfVal, description string, level int) {
+	conObj := GetConfInstance()
+	DefaultConfParam[Name] = utils.NewConfParam(Name, ConfVal, description, level)
+	conObj.RegisterConfParam(Name, ConfVal, description, level)
 }
