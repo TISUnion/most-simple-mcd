@@ -38,4 +38,8 @@ type ServerConf struct {
 	// Version
 	// 服务端版本
 	Version string `json:"version"`
+
+	// GameType
+	// 服务器模式
+	GameType string `json:"gameType"`
 }

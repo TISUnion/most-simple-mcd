@@ -35,6 +35,12 @@ const (
 // 配置常量
 const (
 	RELOAD_CONF_JOB_NAME = "reload-conf"
+	// 配置覆盖优先级
+	CONF_SYSTEM_LEVEL      = 4
+	CONF_TERMINAL_LEVEL    = 3
+	CONF_ENVIRONMENT_LEVEL = 2
+	CONF_FILE_LEVEL        = 1
+	CONF_DEFAULT_LEVEL     = 0
 )
 
 // 日志常量
@@ -53,11 +59,6 @@ const (
 	LOG_FORMAT                    = "%s [%s]: %s\r\n"
 	LOG_CODELINE_FORMAT           = "%s [%s] %s : %s\r\n"
 	LOG_TIME_FORMAT               = "2006-01-02 15:04:05.000000"
-	// 配置覆盖优先级
-	CONF_TERMINAL_LEVEL    = 3
-	CONF_ENVIRONMENT_LEVEL = 2
-	CONF_FILE_LEVEL        = 1
-	CONF_DEFAULT_LEVEL     = 0
 )
 
 // mc服务端常量

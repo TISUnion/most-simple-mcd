@@ -12,6 +12,7 @@ import (
 	"io"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"sync"
 )
@@ -224,9 +225,32 @@ func (m *MinecraftServer) reciveMessageToChan() {
 func (m *MinecraftServer) handleMessage() {
 	for {
 		msg := <-m.messageChan
-		// TODO 分发给各插件
 		m.WriteLog(string(msg.OriginData), constant.LOG_INFO)
+		if m.Version == "" {
+			m.getVersion(msg.OriginData)
+		}
+		if m.GameType == "" {
+			m.getGameType(msg.OriginData)
+		}
+		// TODO 分发给各插件
+
 		fmt.Print(string(msg.OriginData))
+	}
+}
+
+func (m *MinecraftServer) getVersion(data []byte) {
+	reg, _ := regexp.Compile("([1-9]*\\.[1-9]*\\.[1-9]*)")
+	ves := reg.Find(data)
+	if len(ves) > 0 {
+		m.Version = string(ves)
+	}
+}
+
+func (m *MinecraftServer) getGameType(data []byte) {
+	reg, _ := regexp.Compile("Default game type: (?P<type>[a-zA-Z]+)")
+	match := reg.FindSubmatch(data)
+	if len(match) > 1 {
+		m.GameType = string(match[1])
 	}
 }
 

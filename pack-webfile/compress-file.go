@@ -4,6 +4,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/klauspost/compress/flate"
 	"github.com/mholt/archiver/v3"
@@ -30,38 +31,35 @@ func main() {
 		ImplicitTopLevelFolder: false,
 	}
 	if err := z.Archive(originWebDirFiles, compressFileName); err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	}
 
 	if compressFileData, err := ioutil.ReadFile(compressFileName); err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	} else {
 		compressFileDataStr := ""
+		buff := bytes.NewBuffer([]byte{})
 		for _, v := range compressFileData {
-			compressFileDataStr += fmt.Sprintf("%d,", int(v))
+			buff.WriteString(fmt.Sprintf("%d,", int(v)))
 		}
+		compressFileDataStr = buff.String()
 		compressFileDataStr = compressFileDataStr[:len(compressFileDataStr)-1]
 		compressFileDataStr = fmt.Sprintf("{%s}", compressFileDataStr)
 		//fmt.Println(compressFileDataStr)
 		if codeData, err := ioutil.ReadFile(codeFileName); err != nil {
-			fmt.Println(err)
-			return
+			panic(err)
 		} else {
 			codeDataStr := string(codeData)
 			if reg, err := regexp.Compile("\\{(.*)\\}"); err != nil {
-				fmt.Println(err)
-				return
+				panic(err)
 			} else {
 				str := reg.ReplaceAllString(codeDataStr, compressFileDataStr)
 				if codefile, err := os.OpenFile(codeFileName, os.O_WRONLY, 0777); err != nil {
-					fmt.Println(err)
-					return
+					panic(err)
 				} else {
 					_, err := codefile.Write([]byte(str))
 					if err != nil {
-						fmt.Println(err)
+						panic(err)
 					}
 					codefile.Close()
 				}
