@@ -7,6 +7,7 @@ import (
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"net/http"
 	"time"
 )
@@ -38,6 +39,9 @@ func RegisterRouter() {
 		})
 		// 获取用户信息
 		v1.GET("/user/info", getInfo)
+		// websocket实时监听服务端耗费资源
+		v1.GET("/server/resources/listen/:serverId", serversResourcesListen)
+
 	}
 }
 
@@ -79,10 +83,44 @@ func getInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", adminObj))
 }
 
+// 用户注销
 func userLogout(c *gin.Context) {
 	SetFromDatabase(constant.DEFAULT_TOKEN_DB_KEY, "")
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
+
+// 服务端消耗资源监听 TODO
+func serversResourcesListen(c *gin.Context) {
+	serverId, ok := c.Params.Get("serverId")
+	if serverId == "" || !ok {
+
+	}
+	upGrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		return
+	}
+	defer ws.Close()
+
+	for {
+		//读取ws中的数据
+		mt, message, err := ws.ReadMessage()
+		if err != nil {
+			break
+		}
+		//写入ws数据
+		err = ws.WriteMessage(mt, message)
+		if err != nil {
+			break
+		}
+	}
+}
+
+// 修改
 
 // 设置初始账号密码
 func setDefaultAccount() *json_struct.AdminUser {
