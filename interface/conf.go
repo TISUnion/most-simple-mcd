@@ -1,12 +1,6 @@
 package _interface
 
-type ConfParam struct {
-	ConfVal        string
-	DefaultConfVal string
-	Name           string
-	Level          int
-	Description    string
-}
+import json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 
 type Conf interface {
 	CallBack
@@ -14,6 +8,10 @@ type Conf interface {
 	// GetConfig
 	// 获取所有配置
 	GetConfig() map[string]string
+
+	// GetConfigObj
+	// 获取所有配置对象
+	GetConfigObj()  map[string]*json_struct.ConfParam
 
 	// GetConfigKeys
 	// 获取所有配置的键值

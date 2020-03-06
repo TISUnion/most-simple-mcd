@@ -39,16 +39,22 @@ func RegisterRouter() {
 		})
 		// 获取用户信息
 		v1.GET("/user/info", getInfo)
+		// 更新用户信息
+		v1.PATCH("/user/account", updateUserData)
+		// 获取配置
+		v1.GET("/config/list", getConfig)
+		// 修改配置
+		v1.PATCH("/config", updateConfig)
+
 		// websocket实时监听服务端耗费资源
 		v1.GET("/server/resources/listen/:serverId", serversResourcesListen)
-
 	}
 }
-
 // 用户登录
 func userLogin(c *gin.Context) {
 	var reqInfo json_struct.AdminUser
 	if err := c.BindJSON(&reqInfo); err != nil {
+		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}
@@ -58,7 +64,8 @@ func userLogin(c *gin.Context) {
 		adminObj = *setDefaultAccount()
 	} else {
 		if err := json.Unmarshal([]byte(adminJson), &adminObj); err != nil {
-			c.JSON(http.StatusOK, getResponse(456789, fmt.Sprintf("%v", err), ""))
+			WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
+			c.JSON(http.StatusOK, getResponse(constant.HTTP_SYSTEM_ERROR, constant.HTTP_SYSTEM_ERROR_MESSAGE, ""))
 			return
 		}
 	}
@@ -120,7 +127,55 @@ func serversResourcesListen(c *gin.Context) {
 	}
 }
 
-// 修改
+// 修改用户信息
+func updateUserData(c *gin.Context) {
+	// 获取用户设置信息
+	var reqInfo json_struct.AdminUser
+	if err := c.BindJSON(&reqInfo); err != nil {
+		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	// 获取数据库信息
+	var adminObj json_struct.AdminUser
+	adminJson := GetFromDatabase(constant.DEFAULT_ACCOUNT_DB_KEY)
+	if err := json.Unmarshal([]byte(adminJson), &adminObj); err != nil {
+		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_SYSTEM_ERROR, constant.HTTP_SYSTEM_ERROR_MESSAGE, ""))
+		return
+	}
+
+	if reqInfo.Account != "" {
+		adminObj.Account = reqInfo.Account
+	}
+	if reqInfo.Avatar != "" {
+		adminObj.Avatar = reqInfo.Avatar
+	}
+	if reqInfo.Password != "" {
+		reqInfo.Password = utils.Md5(reqInfo.Password)
+	}
+	jsonStr, _ := json.Marshal(reqInfo)
+	SetFromDatabase(constant.DEFAULT_ACCOUNT_DB_KEY, string(jsonStr))
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
+}
+
+// 获取配置内容
+func getConfig(c *gin.Context) {
+	// 获取用户设置信息
+	jsonObj := make([]*json_struct.ConfParam, 0)
+	conf := GetConfInstance().GetConfigObj()
+	for _, v := range conf {
+		jsonObj = append(jsonObj, v)
+	}
+	jsonStr, _ := json.Marshal(jsonObj)
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", jsonStr))
+}
+
+// 更新配置内容
+func updateConfig(c *gin.Context) {
+
+}
+
 
 // 设置初始账号密码
 func setDefaultAccount() *json_struct.AdminUser {
@@ -143,4 +198,8 @@ func getResponse(code int, message string, data interface{}) gin.H {
 	responseData["message"] = message
 	responseData["data"] = data
 	return responseData
+}
+
+func errorFormat(err error) string {
+	return fmt.Sprintf("web error: %v", err)
 }

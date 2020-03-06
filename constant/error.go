@@ -21,6 +21,8 @@ const (
 // http错误码
 const (
 	HTTP_OK                   = 0
+	HTTP_SYSTEM_ERROR         = 2009199999 // 系统错误
+	HTTP_SYSTEM_ERROR_MESSAGE = "系统错误"
 	HTTP_PARAMS_ERROR         = 2009190000 // 参数错误
 	HTTP_PARAMS_ERROR_MESSAGE = "参数错误"
 	PASSWORD_ERROR            = 2009190001

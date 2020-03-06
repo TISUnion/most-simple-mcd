@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
+	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
 	"io/ioutil"
@@ -16,15 +17,15 @@ import (
 
 var (
 	_appConf         *Conf
-	DefaultConfParam map[string]*_interface.ConfParam
+	DefaultConfParam map[string]*json_struct.ConfParam
 )
 
 // Conf
-// 导入配置优先级： 命令行变量 > 环境变量 > 配置文件 > 默认配置
+// 导入配置优先级：管理后台设置配置 > 命令行变量 > 环境变量 > 配置文件 > 默认配置
 type Conf struct {
 	// Confs
 	// 配置
-	confs map[string]*_interface.ConfParam
+	confs map[string]*json_struct.ConfParam
 
 	// ConfKeys
 	// 所有配置键值
@@ -35,9 +36,13 @@ type Conf struct {
 	lock *sync.Mutex
 }
 
+func (c *Conf) GetConfigObj() map[string]*json_struct.ConfParam {
+	return c.confs
+}
+
 func ConfInit() {
 	// 注册默认配置
-	DefaultConfParam = make(map[string]*_interface.ConfParam)
+	DefaultConfParam = make(map[string]*json_struct.ConfParam)
 	RegisterConfig(constant.IS_RELOAD_CONF, "false", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	RegisterConfig(constant.RELOAD_CONF_INTERVAL, "5000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	RegisterConfig(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
@@ -102,19 +107,11 @@ func (c *Conf) loadFilePath(terminalConfs map[string]*string) {
 	}
 }
 
-// loadPluginsConfKeysType
-// TODO 加载插件的所有配置键
-func (c *Conf) loadPluginsConf() {
-
-}
-
 // reloadConfig
 // 重新再加配置
 func (c *Conf) ReloadConfig() {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	// 加载插件配置文件
-	c.loadPluginsConf()
 	// 加载配置文件
 	c.loadFileConf()
 	// 加载环境变量
@@ -199,9 +196,6 @@ func (c *Conf) Init(terminalConfs map[string]*string) {
 	// 加载文件配置文件路径
 	c.loadFilePath(terminalConfs)
 
-	// 加载插件配置文件
-	c.loadPluginsConf()
-
 	// 加载配置文件
 	c.loadFileConf()
 
@@ -228,7 +222,7 @@ func (c *Conf) SetConfParam(Name, ConfVal, description string, level int) {
 func (c *Conf) RegisterConfParam(Name, ConfVal, description string, level int) {
 	if _, ok := c.confs[Name]; !ok {
 		c.ConfKeys = append(c.ConfKeys, Name)
-		c.confs[Name] = &_interface.ConfParam{
+		c.confs[Name] = &json_struct.ConfParam{
 			ConfVal:        ConfVal,
 			Name:           Name,
 			Level:          level,
@@ -275,7 +269,7 @@ func GetConfInstance() _interface.Conf {
 	_appConf = &Conf{
 		lock:     &sync.Mutex{},
 		ConfKeys: make([]string, 0),
-		confs:    make(map[string]*_interface.ConfParam),
+		confs:    make(map[string]*json_struct.ConfParam),
 	}
 	// 注册回调
 	RegisterCallBack(_appConf)
@@ -283,7 +277,7 @@ func GetConfInstance() _interface.Conf {
 }
 
 // 设置ini配置对象
-func setIniCfg(data map[string]*_interface.ConfParam) *ini.File {
+func setIniCfg(data map[string]*json_struct.ConfParam) *ini.File {
 	cfg := ini.Empty()
 	sec, _ := cfg.NewSection(ini.DefaultSection)
 	for k, v := range data {
