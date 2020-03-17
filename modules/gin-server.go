@@ -1,4 +1,4 @@
-package service
+package modules
 
 import (
 	"fmt"

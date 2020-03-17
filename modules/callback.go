@@ -1,4 +1,4 @@
-package service
+package modules
 
 import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
