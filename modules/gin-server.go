@@ -82,10 +82,10 @@ func (g *GinServer) appendWsToPool(ctx context.Context, serverId string, ws *web
 }
 
 func (g *GinServer) websocketBroadcast(ctx context.Context, serv server.MinecraftServer, cancelFunc context.CancelFunc) {
+	serv.StartMonitorServer()
 	resouceChan := serv.GetServerMonitor().GetMessageChan()
 	serverId := serv.GetServerConf().EntryId
 	var resourceMsg *json_struct.MonitorMessage
-	serv.StartMonitorServer()
 	for {
 		select {
 		case resourceMsg = <-resouceChan:

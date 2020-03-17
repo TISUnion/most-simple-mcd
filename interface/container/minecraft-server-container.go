@@ -20,6 +20,9 @@ type MinecraftContainer interface {
 	// 根据id开启服务端
 	StartById(string) error
 
+	// 启动所有服务端
+	StartAll() error
+
 	// 根据id停止服务端
 	StopById(string) error
 

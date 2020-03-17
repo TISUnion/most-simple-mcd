@@ -45,10 +45,9 @@ func RegisterRouter() {
 		v1.GET("/config/list", getConfig)
 		// 修改配置
 		v1.PATCH("/config", updateConfig)
-
-		// websocket实时监听服务端耗费资源
-		v1.GET("/server/resources/listen/:serverId", serversResourcesListen)
 	}
+	// websocket实时监听服务端耗费资源
+	router.GET("/server/resources/listen/:serverId", serversResourcesListen)
 }
 
 // 用户登录

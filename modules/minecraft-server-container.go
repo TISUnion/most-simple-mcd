@@ -83,6 +83,25 @@ func (m *MinecraftServerContainer) StartById(id string) error {
 	return nil
 }
 
+func (m *MinecraftServerContainer) StartAll() error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	for _, minecraftServer := range m.minecraftServers {
+		id := minecraftServer.GetServerConf().EntryId
+		// 已经开启则不需要重复启动
+		if _, ok := m.startServers[id]; ok {
+			continue
+		}
+		err := minecraftServer.Start()
+		if err != nil {
+			return err
+		}
+		m.startServers[id] = minecraftServer
+		delete(m.stopServers, id)
+	}
+	return nil
+}
+
 // 根据id停止服务端
 func (m *MinecraftServerContainer) StopById(id string) error {
 	m.lock.Lock()
