@@ -1,6 +1,9 @@
 package json_struct
 
 type MonitorMessage struct {
+	// id若为0，则为全局资源监控
+	Id string `json:"id"`
+
 	// cpu使用百分比
 	CpuUsedPercent float64 `json:"cpu_used_percent"`
 

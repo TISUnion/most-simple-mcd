@@ -1,10 +1,13 @@
 package modules
 
 import (
+	"context"
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
+	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"net/http"
 	"strconv"
 	"sync"
@@ -18,6 +21,7 @@ type GinServer struct {
 	httpServer *http.Server
 	port       int
 	lock       *sync.Mutex
+	wsPool     map[string][]*websocket.Conn
 }
 
 func (g *GinServer) GetRouter() *gin.Engine {
@@ -34,6 +38,7 @@ func (g *GinServer) DestructCallBack() {
 
 func (g *GinServer) InitCallBack() {
 	RegisterRouter()
+	g.wsPool = make(map[string][]*websocket.Conn)
 }
 
 func (g *GinServer) Start() error {
@@ -58,6 +63,48 @@ func (g *GinServer) Restart() error {
 	g.httpServer = getHttpServerObj(g.port, g.router)
 	go g.httpServer.ListenAndServe()
 	return nil
+}
+
+func (g *GinServer) appendWsToPool(ctx context.Context, serverId string, ws *websocket.Conn) {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+	mcContainer := GetMinecraftServerContainerInstance()
+	mcServ, ok := mcContainer.GetServerById(serverId)
+	if !ok {
+		return
+	}
+	if _, ok := g.wsPool[serverId]; !ok {
+		childCtx, cancelFunc := context.WithCancel(ctx)
+		go g.websocketBroadcast(childCtx, mcServ, cancelFunc)
+	}
+	g.wsPool[serverId] = append(g.wsPool[serverId], ws)
+	return
+}
+
+func (g *GinServer) websocketBroadcast(ctx context.Context, serv server.MinecraftServer, cancelFunc context.CancelFunc) {
+	resouceChan := serv.GetServerMonitor().GetMessageChan()
+	serverId := serv.GetServerConf().EntryId
+	var resourceMsg *json_struct.MonitorMessage
+	serv.StartMonitorServer()
+	for {
+		select {
+		case resourceMsg = <-resouceChan:
+			if len(g.wsPool[serverId]) == 0 {
+				cancelFunc()
+			}
+			for i, ws := range g.wsPool[serverId] {
+				if err := ws.WriteJSON(resourceMsg); err != nil {
+					// 删除无用ws
+					g.wsPool[serverId] = append(g.wsPool[serverId][:i], g.wsPool[serverId][i+1:len(g.wsPool[serverId])]...)
+					ws.Close()
+				}
+			}
+		case <-ctx.Done():
+			delete(g.wsPool, serverId)
+			serv.StopMonitorServer()
+			return
+		}
+	}
 }
 
 func GetGinServerInstance() server.GinServer {
@@ -97,4 +144,8 @@ func getHttpServerObj(port int, router *gin.Engine) *http.Server {
 		ReadHeaderTimeout: time.Second * 8,
 		WriteTimeout:      time.Second * 8,
 	}
+}
+
+func AppendWsToPool(ctx context.Context, serverId string, ws *websocket.Conn) {
+	ginServerInstance.appendWsToPool(ctx, serverId, ws)
 }

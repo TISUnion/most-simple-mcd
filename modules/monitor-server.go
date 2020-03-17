@@ -78,6 +78,7 @@ func (m *MonitorServer) GetMonitorMessage() {
 		VirtualMemoryUsedPercent: utils.Uint64Tofloat64(memoryInfo.VMS) / utils.Uint64Tofloat64(virtualMem.Total) * 100,
 		MemoryUsed:               memoryInfo.RSS,
 		VirtualMemoryUsed:        memoryInfo.VMS,
+		Id:                       m.serverId,
 	}
 	m.messageChan <- msg
 }

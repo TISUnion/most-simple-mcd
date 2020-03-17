@@ -4,7 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	_interface "github.com/TISUnion/most-simple-mcd/interface"
+	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"net"
 	"strconv"
@@ -16,8 +16,8 @@ func PanicError(msg string, err error) {
 }
 
 // 创建confParam实例
-func NewConfParam(Name, ConfVal, description string, level int) *_interface.ConfParam {
-	return &_interface.ConfParam{
+func NewConfParam(Name, ConfVal, description string, level int) *json_struct.ConfParam {
+	return &json_struct.ConfParam{
 		ConfVal:        ConfVal,
 		DefaultConfVal: ConfVal,
 		Name:           Name,

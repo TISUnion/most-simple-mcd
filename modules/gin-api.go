@@ -50,6 +50,7 @@ func RegisterRouter() {
 		v1.GET("/server/resources/listen/:serverId", serversResourcesListen)
 	}
 }
+
 // 用户登录
 func userLogin(c *gin.Context) {
 	var reqInfo json_struct.AdminUser
@@ -96,7 +97,7 @@ func userLogout(c *gin.Context) {
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 
-// 服务端消耗资源监听 TODO
+// 服务端消耗资源监听
 func serversResourcesListen(c *gin.Context) {
 	serverId, ok := c.Params.Get("serverId")
 	if serverId == "" || !ok {
@@ -111,20 +112,7 @@ func serversResourcesListen(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	defer ws.Close()
-
-	for {
-		//读取ws中的数据
-		mt, message, err := ws.ReadMessage()
-		if err != nil {
-			break
-		}
-		//写入ws数据
-		err = ws.WriteMessage(mt, message)
-		if err != nil {
-			break
-		}
-	}
+	AppendWsToPool(c, serverId, ws)
 }
 
 // 修改用户信息
@@ -167,15 +155,24 @@ func getConfig(c *gin.Context) {
 	for _, v := range conf {
 		jsonObj = append(jsonObj, v)
 	}
-	jsonStr, _ := json.Marshal(jsonObj)
-	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", jsonStr))
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", jsonObj))
 }
 
 // 更新配置内容
 func updateConfig(c *gin.Context) {
-
+	// 获取用户设置信息
+	var reqInfo []*json_struct.ConfParam
+	if err := c.BindJSON(&reqInfo); err != nil {
+		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	confObj := GetConfInstance()
+	for _, v := range reqInfo {
+		confObj.SetConfig(v.Name, v.ConfVal)
+	}
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
-
 
 // 设置初始账号密码
 func setDefaultAccount() *json_struct.AdminUser {

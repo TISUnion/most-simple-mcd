@@ -75,6 +75,13 @@ func (m *MinecraftServer) StartMonitorServer() {
 	}
 }
 
+func (m *MinecraftServer) StopMonitorServer() {
+	if m.IsStartMonitor {
+		m.IsStartMonitor = false
+		_ = m.monitorServer.Stop()
+	}
+}
+
 func (m *MinecraftServer) GetServerMonitor() server.MonitorServer {
 	return m.monitorServer
 }
