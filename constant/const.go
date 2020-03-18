@@ -89,3 +89,8 @@ const (
 	DEFAULT_ACCOUNT             = "admin"
 	DEFAULT_PASSWORD            = "123456"
 )
+
+// 各模块常量
+const (
+	TIME_FORMAT = "2006-01-02 15:04:05"
+)

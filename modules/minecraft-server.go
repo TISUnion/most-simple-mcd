@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"strconv"
 	"sync"
+	"time"
 )
 
 var (
@@ -234,6 +235,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 		m.messageChan <- &json_struct.ReciveMessageType{
 			OriginData: everyBuff,
 			ServerId:   m.EntryId,
+			Time:       time.Now().Format(constant.TIME_FORMAT),
 		}
 	}
 }

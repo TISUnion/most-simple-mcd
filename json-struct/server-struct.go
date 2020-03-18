@@ -47,9 +47,9 @@ type ServerConf struct {
 
 // 服务器接收消息
 type ReciveMessageType struct {
-	Player     string
-	Time       string
-	Speak      string
-	OriginData []byte
-	ServerId   string
+	Player     string `json:"player"`
+	Time       string `json:"time"`
+	Speak      string `json:"speak"`
+	OriginData []byte `json:"origin_data"`
+	ServerId   string `json:"server_id"`
 }
