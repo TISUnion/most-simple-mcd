@@ -92,5 +92,8 @@ const (
 
 // 各模块常量
 const (
-	TIME_FORMAT = "2006-01-02 15:04:05"
+	TIME_FORMAT         = "2006-01-02 15:04:05"
+	PLUGIN_COMMAND_TYPE = 1 //插件运行命令
+	SERVER_COMMAND_TYPE = 2 //服务端运行命令
+	ALL_COMMAND_TYPE    = 3 //插件、服务端都运行
 )

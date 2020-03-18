@@ -21,8 +21,8 @@ type OperateResult struct {
 
 // 修改配置结构
 type Config struct {
-	ConfVal        string `json:"config_val"`
-	ConfKey        string `json:"config_key"`
+	ConfVal string `json:"config_val"`
+	ConfKey string `json:"config_key"`
 }
 
 // 配置信息
@@ -32,4 +32,12 @@ type ConfParam struct {
 	Name           string `json:"config_key"`
 	Level          int    `json:"level"`
 	Description    string `json:"description"`
+}
+
+// 运行命令
+type Command struct {
+	Command string `json:"command"`
+
+	// 1：插件运行命令  2：服务端运行命令   3：插件、服务端都运行
+	Type int `json:"type"`
 }

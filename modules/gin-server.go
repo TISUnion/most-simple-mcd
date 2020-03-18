@@ -115,7 +115,7 @@ func (g *GinServer) resourceWebsocketBroadcast(ctx context.Context, serv server.
 	}
 }
 
-func (g *GinServer) appendStdoutWsToPool(serverId string, ws *websocket.Conn) {
+func (g *GinServer) appendStdWsToPool(serverId string, ws *websocket.Conn) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 	mcContainer := GetMinecraftServerContainerInstance()
@@ -145,6 +145,34 @@ func (g *GinServer) stdoutWebsocketBroadcast(serverId string) {
 				stdoutWs.Close()
 			}
 		}
+	}
+}
+
+func (g *GinServer) listenStdinFromWs(serverId string, ws *websocket.Conn) {
+	mcContainer := GetMinecraftServerContainerInstance()
+	mcServ, ok := mcContainer.GetServerById(serverId)
+	if !ok {
+		ws.Close()
+		return
+	}
+	commandReq := &json_struct.Command{}
+	for {
+		err := ws.ReadJSON(commandReq)
+		if err != nil {
+			ws.Close()
+			return
+		}
+
+		// TODO 分发给各插件
+		if commandReq.Type == constant.PLUGIN_COMMAND_TYPE || commandReq.Type == constant.ALL_COMMAND_TYPE {
+
+		}
+
+		// 运行服务端命令
+		if commandReq.Type == constant.SERVER_COMMAND_TYPE || commandReq.Type == constant.ALL_COMMAND_TYPE {
+			_ = mcServ.Command(commandReq.Command)
+		}
+		WriteLogToDefault(fmt.Sprintf("web后台运行命令：%s", commandReq.Command))
 	}
 }
 
@@ -191,6 +219,10 @@ func AppendResourceWsToPool(ctx context.Context, serverId string, ws *websocket.
 	ginServerInstance.appendResourceWsToPool(ctx, serverId, ws)
 }
 
-func AppendStdoutWsToPool(serverId string, ws *websocket.Conn) {
-	ginServerInstance.appendStdoutWsToPool(serverId, ws)
+func AppendStdWsToPool(serverId string, ws *websocket.Conn) {
+	ginServerInstance.appendStdWsToPool(serverId, ws)
+}
+
+func ListenStdinFromWs(serverId string, ws *websocket.Conn) {
+	go ginServerInstance.listenStdinFromWs(serverId, ws)
 }

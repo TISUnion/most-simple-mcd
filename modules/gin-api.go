@@ -49,7 +49,7 @@ func RegisterRouter() {
 	// websocket实时监听服务端耗费资源
 	router.GET("/server/resources/listen/:serverId", serversResourcesListen)
 	// websocket实时获取服务器输出
-	router.GET("/server/stdout/listen/:serverId", serversStdoutListen)
+	router.GET("/server/std/listen/:serverId", serversStdListen)
 }
 
 // 用户登录
@@ -98,7 +98,7 @@ func userLogout(c *gin.Context) {
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 
-// 服务端消耗资源监听 TODO 接口不安全
+// 服务端消耗资源监听
 func serversResourcesListen(c *gin.Context) {
 	serverId, ok := c.Params.Get("serverId")
 	if serverId == "" || !ok {
@@ -113,11 +113,26 @@ func serversResourcesListen(c *gin.Context) {
 	if err != nil {
 		return
 	}
+	// 校验token
+	for {
+		_, tokenByte, err := ws.ReadMessage()
+		if err != nil {
+			ws.Close()
+			return
+		}
+		dbtoken := GetFromDatabase(constant.DEFAULT_TOKEN_DB_KEY)
+		if string(tokenByte) == dbtoken {
+			break
+		} else {
+			ws.Close()
+			return
+		}
+	}
 	AppendResourceWsToPool(c, serverId, ws)
 }
 
-// 实时获取服务器输出 TODO 接口不安全
-func serversStdoutListen(c *gin.Context) {
+// 实时获取服务器输出以及输入命令
+func serversStdListen(c *gin.Context) {
 	serverId, ok := c.Params.Get("serverId")
 	if serverId == "" || !ok {
 
@@ -131,7 +146,23 @@ func serversStdoutListen(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	AppendStdoutWsToPool(serverId, ws)
+	// 校验token
+	for {
+		_, tokenByte, err := ws.ReadMessage()
+		if err != nil {
+			ws.Close()
+			return
+		}
+		dbtoken := GetFromDatabase(constant.DEFAULT_TOKEN_DB_KEY)
+		if string(tokenByte) == dbtoken {
+			break
+		} else {
+			ws.Close()
+			return
+		}
+	}
+	AppendStdWsToPool(serverId, ws)
+	ListenStdinFromWs(serverId, ws)
 }
 
 // 修改用户信息
@@ -190,6 +221,8 @@ func updateConfig(c *gin.Context) {
 	for _, v := range reqInfo {
 		confObj.SetConfig(v.Name, v.ConfVal)
 	}
+	// 执行配置更改回调
+	RunChangeConfCallBacks()
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 

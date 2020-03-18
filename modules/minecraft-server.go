@@ -286,6 +286,8 @@ func (m *MinecraftServer) Command(c string) error {
 }
 
 func (m *MinecraftServer) _command(c string) error {
+	// 不加换行无法执行命令
+	c += "\n"
 	_, err := m.stdin.Write([]byte(c))
 	return err
 }
