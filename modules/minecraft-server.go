@@ -58,9 +58,19 @@ type MinecraftServer struct {
 	// 资源监听器
 	monitorServer server.MonitorServer
 
+	// 其他模块订阅服务的消息推送管道
+	subscribeMessageChans []chan *json_struct.ReciveMessageType
+
 	// Logger
 	// 服务端对应日志
 	logger _interface.Log
+}
+
+func (m *MinecraftServer) RegisterSubscribeMessageChan(c chan *json_struct.ReciveMessageType) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	m.subscribeMessageChans = append(m.subscribeMessageChans, c)
 }
 
 func (m *MinecraftServer) GetServerEntryId() string {
@@ -241,7 +251,13 @@ func (m *MinecraftServer) handleMessage() {
 		}
 		// TODO 分发给各插件
 
-		fmt.Print(string(msg.OriginData))
+		// 分发给各已订阅模块
+		go func() {
+			for _, c := range m.subscribeMessageChans {
+				c <- msg
+			}
+		}()
+		//fmt.Print(string(msg.OriginData))
 	}
 }
 

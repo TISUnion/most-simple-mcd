@@ -1,4 +1,4 @@
-package container
+package plugin
 
 import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
@@ -10,7 +10,7 @@ type PluginContainer interface {
 	_interface.CallBack
 
 	// 注册插件
-	RegisterPlugin(_interface.Plugin)
+	RegisterPlugin(Plugin)
 
 	// 新建一个管理器实例
 	NewPluginManager(server server.MinecraftServer)

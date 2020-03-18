@@ -17,11 +17,13 @@ import (
 var ginServerInstance *GinServer
 
 type GinServer struct {
-	router     *gin.Engine
-	httpServer *http.Server
-	port       int
-	lock       *sync.Mutex
-	wsPool     map[string][]*websocket.Conn
+	router         *gin.Engine
+	httpServer     *http.Server
+	port           int
+	lock           *sync.Mutex
+	resourceWsPool map[string][]*websocket.Conn
+	stdoutWsPool   map[string][]*websocket.Conn
+	stdoutChans    map[string]chan *json_struct.ReciveMessageType
 }
 
 func (g *GinServer) GetRouter() *gin.Engine {
@@ -38,7 +40,9 @@ func (g *GinServer) DestructCallBack() {
 
 func (g *GinServer) InitCallBack() {
 	RegisterRouter()
-	g.wsPool = make(map[string][]*websocket.Conn)
+	g.resourceWsPool = make(map[string][]*websocket.Conn)
+	g.stdoutWsPool = make(map[string][]*websocket.Conn)
+	g.stdoutChans = make(map[string]chan *json_struct.ReciveMessageType)
 }
 
 func (g *GinServer) Start() error {
@@ -65,23 +69,24 @@ func (g *GinServer) Restart() error {
 	return nil
 }
 
-func (g *GinServer) appendWsToPool(ctx context.Context, serverId string, ws *websocket.Conn) {
+func (g *GinServer) appendResourceWsToPool(ctx context.Context, serverId string, ws *websocket.Conn) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 	mcContainer := GetMinecraftServerContainerInstance()
 	mcServ, ok := mcContainer.GetServerById(serverId)
 	if !ok {
+		ws.Close()
 		return
 	}
-	if _, ok := g.wsPool[serverId]; !ok {
+	if _, ok := g.resourceWsPool[serverId]; !ok {
 		childCtx, cancelFunc := context.WithCancel(ctx)
-		go g.websocketBroadcast(childCtx, mcServ, cancelFunc)
+		go g.resourceWebsocketBroadcast(childCtx, mcServ, cancelFunc)
 	}
-	g.wsPool[serverId] = append(g.wsPool[serverId], ws)
+	g.resourceWsPool[serverId] = append(g.resourceWsPool[serverId], ws)
 	return
 }
 
-func (g *GinServer) websocketBroadcast(ctx context.Context, serv server.MinecraftServer, cancelFunc context.CancelFunc) {
+func (g *GinServer) resourceWebsocketBroadcast(ctx context.Context, serv server.MinecraftServer, cancelFunc context.CancelFunc) {
 	serv.StartMonitorServer()
 	resouceChan := serv.GetServerMonitor().GetMessageChan()
 	serverId := serv.GetServerConf().EntryId
@@ -89,20 +94,56 @@ func (g *GinServer) websocketBroadcast(ctx context.Context, serv server.Minecraf
 	for {
 		select {
 		case resourceMsg = <-resouceChan:
-			if len(g.wsPool[serverId]) == 0 {
+			if len(g.resourceWsPool[serverId]) == 0 {
 				cancelFunc()
 			}
-			for i, ws := range g.wsPool[serverId] {
+			// 使用临时数组进行循环，防止删除后越界
+			loopWS := make([]*websocket.Conn, len(g.resourceWsPool[serverId]))
+			copy(loopWS, g.resourceWsPool[serverId])
+			for i, ws := range loopWS {
 				if err := ws.WriteJSON(resourceMsg); err != nil {
 					// 删除无用ws
-					g.wsPool[serverId] = append(g.wsPool[serverId][:i], g.wsPool[serverId][i+1:len(g.wsPool[serverId])]...)
+					g.resourceWsPool[serverId] = append(g.resourceWsPool[serverId][:i], g.resourceWsPool[serverId][i+1:len(g.resourceWsPool[serverId])]...)
 					ws.Close()
 				}
 			}
 		case <-ctx.Done():
-			delete(g.wsPool, serverId)
+			delete(g.resourceWsPool, serverId)
 			serv.StopMonitorServer()
 			return
+		}
+	}
+}
+
+func (g *GinServer) appendStdoutWsToPool(serverId string, ws *websocket.Conn) {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+	mcContainer := GetMinecraftServerContainerInstance()
+	mcServ, ok := mcContainer.GetServerById(serverId)
+	if !ok {
+		ws.Close()
+		return
+	}
+	g.stdoutWsPool[serverId] = append(g.stdoutWsPool[serverId], ws)
+	if _, ok := g.stdoutChans[serverId]; !ok {
+		g.stdoutChans[serverId] = make(chan *json_struct.ReciveMessageType, 10)
+		mcServ.RegisterSubscribeMessageChan(g.stdoutChans[serverId])
+		go g.stdoutWebsocketBroadcast(serverId)
+	}
+}
+
+func (g *GinServer) stdoutWebsocketBroadcast(serverId string) {
+	for {
+		msg := <-g.stdoutChans[serverId]
+		// 使用临时数组进行循环，防止删除后越界
+		loopWS := make([]*websocket.Conn, len(g.stdoutWsPool[serverId]))
+		copy(loopWS, g.stdoutWsPool[serverId])
+		for i, stdoutWs := range loopWS {
+			if err := stdoutWs.WriteJSON(msg); err != nil {
+				// 删除无用ws
+				g.stdoutWsPool[serverId] = append(g.stdoutWsPool[serverId][:i], g.stdoutWsPool[serverId][i+1:len(g.stdoutWsPool[serverId])]...)
+				stdoutWs.Close()
+			}
 		}
 	}
 }
@@ -146,6 +187,10 @@ func getHttpServerObj(port int, router *gin.Engine) *http.Server {
 	}
 }
 
-func AppendWsToPool(ctx context.Context, serverId string, ws *websocket.Conn) {
-	ginServerInstance.appendWsToPool(ctx, serverId, ws)
+func AppendResourceWsToPool(ctx context.Context, serverId string, ws *websocket.Conn) {
+	ginServerInstance.appendResourceWsToPool(ctx, serverId, ws)
+}
+
+func AppendStdoutWsToPool(serverId string, ws *websocket.Conn) {
+	ginServerInstance.appendStdoutWsToPool(serverId, ws)
 }

@@ -48,6 +48,8 @@ func RegisterRouter() {
 	}
 	// websocket实时监听服务端耗费资源
 	router.GET("/server/resources/listen/:serverId", serversResourcesListen)
+	// websocket实时获取服务器输出
+	router.GET("/server/stdout/listen/:serverId", serversStdoutListen)
 }
 
 // 用户登录
@@ -96,7 +98,7 @@ func userLogout(c *gin.Context) {
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 
-// 服务端消耗资源监听
+// 服务端消耗资源监听 TODO 接口不安全
 func serversResourcesListen(c *gin.Context) {
 	serverId, ok := c.Params.Get("serverId")
 	if serverId == "" || !ok {
@@ -111,7 +113,25 @@ func serversResourcesListen(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	AppendWsToPool(c, serverId, ws)
+	AppendResourceWsToPool(c, serverId, ws)
+}
+
+// 实时获取服务器输出 TODO 接口不安全
+func serversStdoutListen(c *gin.Context) {
+	serverId, ok := c.Params.Get("serverId")
+	if serverId == "" || !ok {
+
+	}
+	upGrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		return
+	}
+	AppendStdoutWsToPool(serverId, ws)
 }
 
 // 修改用户信息

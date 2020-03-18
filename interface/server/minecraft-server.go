@@ -20,8 +20,11 @@ type MinecraftServer interface {
 	// 获取资源监控服务
 	GetServerMonitor() MonitorServer
 
-	// 获取当前全局id,每次启动id不一定相同 TODO 后期优化
+	// 获取当前服务端uuid
 	GetServerEntryId() string
+
+	// 注册订阅该服务端消息管道，PS：必须保证管道必须一直是被消费中！
+	RegisterSubscribeMessageChan(chan *json_struct.ReciveMessageType)
 
 	// 启动资源监控服务(只有关闭后才会启动)
 	StartMonitorServer()

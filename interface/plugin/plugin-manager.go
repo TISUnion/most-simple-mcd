@@ -1,4 +1,4 @@
-package server
+package plugin
 
 import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
@@ -10,7 +10,7 @@ type PluginManager interface {
 	_interface.CallBack
 
 	// 获取可用所有插件
-	GetPlugins() map[string]_interface.Plugin
+	GetPlugins() map[string]Plugin
 
 	// 根据id禁用插件
 	BanPlugin(string)

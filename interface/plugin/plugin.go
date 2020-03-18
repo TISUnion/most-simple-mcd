@@ -1,12 +1,13 @@
-package _interface
+package plugin
 
 import (
+	"github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 )
 
 type Plugin interface {
-	CallBack
+	_interface.CallBack
 
 	// 插件ID（uuid）
 	GetId() string
