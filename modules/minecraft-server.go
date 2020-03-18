@@ -52,7 +52,7 @@ type MinecraftServer struct {
 
 	// messageChan
 	// 玩家发言存储chan
-	messageChan chan *server.ReciveMessageType
+	messageChan chan *json_struct.ReciveMessageType
 
 	// MonitorServer
 	// 资源监听器
@@ -221,7 +221,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 		if err != nil {
 			return
 		}
-		m.messageChan <- &server.ReciveMessageType{
+		m.messageChan <- &json_struct.ReciveMessageType{
 			OriginData: everyBuff,
 			ServerId:   m.EntryId,
 		}
@@ -407,7 +407,7 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 		stdout:      stdout,
 		lock:        &sync.Mutex{},
 		isStart:     false,
-		messageChan: make(chan *server.ReciveMessageType, 10),
+		messageChan: make(chan *json_struct.ReciveMessageType, 10),
 		logger:      GetLogContainerInstance().AddLog(serverConf.EntryId),
 	}
 	RegisterCallBack(minecraftServer)

@@ -1,5 +1,6 @@
 package json_struct
 
+// 服务器配置
 type ServerConf struct {
 	// EntryId
 	// 实例唯一id
@@ -42,4 +43,13 @@ type ServerConf struct {
 	// GameType
 	// 服务器模式
 	GameType string `json:"gameType"`
+}
+
+// 服务器接收消息
+type ReciveMessageType struct {
+	Player     string
+	Time       string
+	Speak      string
+	OriginData []byte
+	ServerId   string
 }

@@ -2,17 +2,9 @@ package server
 
 import json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 
-type ReciveMessageType struct {
-	Player     string
-	Time       string
-	Speak      string
-	OriginData []byte
-	ServerId   string
-}
-
 type MinecraftServer interface {
 	BasicServer
-	// 第一参数为命令，后面为参数
+	// 执行命令
 	Command(string) error //执行命令
 
 	// 修改内存使用阈值（单位M）
