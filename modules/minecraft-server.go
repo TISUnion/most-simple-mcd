@@ -280,7 +280,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 	}
 }
 
-// TODO 处理消息
+// 处理服务端进程获取的消息
 func (m *MinecraftServer) handleMessage() {
 	for {
 		msg := <-m.messageChan
@@ -291,7 +291,11 @@ func (m *MinecraftServer) handleMessage() {
 		if m.GameType == "" {
 			m.getGameType(msg.OriginData)
 		}
-		// TODO 分发给各插件
+
+		// 分发给插件
+		go func() {
+			m.pluginManager.HandleMessage(msg)
+		}()
 
 		// 分发给各已订阅模块
 		go func() {
