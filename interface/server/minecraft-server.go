@@ -24,10 +24,19 @@ type MinecraftServer interface {
 	GetServerEntryId() string
 
 	// 注册订阅该服务端消息管道，PS：必须保证管道必须一直是被消费中！
-	RegisterSubscribeMessageChan(chan *json_struct.ReciveMessageType)
+	RegisterSubscribeMessageChan(chan *json_struct.ReciveMessage)
 
 	// 启动资源监控服务(只有关闭后才会启动)
 	StartMonitorServer()
+
+	// 根据插件名称或者id，ban插件
+	BanPlugin(string)
+
+	// 根据插件名称或者id，解ban插件
+	UnbanPlugin(string)
+
+	// 获取插件配置
+	GetPluginsInfo()[]*json_struct.PluginInfo
 
 	// 关闭资源监控服务
 	StopMonitorServer()

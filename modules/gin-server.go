@@ -23,7 +23,7 @@ type GinServer struct {
 	lock           *sync.Mutex
 	resourceWsPool map[string][]*websocket.Conn
 	stdoutWsPool   map[string][]*websocket.Conn
-	stdoutChans    map[string]chan *json_struct.ReciveMessageType
+	stdoutChans    map[string]chan *json_struct.ReciveMessage
 }
 
 func (g *GinServer) GetRouter() *gin.Engine {
@@ -42,7 +42,7 @@ func (g *GinServer) InitCallBack() {
 	RegisterRouter()
 	g.resourceWsPool = make(map[string][]*websocket.Conn)
 	g.stdoutWsPool = make(map[string][]*websocket.Conn)
-	g.stdoutChans = make(map[string]chan *json_struct.ReciveMessageType)
+	g.stdoutChans = make(map[string]chan *json_struct.ReciveMessage)
 }
 
 func (g *GinServer) Start() error {
@@ -126,7 +126,7 @@ func (g *GinServer) appendStdWsToPool(serverId string, ws *websocket.Conn) {
 	}
 	g.stdoutWsPool[serverId] = append(g.stdoutWsPool[serverId], ws)
 	if _, ok := g.stdoutChans[serverId]; !ok {
-		g.stdoutChans[serverId] = make(chan *json_struct.ReciveMessageType, 10)
+		g.stdoutChans[serverId] = make(chan *json_struct.ReciveMessage, 10)
 		mcServ.RegisterSubscribeMessageChan(g.stdoutChans[serverId])
 		go g.stdoutWebsocketBroadcast(serverId)
 	}

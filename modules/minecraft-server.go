@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
+	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"github.com/TISUnion/most-simple-mcd/utils"
@@ -53,21 +54,57 @@ type MinecraftServer struct {
 
 	// messageChan
 	// 玩家发言存储chan
-	messageChan chan *json_struct.ReciveMessageType
+	messageChan chan *json_struct.ReciveMessage
 
 	// MonitorServer
 	// 资源监听器
 	monitorServer server.MonitorServer
 
+	// 插件管理器
+	pluginManager plugin.PluginManager
+
 	// 其他模块订阅服务的消息推送管道
-	subscribeMessageChans []chan *json_struct.ReciveMessageType
+	subscribeMessageChans []chan *json_struct.ReciveMessage
 
 	// Logger
 	// 服务端对应日志
 	logger _interface.Log
 }
 
-func (m *MinecraftServer) RegisterSubscribeMessageChan(c chan *json_struct.ReciveMessageType) {
+func (m *MinecraftServer) BanPlugin(pluginId string) {
+	m.pluginManager.BanPlugin(pluginId)
+}
+
+func (m *MinecraftServer) UnbanPlugin(pluginId string) {
+	m.pluginManager.UnbanPlugin(pluginId)
+}
+
+func (m *MinecraftServer) GetPluginsInfo() []*json_struct.PluginInfo {
+	res := make([]*json_struct.PluginInfo, 0)
+	ablePlugins := m.pluginManager.GetAblePlugins()
+	for _, p := range ablePlugins {
+		res = append(res, &json_struct.PluginInfo{
+			Name:        p.GetName(),
+			Id:          p.GetId(),
+			IsBan:       false,
+			CommandName: p.GetCommandName(),
+			Description: p.GetDescription(),
+		})
+	}
+	disablePlugins := m.pluginManager.GetDisablePlugins()
+	for _, p := range disablePlugins {
+		res = append(res, &json_struct.PluginInfo{
+			Name:        p.GetName(),
+			Id:          p.GetId(),
+			IsBan:       true,
+			CommandName: p.GetCommandName(),
+			Description: p.GetDescription(),
+		})
+	}
+	return res
+}
+
+func (m *MinecraftServer) RegisterSubscribeMessageChan(c chan *json_struct.ReciveMessage) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -120,6 +157,9 @@ func (m *MinecraftServer) InitCallBack() {
 	// 开启发送和接受消息
 	go m.reciveMessageToChan()
 	go m.handleMessage()
+
+	// 创建插件管理器
+	m.pluginManager = GetPluginContainerInstance().NewPluginManager(m)
 }
 
 func (m *MinecraftServer) DestructCallBack() {
@@ -232,7 +272,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 		if err != nil {
 			return
 		}
-		m.messageChan <- &json_struct.ReciveMessageType{
+		m.messageChan <- &json_struct.ReciveMessage{
 			OriginData: everyBuff,
 			ServerId:   m.EntryId,
 			Time:       time.Now().Format(constant.TIME_FORMAT),
@@ -427,7 +467,7 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 		stdout:      stdout,
 		lock:        &sync.Mutex{},
 		isStart:     false,
-		messageChan: make(chan *json_struct.ReciveMessageType, 10),
+		messageChan: make(chan *json_struct.ReciveMessage, 10),
 		logger:      GetLogContainerInstance().AddLog(serverConf.EntryId),
 	}
 	RegisterCallBack(minecraftServer)

@@ -13,6 +13,6 @@ type PluginContainer interface {
 	RegisterPlugin(Plugin)
 
 	// 新建一个管理器实例
-	NewPluginManager(server server.MinecraftServer)
+	NewPluginManager(server server.MinecraftServer) PluginManager
 
 }

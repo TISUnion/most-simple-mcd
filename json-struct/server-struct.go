@@ -46,10 +46,19 @@ type ServerConf struct {
 }
 
 // 服务器接收消息
-type ReciveMessageType struct {
+type ReciveMessage struct {
 	Player     string `json:"player"`
 	Time       string `json:"time"`
 	Speak      string `json:"speak"`
 	OriginData []byte `json:"origin_data"`
 	ServerId   string `json:"server_id"`
+}
+
+// 插件信息
+type PluginInfo struct {
+	Name        string `json:"name"`
+	Id          string `json:"id"`
+	IsBan       bool   `json:"is_ban"`
+	CommandName string `json:"command_name"`
+	Description string `json:"description"`
 }
