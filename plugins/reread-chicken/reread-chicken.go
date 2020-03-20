@@ -10,11 +10,11 @@ import (
 type RereadChickenPlugin struct{}
 
 func (r *RereadChickenPlugin) GetDescription() string {
-	return ""
+	return "复读鸡"
 }
 
 func (r *RereadChickenPlugin) GetCommandName() string {
-	return ""
+	return "!!repeat"
 }
 
 func (r *RereadChickenPlugin) ChangeConfCallBack()                                  {}

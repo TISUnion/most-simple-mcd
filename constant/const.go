@@ -72,6 +72,13 @@ const (
 	MC_SERVER_BACK   = "minecraft-servers-back"
 	MC_SERVER_DB_KEY = "minecraft:server:configs"
 	DEFAULT_PORT     = 25565
+
+	MC_SERVER_START   = 1
+	MC_SERVER_STOP    = 2
+	MC_SERVER_RESTART = 3
+
+	MC_PLUGIN_START = 1
+	MC_PLUGIN_STOP  = 2
 )
 
 // DB常量
@@ -88,6 +95,7 @@ const (
 	DEFAULT_TOKEN_DB_KEY_EXPIRE = 4 * time.Hour
 	DEFAULT_ACCOUNT             = "admin"
 	DEFAULT_PASSWORD            = "123456"
+	QUERY_ID                    = "id"
 )
 
 // 各模块常量

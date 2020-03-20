@@ -43,6 +43,10 @@ type ServerConf struct {
 	// GameType
 	// 服务器模式
 	GameType string `json:"gameType"`
+
+	// IsStart
+	// 是否启动
+	IsStart bool `json:"is_start"`
 }
 
 // 服务器接收消息
@@ -61,4 +65,25 @@ type PluginInfo struct {
 	IsBan       bool   `json:"is_ban"`
 	CommandName string `json:"command_name"`
 	Description string `json:"description"`
+}
+
+// 服务器详情
+type ServerDetail struct {
+	ServInfo *ServerConf   `json:"server_info"`
+	PlgnInfo []*PluginInfo `json:"plugin_info"`
+}
+
+// 操作服务器
+type OperateServer struct {
+	ServerId []string `json:"id"`
+	// 操作类型：1. 启动  2. 停止  3.重启
+	OperateType int `json:"operate_type"`
+}
+
+// 操作插件
+type OperatePlugin struct {
+	ServerId string   `json:"id"`
+	PluginId []string `json:"id"`
+	// 操作类型：1. 启动  2. 停止
+	OperateType int `json:"operate_type"`
 }

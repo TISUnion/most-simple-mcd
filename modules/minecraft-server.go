@@ -48,10 +48,6 @@ type MinecraftServer struct {
 	// 输入管道同步锁
 	lock *sync.Mutex
 
-	// isStart
-	// 是否启动
-	isStart bool
-
 	// messageChan
 	// 玩家发言存储chan
 	messageChan chan *json_struct.ReciveMessage
@@ -194,14 +190,14 @@ func (m *MinecraftServer) Start() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	if m.isStart {
+	if m.IsStart {
 		WriteLogToDefault(fmt.Sprintf("服务器: %s,重复启动", m.Name), constant.LOG_WARNING)
 		return nil
 	}
 	if err := m.runProcess(); err != nil {
 		return err
 	}
-	m.isStart = true
+	m.IsStart = true
 	// TODO 加载插件
 	return nil
 }
@@ -209,10 +205,10 @@ func (m *MinecraftServer) Start() error {
 func (m *MinecraftServer) Stop() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	if !m.isStart {
+	if !m.IsStart {
 		return nil
 	}
-	m.isStart = false
+	m.IsStart = false
 	if err := m._command("/stop"); err != nil {
 		// windows下还是无法杀死进程，TODO 后期优化
 		_ = m.CmdObj.Process.Kill()
@@ -224,7 +220,7 @@ func (m *MinecraftServer) Stop() error {
 }
 
 func (m *MinecraftServer) Restart() error {
-	if m.isStart {
+	if m.IsStart {
 		if err := m.Stop(); err != nil {
 			return err
 		}
@@ -430,7 +426,7 @@ func (m *MinecraftServer) resetParams() {
 	m.CmdObj = exec.Command(m.CmdStr[0], m.CmdStr[1:]...)
 	m.stdin, _ = m.CmdObj.StdinPipe()
 	m.stdout, _ = m.CmdObj.StdoutPipe()
-	m.isStart = false
+	m.IsStart = false
 	m.CmdObj.Dir = m.RunPath
 	if m.monitorServer != nil {
 		// 关闭这个监控器
@@ -470,7 +466,6 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 		stdin:       stdin,
 		stdout:      stdout,
 		lock:        &sync.Mutex{},
-		isStart:     false,
 		messageChan: make(chan *json_struct.ReciveMessage, 10),
 		logger:      GetLogContainerInstance().AddLog(serverConf.EntryId),
 	}

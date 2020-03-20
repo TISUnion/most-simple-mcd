@@ -45,11 +45,19 @@ func RegisterRouter() {
 		v1.GET("/config/list", getConfig)
 		// 修改配置
 		v1.PATCH("/config", updateConfig)
+		// 获取服务端列表
+		v1.GET("/server/list", serversInfoList)
+		// 获取服务端详情
+		v1.GET("/server/detail", serverDetail)
+		// 操作服务端
+		v1.POST("/server", operateServer)
+		// 操作插件
+		v1.POST("/plugin", operatePlugin)
 	}
 	// websocket实时监听服务端耗费资源
-	router.GET("/server/resources/listen/:serverId", serversResourcesListen)
+	router.GET("/server/resources/listen", serversResourcesListen)
 	// websocket实时获取服务器输出
-	router.GET("/server/std/listen/:serverId", serversStdListen)
+	router.GET("/server/std/listen", serversStdListen)
 }
 
 // 用户登录
@@ -100,8 +108,8 @@ func userLogout(c *gin.Context) {
 
 // 服务端消耗资源监听
 func serversResourcesListen(c *gin.Context) {
-	serverId, ok := c.Params.Get("serverId")
-	if serverId == "" || !ok {
+	serverId := c.Query(constant.QUERY_ID)
+	if serverId == "" {
 
 	}
 	upGrader := websocket.Upgrader{
@@ -133,8 +141,8 @@ func serversResourcesListen(c *gin.Context) {
 
 // 实时获取服务器输出以及输入命令
 func serversStdListen(c *gin.Context) {
-	serverId, ok := c.Params.Get("serverId")
-	if serverId == "" || !ok {
+	serverId := c.Query(constant.QUERY_ID)
+	if serverId == "" {
 
 	}
 	upGrader := websocket.Upgrader{
@@ -163,6 +171,87 @@ func serversStdListen(c *gin.Context) {
 	}
 	AppendStdWsToPool(serverId, ws)
 	ListenStdinFromWs(serverId, ws)
+}
+
+// 获取服务端列表
+func serversInfoList(c *gin.Context) {
+	ctr := GetMinecraftServerContainerInstance()
+	confs := ctr.GetAllServerConf()
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", confs))
+}
+
+// 获取服务端详情
+func serverDetail(c *gin.Context) {
+	serverId := c.Query(constant.QUERY_ID)
+	if serverId == "" {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	ctr := GetMinecraftServerContainerInstance()
+	serv, ok := ctr.GetServerById(serverId)
+	if !ok {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	info := &json_struct.ServerDetail{
+		ServInfo: serv.GetServerConf(),
+		PlgnInfo: serv.GetPluginsInfo(),
+	}
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", info))
+}
+
+// 服务端操作
+func operateServer(c *gin.Context) {
+	ops := &json_struct.OperateServer{}
+	if err := c.BindJSON(ops); err != nil {
+		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	opType := ops.OperateType
+	ctr := GetMinecraftServerContainerInstance()
+	for _, s := range ops.ServerId {
+		serv, ok := ctr.GetServerById(s)
+		if !ok {
+			c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+			return
+		}
+		switch opType {
+		case constant.MC_SERVER_START:
+			_ = serv.Start()
+		case constant.MC_SERVER_STOP:
+			_ = serv.Stop()
+		case constant.MC_SERVER_RESTART:
+			_ = serv.Restart()
+		}
+	}
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
+}
+
+// 服务端插件操作
+func operatePlugin(c *gin.Context) {
+	opp := &json_struct.OperatePlugin{}
+	if err := c.BindJSON(opp); err != nil {
+		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	opType := opp.OperateType
+	ctr := GetMinecraftServerContainerInstance()
+	serv, ok := ctr.GetServerById(opp.ServerId)
+	if !ok {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	for _, plId := range opp.PluginId {
+		switch opType {
+		case constant.MC_PLUGIN_START:
+			serv.UnbanPlugin(plId)
+		case constant.MC_PLUGIN_STOP:
+			serv.BanPlugin(plId)
+		}
+	}
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 
 // 修改用户信息
