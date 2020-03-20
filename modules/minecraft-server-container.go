@@ -235,6 +235,10 @@ func (m *MinecraftServerContainer) SaveToDb() {
 // 持久化服务器配置
 func (m *MinecraftServerContainer) _saveToDb() {
 	config := m._getAllServerConf()
+	// 存入数据库，默认服务器未启动
+	for _, c := range config {
+		c.State = constant.MC_STATE_STOP
+	}
 	data, _ := json.Marshal(config)
 	SetFromDatabase(constant.MC_SERVER_DB_KEY, string(data))
 }

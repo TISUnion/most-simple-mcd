@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -170,7 +171,13 @@ func (g *GinServer) listenStdinFromWs(serverId string, ws *websocket.Conn) {
 
 		// 运行服务端命令
 		if commandReq.Type == constant.SERVER_COMMAND_TYPE || commandReq.Type == constant.ALL_COMMAND_TYPE {
-			_ = mcServ.Command(commandReq.Command)
+			command := strings.TrimSpace(commandReq.Command) // 过滤空格
+			// 如果是关闭服务器，走容器关闭
+			if command == "stop" || command == "/stop" {
+				_ = mcContainer.StopById(serverId)
+			} else {
+				_ = mcServ.Command(command)
+			}
 		}
 		WriteLogToDefault(fmt.Sprintf("web后台运行命令：%s", commandReq.Command))
 	}

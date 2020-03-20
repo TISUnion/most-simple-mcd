@@ -210,19 +210,18 @@ func operateServer(c *gin.Context) {
 	}
 	opType := ops.OperateType
 	ctr := GetMinecraftServerContainerInstance()
+	var err error
 	for _, s := range ops.ServerId {
-		serv, ok := ctr.GetServerById(s)
-		if !ok {
-			c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
-			return
-		}
 		switch opType {
 		case constant.MC_SERVER_START:
-			_ = serv.Start()
+			err = ctr.StartById(s)
 		case constant.MC_SERVER_STOP:
-			_ = serv.Stop()
+			err = ctr.StopById(s)
 		case constant.MC_SERVER_RESTART:
-			_ = serv.Restart()
+			err = ctr.RestartById(s)
+		}
+		if err != nil {
+			WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
 		}
 	}
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))

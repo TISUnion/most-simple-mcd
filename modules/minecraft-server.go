@@ -62,6 +62,9 @@ type MinecraftServer struct {
 	// 其他模块订阅服务的消息推送管道
 	subscribeMessageChans []chan *json_struct.ReciveMessage
 
+	// 接收关闭服务器信号管道
+	stopTagChan chan struct{}
+
 	// Logger
 	// 服务端对应日志
 	logger _interface.Log
@@ -150,12 +153,10 @@ func (m *MinecraftServer) ChangeConfCallBack() {
 }
 
 func (m *MinecraftServer) InitCallBack() {
-	// 开启发送和接受消息
-	go m.reciveMessageToChan()
+	// 开启处理接收消息的协成
 	go m.handleMessage()
 
-	// 创建插件管理器
-	m.pluginManager = GetPluginContainerInstance().NewPluginManager(m)
+	m.stopTagChan = make(chan struct{})
 }
 
 func (m *MinecraftServer) DestructCallBack() {
@@ -170,7 +171,6 @@ func (m *MinecraftServer) runProcess() error {
 	}
 	// 校验端口
 	if port, err := m.validatePort(); err != nil {
-
 		return err
 	} else {
 		m.Port = port
@@ -178,6 +178,9 @@ func (m *MinecraftServer) runProcess() error {
 	if err := m.CmdObj.Start(); err != nil {
 		return err
 	}
+
+	// 开启消息
+	go m.reciveMessageToChan()
 
 	m.Pid = m.CmdObj.Process.Pid
 
@@ -191,9 +194,7 @@ func (m *MinecraftServer) runProcess() error {
 func (m *MinecraftServer) Start() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-
-	if m.State == constant.MC_STATE_START {
-		WriteLogToDefault(fmt.Sprintf("服务器: %s,重复启动", m.Name), constant.LOG_WARNING)
+	if m.State != constant.MC_STATE_STOP {
 		return nil
 	}
 	m.State = constant.MC_STATE_STARTIND
@@ -201,6 +202,8 @@ func (m *MinecraftServer) Start() error {
 		m.State = constant.MC_STATE_STOP
 		return err
 	}
+	// 创建插件管理器
+	m.pluginManager = GetPluginContainerInstance().NewPluginManager(m)
 	return nil
 }
 
@@ -210,12 +213,13 @@ func (m *MinecraftServer) Stop() error {
 	if m.State != constant.MC_STATE_START {
 		return nil
 	}
-	m.State = constant.MC_STATE_STOP
-	if err := m._command("/stop"); err != nil {
-		// windows下还是无法杀死进程，TODO 后期优化
+	if err := m._command("stop"); err != nil {
+		WriteLogToDefault(fmt.Sprintf("服务器: %s 关闭失败, 原因：%v", m.Name, err), constant.LOG_ERROR)
 		_ = m.CmdObj.Process.Kill()
 	}
-
+	m.State = constant.MC_STATE_STOPING
+	<-m.stopTagChan
+	m.State = constant.MC_STATE_STOP
 	// 重置cmd对象
 	m.resetParams()
 	return nil
@@ -275,6 +279,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 			ServerId:   m.EntryId,
 			Time:       time.Now().Format(constant.TIME_FORMAT),
 		}
+
 	}
 }
 
@@ -282,6 +287,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 func (m *MinecraftServer) handleMessage() {
 	for {
 		msg := <-m.messageChan
+		//fmt.Print(string(msg.OriginData))
 		m.WriteLog(string(msg.OriginData), constant.LOG_INFO)
 		if m.Version == "" {
 			m.getVersion(msg.OriginData)
@@ -289,9 +295,17 @@ func (m *MinecraftServer) handleMessage() {
 		if m.GameType == "" {
 			m.getGameType(msg.OriginData)
 		}
-		if m.State != constant.MC_STATE_START {
+
+		// 正在启动
+		if m.State == constant.MC_STATE_STARTIND {
 			m.sureServerStart(msg.OriginData)
 			continue // 如果还没启动，就不分发消息
+		}
+
+		// 正在关闭
+		if m.State == constant.MC_STATE_STOPING {
+			m.sureServerStop(msg.OriginData)
+			continue // 如果还没关闭，就不分发消息
 		}
 
 		// 分发给插件
@@ -305,7 +319,6 @@ func (m *MinecraftServer) handleMessage() {
 				c <- msg
 			}
 		}()
-		//fmt.Print(string(msg.OriginData))
 	}
 }
 
@@ -331,6 +344,17 @@ func (m *MinecraftServer) sureServerStart(data []byte) {
 	match := reg.Find(data)
 	if len(match) > 0 {
 		m.State = constant.MC_STATE_START
+	}
+}
+
+// 判断服务端是否已经关闭
+func (m *MinecraftServer) sureServerStop(data []byte) {
+	reg, _ := regexp.Compile("\\[Server Shutdown Thread/INFO\\]")
+	match := reg.Find(data)
+	// 如果已关闭则发送关闭信息
+	if len(match) > 0 {
+		m.State = constant.MC_STATE_START
+		m.stopTagChan <- struct{}{}
 	}
 }
 
@@ -442,7 +466,7 @@ func (m *MinecraftServer) resetParams() {
 	m.stdin, _ = m.CmdObj.StdinPipe()
 	m.stdout, _ = m.CmdObj.StdoutPipe()
 	m.State = constant.MC_STATE_STOP
-	m.CmdObj.Dir = m.RunPath
+	m.CmdObj.Dir = filepath.Dir(m.RunPath)
 	if m.monitorServer != nil {
 		// 关闭这个监控器
 		m.monitorServer.DestructCallBack()
