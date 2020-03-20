@@ -73,6 +73,10 @@ const (
 	MC_SERVER_DB_KEY = "minecraft:server:configs"
 	DEFAULT_PORT     = 25565
 
+	MC_STATE_STARTIND = -1
+	MC_STATE_STOP     = 0
+	MC_STATE_START    = 1
+
 	MC_SERVER_START   = 1
 	MC_SERVER_STOP    = 2
 	MC_SERVER_RESTART = 3

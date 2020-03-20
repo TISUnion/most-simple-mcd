@@ -44,9 +44,9 @@ type ServerConf struct {
 	// 服务器模式
 	GameType string `json:"gameType"`
 
-	// IsStart
-	// 是否启动
-	IsStart bool `json:"is_start"`
+	// State
+	// 启动状态：0.未启动 1.启动  -1.正在启动
+	State int `json:"state"`
 }
 
 // 服务器接收消息

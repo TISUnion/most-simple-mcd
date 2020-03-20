@@ -192,25 +192,25 @@ func (m *MinecraftServer) Start() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	if m.IsStart {
+	if m.State == constant.MC_STATE_START {
 		WriteLogToDefault(fmt.Sprintf("服务器: %s,重复启动", m.Name), constant.LOG_WARNING)
 		return nil
 	}
+	m.State = constant.MC_STATE_STARTIND
 	if err := m.runProcess(); err != nil {
+		m.State = constant.MC_STATE_STOP
 		return err
 	}
-	m.IsStart = true
-	// TODO 加载插件
 	return nil
 }
 
 func (m *MinecraftServer) Stop() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	if !m.IsStart {
+	if m.State != constant.MC_STATE_START {
 		return nil
 	}
-	m.IsStart = false
+	m.State = constant.MC_STATE_STOP
 	if err := m._command("/stop"); err != nil {
 		// windows下还是无法杀死进程，TODO 后期优化
 		_ = m.CmdObj.Process.Kill()
@@ -222,7 +222,7 @@ func (m *MinecraftServer) Stop() error {
 }
 
 func (m *MinecraftServer) Restart() error {
-	if m.IsStart {
+	if m.State == constant.MC_STATE_START {
 		if err := m.Stop(); err != nil {
 			return err
 		}
@@ -289,6 +289,10 @@ func (m *MinecraftServer) handleMessage() {
 		if m.GameType == "" {
 			m.getGameType(msg.OriginData)
 		}
+		if m.State != constant.MC_STATE_START {
+			m.sureServerStart(msg.OriginData)
+			continue // 如果还没启动，就不分发消息
+		}
 
 		// 分发给插件
 		go func() {
@@ -318,6 +322,15 @@ func (m *MinecraftServer) getGameType(data []byte) {
 	match := reg.FindSubmatch(data)
 	if len(match) > 1 {
 		m.GameType = string(match[1])
+	}
+}
+
+// 判断服务端是否已经启动
+func (m *MinecraftServer) sureServerStart(data []byte) {
+	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Done \\(.*\\)! For help, type \"help\" or \"\\?\"")
+	match := reg.Find(data)
+	if len(match) > 0 {
+		m.State = constant.MC_STATE_START
 	}
 }
 
@@ -428,7 +441,7 @@ func (m *MinecraftServer) resetParams() {
 	m.CmdObj = exec.Command(m.CmdStr[0], m.CmdStr[1:]...)
 	m.stdin, _ = m.CmdObj.StdinPipe()
 	m.stdout, _ = m.CmdObj.StdoutPipe()
-	m.IsStart = false
+	m.State = constant.MC_STATE_STOP
 	m.CmdObj.Dir = m.RunPath
 	if m.monitorServer != nil {
 		// 关闭这个监控器
