@@ -170,8 +170,10 @@ func (m *MinecraftServer) runProcess() error {
 	}
 	// 校验端口
 	if port, err := m.validatePort(); err != nil {
-		m.Port = port
+
 		return err
+	} else {
+		m.Port = port
 	}
 	if err := m.CmdObj.Start(); err != nil {
 		return err
@@ -304,7 +306,7 @@ func (m *MinecraftServer) handleMessage() {
 }
 
 func (m *MinecraftServer) getVersion(data []byte) {
-	reg, _ := regexp.Compile("([1-9]*\\.[1-9]*\\.[1-9]*)")
+	reg, _ := regexp.Compile("(([0-9]*\\.[0-9]*\\.{0,1}[0-9]*)+)")
 	ves := reg.Find(data)
 	if len(ves) > 0 {
 		m.Version = string(ves)
