@@ -137,6 +137,10 @@ func (m *MinecraftServer) GetServerConf() *json_struct.ServerConf {
 	return m.ServerConf
 }
 
+func (m *MinecraftServer) SetServerConf(c *json_struct.ServerConf)  {
+	m.ServerConf = c
+}
+
 func (m *MinecraftServer) SetMemory(memory int) {
 	if memory > 0 {
 		m.Memory = memory

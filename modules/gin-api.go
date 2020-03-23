@@ -200,6 +200,46 @@ func serverDetail(c *gin.Context) {
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", info))
 }
 
+// 修改服务端信息
+func updateServerInfo(c *gin.Context) {
+	var reqInfo json_struct.ServerConf
+	if err := c.BindJSON(&reqInfo); err != nil {
+		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	ctr := GetMinecraftServerContainerInstance()
+	serv, ok := ctr.GetServerById(reqInfo.EntryId)
+	servConf := serv.GetServerConf()
+	if !ok {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	if reqInfo.Version != "" {
+		servConf.Version = reqInfo.Version
+	}
+	if reqInfo.Name != "" {
+		servConf.Name = reqInfo.Name
+	}
+	if reqInfo.Port != 0 {
+		servConf.Port = reqInfo.Port
+	}
+	if reqInfo.Memory != 0 {
+		servConf.Memory = reqInfo.Memory
+	}
+	if len(reqInfo.CmdStr) > 2 {
+		servConf.CmdStr = reqInfo.CmdStr
+	}
+	if reqInfo.GameType != "" {
+		servConf.CmdStr = reqInfo.CmdStr
+	}
+}
+
+// 向服务端执行一条命令
+func runCommand(c *gin.Context) {
+
+}
+
 // 服务端操作
 func operateServer(c *gin.Context) {
 	ops := &json_struct.OperateServer{}

@@ -17,6 +17,9 @@ type MinecraftServer interface {
 	// 获取服务配置
 	GetServerConf() *json_struct.ServerConf
 
+	// 修改服务配置
+	SetServerConf(*json_struct.ServerConf)
+
 	// 获取资源监控服务
 	GetServerMonitor() MonitorServer
 
