@@ -11,7 +11,7 @@ type Conf interface {
 
 	// GetConfigObj
 	// 获取所有配置对象
-	GetConfigObj()  map[string]*json_struct.ConfParam
+	GetConfigObj() map[string]*json_struct.ConfParam
 
 	// GetConfigKeys
 	// 获取所有配置的键值
@@ -31,5 +31,5 @@ type Conf interface {
 
 	// RegisterConfParam
 	// 注册配置，已拥有，则不覆盖
-	RegisterConfParam(Name, ConfVal, description string, level int)
+	RegisterConfParam(string, string, string, int, bool)
 }

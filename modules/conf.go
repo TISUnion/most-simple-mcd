@@ -214,13 +214,15 @@ func (c *Conf) SetConfParam(Name, ConfVal, description string, level int) {
 		if confParam.Level <= level {
 			confParam.Level = level
 			confParam.ConfVal = ConfVal
-			confParam.Description = description
+			if description != "" {
+				confParam.Description = description
+			}
 		}
 	}
 }
 
 // 注册配置
-func (c *Conf) RegisterConfParam(Name, ConfVal, description string, level int) {
+func (c *Conf) RegisterConfParam(Name, ConfVal, description string, level int, IsAlterable bool) {
 	if _, ok := c.confs[Name]; !ok {
 		c.ConfKeys = append(c.ConfKeys, Name)
 		c.confs[Name] = &json_struct.ConfParam{
@@ -229,6 +231,7 @@ func (c *Conf) RegisterConfParam(Name, ConfVal, description string, level int) {
 			Level:          level,
 			Description:    description,
 			DefaultConfVal: ConfVal,
+			IsAlterable:    IsAlterable,
 		}
 	}
 }
@@ -296,5 +299,5 @@ func GetConfVal(confKey string) string {
 func RegisterConfig(Name, ConfVal, description string, level int, IsAlterable bool) {
 	conObj := GetConfInstance()
 	DefaultConfParam[Name] = utils.NewConfParam(Name, ConfVal, description, level, IsAlterable)
-	conObj.RegisterConfParam(Name, ConfVal, description, level)
+	conObj.RegisterConfParam(Name, ConfVal, description, level, IsAlterable)
 }
