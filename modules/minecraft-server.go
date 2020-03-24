@@ -484,9 +484,6 @@ func (m *MinecraftServer) WriteLog(msg string, level string) {
 		Message: msg,
 		Level:   level,
 	})
-
-	// 写入全局默认日志
-	WriteLogToDefault(msg, level)
 }
 
 // NewMinecraftServer

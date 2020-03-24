@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -65,6 +66,7 @@ func RegisterRouter() {
 		v1.POST("/server/run/command", runCommand)
 		// 获取日志
 		v1.GET("/log/download", getLog)
+		v1.DELETE("/tmp/files", delTmpFlie)
 	}
 	// websocket实时监听服务端耗费资源
 	router.GET("/server/resources/listen", serversResourcesListen)
@@ -305,6 +307,13 @@ func getLog(c *gin.Context) {
 
 // 删除临时文件
 func delTmpFlie(c *gin.Context) {
+	err := os.RemoveAll(GetConfVal(constant.TMP_PATH))
+	if err != nil {
+		WriteLogToDefault(err.Error(), constant.LOG_ERROR)
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_SYSTEM_ERROR, constant.HTTP_SYSTEM_ERROR_MESSAGE, ""))
+		return
+	}
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 
 }
 

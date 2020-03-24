@@ -95,9 +95,8 @@ func (l *LogContainer) AddLogJob() {
 	}
 }
 
-// 把日志写到不用管道中
+// 把日志写到各个管道中
 func (l *LogContainer) WriteLogOnChannels(msg string, level string, channels []string) {
-	channels = append(channels, constant.DEFAULT_LOG_NAME)
 	channels = utils.RemoveRepeatedElement(channels)
 	for _, v := range channels {
 		if log := l.GetLogByName(v); log != nil {
