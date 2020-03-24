@@ -53,6 +53,11 @@ func RegisterRouter() {
 		v1.POST("/server", operateServer)
 		// 操作插件
 		v1.POST("/plugin", operatePlugin)
+
+		// 修改服务端参数
+		v1.PATCH("/server/info", updateServerInfo)
+		// 在指定服务端中运行一条命令
+		v1.POST("/server/run/command", runCommand)
 	}
 	// websocket实时监听服务端耗费资源
 	router.GET("/server/resources/listen", serversResourcesListen)
@@ -210,11 +215,11 @@ func updateServerInfo(c *gin.Context) {
 	}
 	ctr := GetMinecraftServerContainerInstance()
 	serv, ok := ctr.GetServerById(reqInfo.EntryId)
-	servConf := serv.GetServerConf()
 	if !ok {
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}
+	servConf := serv.GetServerConf()
 	if reqInfo.Version != "" {
 		servConf.Version = reqInfo.Version
 	}
@@ -233,11 +238,25 @@ func updateServerInfo(c *gin.Context) {
 	if reqInfo.GameType != "" {
 		servConf.CmdStr = reqInfo.CmdStr
 	}
+	serv.SetServerConf(servConf)
+	ctr.SaveToDb()
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 
 // 向服务端执行一条命令
 func runCommand(c *gin.Context) {
-
+	var reqInfo json_struct.SingleCommand
+	if err := c.BindJSON(&reqInfo); err != nil {
+		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	ok := RunOneCommand(reqInfo.ServerId, reqInfo.Command, reqInfo.Type)
+	if !ok {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 
 // 服务端操作

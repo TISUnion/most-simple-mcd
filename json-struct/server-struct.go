@@ -4,7 +4,7 @@ package json_struct
 type ServerConf struct {
 	// EntryId
 	// 实例唯一id
-	EntryId string
+	EntryId string `json:"id"`
 
 	// Name
 	// 服务器名称
@@ -14,7 +14,7 @@ type ServerConf struct {
 	// 执行的完整命令
 	// 下标为0： 命令名称
 	// 大于0为命令参数
-	CmdStr []string `json:"cmdStr"`
+	CmdStr []string `json:"cmd_str"`
 
 	// Port
 	// 启动服务器端口
@@ -22,15 +22,15 @@ type ServerConf struct {
 
 	// RunPath
 	// 运行所在工作区间
-	RunPath string `json:"runPath"`
+	RunPath string `json:"run_rath"`
 
 	// IsMirror
 	// 是否是镜像服务器
-	IsMirror bool `json:"isMirror"`
+	IsMirror bool `json:"is_mirror"`
 
 	// IsStartMonitor
 	// 是否启动资源监听器
-	IsStartMonitor bool `json:"isStartMonitor"`
+	IsStartMonitor bool `json:"is_start_monitor"`
 
 	// Memory
 	// 使用内存大小，单位M
@@ -42,7 +42,7 @@ type ServerConf struct {
 
 	// GameType
 	// 服务器模式
-	GameType string `json:"gameType"`
+	GameType string `json:"game_type"`
 
 	// State
 	// 启动状态：0.未启动 1.启动  -1.正在启动 -2.正在关闭
@@ -82,8 +82,8 @@ type OperateServer struct {
 
 // 操作插件
 type OperatePlugin struct {
-	ServerId string   `json:"id"`
-	PluginId []string `json:"id"`
+	ServerId string   `json:"server_id"`
+	PluginId []string `json:"plugin_id"`
 	// 操作类型：1. 启动  2. 停止
 	OperateType int `json:"operate_type"`
 }

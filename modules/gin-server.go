@@ -150,12 +150,6 @@ func (g *GinServer) stdoutWebsocketBroadcast(serverId string) {
 }
 
 func (g *GinServer) listenStdinFromWs(serverId string, ws *websocket.Conn) {
-	mcContainer := GetMinecraftServerContainerInstance()
-	mcServ, ok := mcContainer.GetServerById(serverId)
-	if !ok {
-		ws.Close()
-		return
-	}
 	commandReq := &json_struct.Command{}
 	for {
 		err := ws.ReadJSON(commandReq)
@@ -163,24 +157,38 @@ func (g *GinServer) listenStdinFromWs(serverId string, ws *websocket.Conn) {
 			ws.Close()
 			return
 		}
-
-		// TODO 分发给各插件
-		if commandReq.Type == constant.PLUGIN_COMMAND_TYPE || commandReq.Type == constant.ALL_COMMAND_TYPE {
-
+		if ok := RunOneCommand(serverId, commandReq.Command, commandReq.Type); !ok {
+			ws.Close()
+			return
 		}
 
-		// 运行服务端命令
-		if commandReq.Type == constant.SERVER_COMMAND_TYPE || commandReq.Type == constant.ALL_COMMAND_TYPE {
-			command := strings.TrimSpace(commandReq.Command) // 过滤空格
-			// 如果是关闭服务器，走容器关闭
-			if command == "stop" || command == "/stop" {
-				_ = mcContainer.StopById(serverId)
-			} else {
-				_ = mcServ.Command(command)
-			}
-		}
-		WriteLogToDefault(fmt.Sprintf("web后台运行命令：%s", commandReq.Command))
 	}
+}
+
+func RunOneCommand(serverId, command string, commandType int) bool {
+	mcContainer := GetMinecraftServerContainerInstance()
+	mcServ, ok := mcContainer.GetServerById(serverId)
+	if !ok {
+		return false
+	}
+	// TODO 分发给各插件
+	if commandType == constant.PLUGIN_COMMAND_TYPE || commandType == constant.ALL_COMMAND_TYPE {
+
+	}
+
+	// 运行服务端命令
+	if commandType == constant.SERVER_COMMAND_TYPE || commandType == constant.ALL_COMMAND_TYPE {
+		command := strings.TrimSpace(command) // 过滤空格
+		// 如果是关闭服务器，走容器关闭
+		if command == "stop" || command == "/stop" {
+			_ = mcContainer.StopById(serverId)
+		} else {
+			_ = mcServ.Command(command)
+		}
+	}
+	WriteLogToDefault(fmt.Sprintf("web后台运行命令：%s", command))
+
+	return true
 }
 
 func GetGinServerInstance() server.GinServer {
