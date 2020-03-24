@@ -44,7 +44,7 @@ type Command struct {
 
 // 运行一条命令
 type SingleCommand struct {
-	Command string `json:"command"`
+	Command  string `json:"command"`
 	ServerId string `json:"id"`
 	// 1：插件运行命令  2：服务端运行命令   3：插件、服务端都运行
 	Type int `json:"type"`

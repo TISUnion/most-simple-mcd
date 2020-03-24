@@ -12,6 +12,7 @@ const (
 	LOG_PATH                             = "log_path"                    // 日志写入目录
 	LOG_SAVE_INTERVAL                    = "log_interval"                // 日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中
 	WORKSPACE                            = "workspace"                   // 工作目录
+	TMP_PATH                             = "tmp_path"                    // 临时文件存放目录
 	I18N                                 = "i18n"                        // 国际化
 	IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT = "mc_server_port_auto_change"  // 是否自动更换mc服务器重复使用的端口
 	MONITOR_INTERVAL                     = "monitor_interval"            // 进程资源读取间隔，单位为秒
@@ -30,6 +31,7 @@ const (
 	WORKSPACE_DESCREPTION                            = "工作目录"
 	I18N_DESCREPTION                                 = "国际化"
 	MONITOR_INTERVAL_DESCREPTION                     = "进程资源读取间隔，单位: 为秒"
+	TMP_PATH_DESCREPTION                             = "临时文件存放目录"
 )
 
 // 配置常量
@@ -101,6 +103,11 @@ const (
 	DEFAULT_ACCOUNT             = "admin"
 	DEFAULT_PASSWORD            = "123456"
 	QUERY_ID                    = "id"
+	QUERY_TYPE                  = "type"
+
+	LOG_TYPE_SERVER  = "1"
+	LOG_TYPE_GIN     = "2"
+	LOG_TYPE_DEFAULT = "3"
 )
 
 // 各模块常量
@@ -109,4 +116,6 @@ const (
 	PLUGIN_COMMAND_TYPE = 1 //插件运行命令
 	SERVER_COMMAND_TYPE = 2 //服务端运行命令
 	ALL_COMMAND_TYPE    = 3 //插件、服务端都运行
+	LOG_DIR             = "logs"
+	GIN_LOG_NAME        = "gin-server"
 )

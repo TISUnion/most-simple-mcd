@@ -6,9 +6,11 @@ import (
 	"github.com/TISUnion/most-simple-mcd/constant"
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"github.com/TISUnion/most-simple-mcd/utils"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"path/filepath"
 	"time"
 )
 
@@ -22,6 +24,9 @@ func RegisterRouter() {
 	router.POST("/user/login", userLogin)
 	// 用户注销
 	router.POST("/user/logout", userLogout)
+	// 静态日志文件
+	router.Use(static.Serve("/static/file/logs", static.LocalFile(filepath.Join(GetConfVal(constant.WORKSPACE), constant.LOG_DIR), true)))
+
 	// 需要登陆才能请求的接口
 	v1 :=
 		router.Group("/api/v1")
@@ -58,6 +63,8 @@ func RegisterRouter() {
 		v1.PATCH("/server/info", updateServerInfo)
 		// 在指定服务端中运行一条命令
 		v1.POST("/server/run/command", runCommand)
+		// 获取日志
+		v1.GET("/log/download", getLog)
 	}
 	// websocket实时监听服务端耗费资源
 	router.GET("/server/resources/listen", serversResourcesListen)
@@ -257,6 +264,48 @@ func runCommand(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
+}
+
+// 获取日志
+func getLog(c *gin.Context) {
+	//type 1. 根据id获取服务端日志  2. gin服务器日志    3. 默认全局日志
+	type_ := c.Query(constant.QUERY_TYPE)
+	//id 如果是根据id获取服务端日志
+	id := c.Query(constant.QUERY_ID)
+	if type_ == "" {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+	}
+	originFilePath := ""
+	logName := time.Now().Format(constant.LOG_TIME_FORMAT) + ".zip"
+	filePath := filepath.Join(GetConfVal(constant.TMP_PATH), logName)
+	switch type_ {
+	case constant.LOG_TYPE_SERVER:
+		ctr := GetMinecraftServerContainerInstance()
+		serv, ok := ctr.GetServerById(id)
+		if !ok {
+			c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+			return
+		}
+		runPath := filepath.Dir(serv.GetServerConf().RunPath)
+		originFilePath = filepath.Join(runPath, constant.LOG_DIR)
+		// 压缩
+		_ = utils.CompressFile(originFilePath, filePath)
+
+	case constant.LOG_TYPE_GIN:
+		originFilePath = filepath.Join(GetConfVal(constant.WORKSPACE), constant.LOG_DIR, constant.GIN_LOG_NAME)
+		// 压缩
+		_ = utils.CompressFile(originFilePath, filePath)
+	case constant.LOG_TYPE_DEFAULT:
+		originFilePath = filepath.Join(GetConfVal(constant.WORKSPACE), constant.LOG_DIR, constant.DEFAULT_LOG_NAME)
+		// 压缩
+		_ = utils.CompressFile(originFilePath, filePath)
+	}
+	c.FileAttachment(filePath, logName)
+}
+
+// 删除临时文件
+func delTmpFlie(c *gin.Context) {
+
 }
 
 // 服务端操作

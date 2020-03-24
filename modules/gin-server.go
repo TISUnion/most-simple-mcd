@@ -6,6 +6,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
@@ -44,6 +45,9 @@ func (g *GinServer) InitCallBack() {
 	g.resourceWsPool = make(map[string][]*websocket.Conn)
 	g.stdoutWsPool = make(map[string][]*websocket.Conn)
 	g.stdoutChans = make(map[string]chan *json_struct.ReciveMessage)
+
+	//  启用gzip压缩
+	g.router.Use(gzip.Gzip(gzip.DefaultCompression))
 }
 
 func (g *GinServer) Start() error {
@@ -199,7 +203,7 @@ func GetGinServerInstance() server.GinServer {
 	port, _ := strconv.Atoi(portStr)
 
 	// 添加日志
-	logger := GetLogContainerInstance().AddLog("gin-server")
+	logger := GetLogContainerInstance().AddLog(constant.GIN_LOG_NAME)
 	gin.DefaultWriter = logger
 	gin.SetMode(gin.ReleaseMode)
 

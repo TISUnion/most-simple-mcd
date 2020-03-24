@@ -58,6 +58,7 @@ func ConfInit() {
 	RegisterConfig(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT, "true", constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	RegisterConfig(constant.MONITOR_INTERVAL, "2s", constant.MONITOR_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 	RegisterConfig(constant.I18N, "zh", constant.I18N_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.TMP_PATH, filepath.Join(GetConfVal(constant.WORKSPACE), "tmp"), constant.TMP_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
 }
 
 // loadFilePath
