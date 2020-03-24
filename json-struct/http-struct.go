@@ -32,6 +32,7 @@ type ConfParam struct {
 	Name           string `json:"config_key"`
 	Level          int    `json:"level"`
 	Description    string `json:"description"`
+	IsAlterable    bool   `json:"is_alterable"`
 }
 
 // 运行命令

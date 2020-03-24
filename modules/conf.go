@@ -43,22 +43,22 @@ func (c *Conf) GetConfigObj() map[string]*json_struct.ConfParam {
 func ConfInit() {
 	// 注册默认配置
 	DefaultConfParam = make(map[string]*json_struct.ConfParam)
-	RegisterConfig(constant.IS_RELOAD_CONF, "false", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	RegisterConfig(constant.RELOAD_CONF_INTERVAL, "5000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	RegisterConfig(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	RegisterConfig(constant.MANAGE_HTTP_SERVER_PORT, "80", constant.MANAGE_HTTP_SERVER_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	RegisterConfig(constant.LOG_SAVE_INTERVAL, constant.LOG_SAVE_INTERVAL_TWICEDAY, constant.LOG_SAVE_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.IS_RELOAD_CONF, "false", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL, true)
+	RegisterConfig(constant.RELOAD_CONF_INTERVAL, "5000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL, true)
+	RegisterConfig(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL, false)
+	RegisterConfig(constant.MANAGE_HTTP_SERVER_PORT, "80", constant.MANAGE_HTTP_SERVER_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL, false)
+	RegisterConfig(constant.LOG_SAVE_INTERVAL, constant.LOG_SAVE_INTERVAL_TWICEDAY, constant.LOG_SAVE_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL, true)
 	if workspace, err := utils.GetCurrentPath(); err == nil {
-		RegisterConfig(constant.WORKSPACE, workspace, constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+		RegisterConfig(constant.WORKSPACE, workspace, constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL, false)
 	} else {
-		RegisterConfig(constant.WORKSPACE, "./", constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+		RegisterConfig(constant.WORKSPACE, "./", constant.WORKSPACE_DESCREPTION, constant.CONF_DEFAULT_LEVEL, false)
 	}
-	RegisterConfig(constant.LOG_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "logs"), constant.LOG_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	RegisterConfig(constant.CONF_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "conf/mcd.ini"), constant.CONF_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	RegisterConfig(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT, "true", constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	RegisterConfig(constant.MONITOR_INTERVAL, "2s", constant.MONITOR_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	RegisterConfig(constant.I18N, "zh", constant.I18N_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
-	RegisterConfig(constant.TMP_PATH, filepath.Join(GetConfVal(constant.WORKSPACE), "tmp"), constant.TMP_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL)
+	RegisterConfig(constant.LOG_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "logs"), constant.LOG_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL, false)
+	RegisterConfig(constant.CONF_PATH, filepath.Join(DefaultConfParam[constant.WORKSPACE].ConfVal, "conf/mcd.ini"), constant.CONF_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL, false)
+	RegisterConfig(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT, "true", constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT_DESCREPTION, constant.CONF_DEFAULT_LEVEL, true)
+	RegisterConfig(constant.MONITOR_INTERVAL, "2s", constant.MONITOR_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL, true)
+	RegisterConfig(constant.I18N, "zh", constant.I18N_DESCREPTION, constant.CONF_DEFAULT_LEVEL, true)
+	RegisterConfig(constant.TMP_PATH, filepath.Join(GetConfVal(constant.WORKSPACE), "tmp"), constant.TMP_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL, false)
 }
 
 // loadFilePath
@@ -293,8 +293,8 @@ func GetConfVal(confKey string) string {
 	return GetConfInstance().GetConfVal(confKey)
 }
 
-func RegisterConfig(Name, ConfVal, description string, level int) {
+func RegisterConfig(Name, ConfVal, description string, level int, IsAlterable bool) {
 	conObj := GetConfInstance()
-	DefaultConfParam[Name] = utils.NewConfParam(Name, ConfVal, description, level)
+	DefaultConfParam[Name] = utils.NewConfParam(Name, ConfVal, description, level, IsAlterable)
 	conObj.RegisterConfParam(Name, ConfVal, description, level)
 }
