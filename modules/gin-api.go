@@ -46,11 +46,11 @@ func RegisterRouter() {
 		// 获取用户信息
 		v1.GET("/user/info", getInfo)
 		// 更新用户信息
-		v1.PATCH("/user/account", updateUserData)
+		v1.POST("/user/account", updateUserData)
 		// 获取配置
 		v1.GET("/config/list", getConfig)
 		// 修改配置
-		v1.PATCH("/config", updateConfig)
+		v1.POST("/config", updateConfig)
 		// 获取服务端列表
 		v1.GET("/server/list", serversInfoList)
 		// 获取服务端详情
@@ -61,12 +61,12 @@ func RegisterRouter() {
 		v1.POST("/plugin", operatePlugin)
 
 		// 修改服务端参数
-		v1.PATCH("/server/info", updateServerInfo)
+		v1.POST("/server/info", updateServerInfo)
 		// 在指定服务端中运行一条命令
 		v1.POST("/server/run/command", runCommand)
 		// 获取日志
 		v1.GET("/log/download", getLog)
-		v1.DELETE("/tmp/files", delTmpFlie)
+		v1.POST("/tmp/files", delTmpFlie)
 	}
 	// websocket实时监听服务端耗费资源
 	router.GET("/server/resources/listen", serversResourcesListen)
@@ -424,7 +424,7 @@ func updateConfig(c *gin.Context) {
 	}
 	confObj := GetConfInstance()
 	for _, v := range reqInfo {
-		confObj.SetConfig(v.Name, v.ConfVal)
+		confObj.SetConfParam(v.Name, v.ConfVal, v.Description, constant.CONF_SYSTEM_LEVEL)
 	}
 	// 执行配置更改回调
 	RunChangeConfCallBacks()

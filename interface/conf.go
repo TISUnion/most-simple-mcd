@@ -23,7 +23,7 @@ type Conf interface {
 
 	// SetConfig
 	// 设置一个配置变量（若存在则覆盖, 不存在不会创建，需要先注册）
-	SetConfig(string, string)
+	SetConfParam(string, string, string, int)
 
 	// ReloadConfig
 	// 重载配置

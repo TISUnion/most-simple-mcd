@@ -182,14 +182,6 @@ func (c *Conf) GetConfVal(key string) string {
 	return ""
 }
 
-func (c *Conf) SetConfig(key string, val string) {
-	if key != "" {
-		c.lock.Lock()
-		defer c.lock.Unlock()
-		c.confs[key].ConfVal = val
-	}
-}
-
 func (c *Conf) Init(terminalConfs map[string]*string) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
