@@ -53,6 +53,8 @@ func RegisterRouter() {
 		v1.POST("/config", updateConfig)
 		// 获取服务端列表
 		v1.GET("/server/list", serversInfoList)
+		// 获取服务端运行状态
+		v1.GET("/server/ping", getServerState)
 		// 获取服务端详情
 		v1.GET("/server/detail", serverDetail)
 		// 操作服务端
@@ -192,6 +194,23 @@ func serversInfoList(c *gin.Context) {
 	ctr := GetMinecraftServerContainerInstance()
 	confs := ctr.GetAllServerConf()
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", confs))
+}
+
+// 获取服务端运行状态
+func getServerState(c *gin.Context) {
+	serverId := c.Query(constant.QUERY_ID)
+	if serverId == "" {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	ctr := GetMinecraftServerContainerInstance()
+	serv, ok := ctr.GetServerById(serverId)
+	if !ok {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		return
+	}
+	servCfg := serv.GetServerConf()
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", &json_struct.ServerRunState{State: servCfg.State}))
 }
 
 // 获取服务端详情

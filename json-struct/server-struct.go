@@ -49,6 +49,13 @@ type ServerConf struct {
 	State int `json:"state"`
 }
 
+// 服务端运行状态
+type ServerRunState struct {
+	// State
+	// 启动状态：0.未启动 1.启动  -1.正在启动 -2.正在关闭
+	State int `json:"state"`
+}
+
 // 服务器接收消息
 type ReciveMessage struct {
 	Player     string `json:"player"`
