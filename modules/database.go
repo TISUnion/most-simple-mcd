@@ -8,8 +8,11 @@ import (
 	"github.com/dgraph-io/badger"
 	"github.com/dgraph-io/badger/options"
 	"path/filepath"
+	"sync"
 	"time"
 )
+
+var lock = &sync.Mutex{}
 
 type DataBase struct {
 	badgerDb *badger.DB
@@ -69,6 +72,8 @@ func (d *DataBase) SetWiteTTL(k string, v string, t time.Duration) {
 }
 
 func getDataBaseObj(name string) _interface.Database {
+	lock.Lock()
+	defer lock.Unlock()
 	db := newDataBase(name)
 	if db == nil {
 		return nil

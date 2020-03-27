@@ -26,7 +26,7 @@ const (
 	IS_MANAGE_HTTP_DESCREPTION                       = "启动管理后台"
 	MANAGE_HTTP_SERVER_PORT_DESCREPTION              = "管理后台服务端口"
 	LOG_PATH_DESCREPTION                             = "日志写入目录"
-	LOG_SAVE_INTERVAL_DESCREPTION                    = "日志保存间隔，例如: 每2天对久日志压缩，日志写入新日志中"
+	LOG_SAVE_INTERVAL_DESCREPTION                    = "日志保存间隔，例如: 每2天对旧日志压缩，日志写入新日志中"
 	IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT_DESCREPTION = "是否自动更换mc服务器重复使用的端口"
 	WORKSPACE_DESCREPTION                            = "工作目录"
 	I18N_DESCREPTION                                 = "国际化"

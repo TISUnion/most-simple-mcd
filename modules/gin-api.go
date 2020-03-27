@@ -279,11 +279,7 @@ func runCommand(c *gin.Context) {
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}
-	ok := RunOneCommand(reqInfo.ServerId, reqInfo.Command, reqInfo.Type)
-	if !ok {
-		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
-		return
-	}
+	RunOneCommand(reqInfo.ServerId, reqInfo.Command, reqInfo.Type)
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 

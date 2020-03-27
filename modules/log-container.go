@@ -77,8 +77,8 @@ func (l *LogContainer) AddLog(name string, params ...string) _interface.Log {
 	return logItem
 }
 
-// 每日新建新日志文件，
-func (l *LogContainer) AddLogJob() {
+// 压缩日志文件
+func (l *LogContainer) CompressLogJobFunc() {
 	for _, k := range l.Logs {
 		logDir := filepath.Dir(k.Path)
 		logPath := fmt.Sprintf("%s/%s.log", logDir, time.Now().Format("2006-01-02"))
@@ -138,7 +138,7 @@ func (l *LogContainer) ChangeConfCallBack() {
 		l.logSaveInterval = logSaveInterval
 		jobContainer.StopJob(constant.EVERYDAY_JOB_NAME)
 		// 重新注册定时清理日志任务
-		jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, logSaveInterval, l.AddLogJob)
+		jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, logSaveInterval, l.CompressLogJobFunc)
 		_ = jobContainer.StartJob(constant.EVERYDAY_JOB_NAME)
 	}
 }
@@ -163,7 +163,7 @@ func (l *LogContainer) InitCallBack() {
 	l.AddLog(constant.DEFAULT_LOG_NAME, constant.LOG_INFO)
 
 	// 初始化定时清理日志任务
-	jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, GetConfVal(constant.LOG_SAVE_INTERVAL), l.AddLogJob)
+	jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, GetConfVal(constant.LOG_SAVE_INTERVAL), l.CompressLogJobFunc)
 	_ = jobContainer.StartJob(constant.EVERYDAY_JOB_NAME)
 }
 
