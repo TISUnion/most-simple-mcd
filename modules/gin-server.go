@@ -102,13 +102,12 @@ func (g *GinServer) resourceWebsocketBroadcast(ctx context.Context, serv server.
 				cancelFunc()
 			}
 			// 使用临时数组进行循环，防止删除后越界
-			loopWS := make([]*websocket.Conn, len(g.resourceWsPool[serverId]))
-			copy(loopWS, g.resourceWsPool[serverId])
-			for i, ws := range loopWS {
+			for i, ws := range g.resourceWsPool[serverId] {
 				if err := ws.WriteJSON(resourceMsg); err != nil {
 					// 删除无用ws
 					g.resourceWsPool[serverId] = append(g.resourceWsPool[serverId][:i], g.resourceWsPool[serverId][i+1:len(g.resourceWsPool[serverId])]...)
 					ws.Close()
+					i--
 				}
 			}
 		case <-ctx.Done():
@@ -140,13 +139,12 @@ func (g *GinServer) stdoutWebsocketBroadcast(serverId string) {
 	for {
 		msg := <-g.stdoutChans[serverId]
 		// 使用临时数组进行循环，防止删除后越界
-		loopWS := make([]*websocket.Conn, len(g.stdoutWsPool[serverId]))
-		copy(loopWS, g.stdoutWsPool[serverId])
-		for i, stdoutWs := range loopWS {
+		for i, stdoutWs := range g.stdoutWsPool[serverId] {
 			if err := stdoutWs.WriteJSON(msg); err != nil {
 				// 删除无用ws
 				g.stdoutWsPool[serverId] = append(g.stdoutWsPool[serverId][:i], g.stdoutWsPool[serverId][i+1:len(g.stdoutWsPool[serverId])]...)
 				stdoutWs.Close()
+				i--
 			}
 		}
 	}
