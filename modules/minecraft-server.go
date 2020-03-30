@@ -11,6 +11,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
 	"io"
+	"net"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -159,6 +160,9 @@ func (m *MinecraftServer) ChangeConfCallBack() {
 func (m *MinecraftServer) InitCallBack() {
 	// 开启处理接收消息的协成
 	go m.handleMessage()
+
+	// 初始化ip
+	m.initLocalIps()
 
 	m.stopTagChan = make(chan struct{})
 }
@@ -484,6 +488,23 @@ func (m *MinecraftServer) WriteLog(msg string, level string) {
 		Message: msg,
 		Level:   level,
 	})
+}
+
+func (m *MinecraftServer) initLocalIps() {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return
+	}
+	ips := make ([]string, 0)
+	for _, address := range addrs {
+		// 检查ip地址判断是否回环地址
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				ips = append(ips, ipnet.IP.String())
+			}
+		}
+	}
+	m.Ips = ips
 }
 
 // NewMinecraftServer
