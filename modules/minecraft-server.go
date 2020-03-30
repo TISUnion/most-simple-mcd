@@ -140,6 +140,8 @@ func (m *MinecraftServer) GetServerConf() *json_struct.ServerConf {
 
 func (m *MinecraftServer) SetServerConf(c *json_struct.ServerConf)  {
 	m.ServerConf = c
+	// 修改完配置后，要重新初始化服务端cmd对象
+	m.resetParams()
 }
 
 func (m *MinecraftServer) SetMemory(memory int) {
@@ -469,7 +471,9 @@ func (m *MinecraftServer) resetParams() {
 	_ = m.stdin.Close()
 	_ = m.stdout.Close()
 	// 重新拼接运行命令
-	m.CmdStr = utils.GetCommandArr(m.Memory, m.RunPath)
+	if len(m.CmdStr) == 0 {
+		m.CmdStr = utils.GetCommandArr(m.Memory, m.RunPath)
+	}
 	m.CmdObj = exec.Command(m.CmdStr[0], m.CmdStr[1:]...)
 	m.stdin, _ = m.CmdObj.StdinPipe()
 	m.stdout, _ = m.CmdObj.StdoutPipe()

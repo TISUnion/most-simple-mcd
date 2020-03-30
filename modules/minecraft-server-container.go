@@ -157,7 +157,9 @@ func (m *MinecraftServerContainer) AddServer(config *json_struct.ServerConf) {
 	if config.Memory <= 0 {
 		config.Memory = 1024
 	}
-	config.CmdStr = utils.GetCommandArr(config.Memory, config.RunPath)
+	if len(config.CmdStr) == 0 {
+		config.CmdStr = utils.GetCommandArr(config.Memory, config.RunPath)
+	}
 
 	mcServer := NewMinecraftServer(config)
 
@@ -222,6 +224,10 @@ func (m *MinecraftServerContainer) getServerConfFromDb() []*json_struct.ServerCo
 	serversConfStr := GetFromDatabase(constant.MC_SERVER_DB_KEY)
 	var serversConf []*json_struct.ServerConf
 	_ = json.Unmarshal([]byte(serversConfStr), &serversConf)
+	// 默认服务端未启动
+	for _, c := range serversConf {
+		c.State = constant.MC_STATE_STOP
+	}
 	return serversConf
 }
 
@@ -235,10 +241,6 @@ func (m *MinecraftServerContainer) SaveToDb() {
 // 持久化服务器配置
 func (m *MinecraftServerContainer) _saveToDb() {
 	config := m._getAllServerConf()
-	// 存入数据库，默认服务器未启动
-	for _, c := range config {
-		c.State = constant.MC_STATE_STOP
-	}
 	data, _ := json.Marshal(config)
 	SetFromDatabase(constant.MC_SERVER_DB_KEY, string(data))
 }

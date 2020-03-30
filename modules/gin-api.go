@@ -264,7 +264,7 @@ func updateServerInfo(c *gin.Context) {
 		servConf.CmdStr = reqInfo.CmdStr
 	}
 	if reqInfo.GameType != "" {
-		servConf.CmdStr = reqInfo.CmdStr
+		servConf.GameType = reqInfo.GameType
 	}
 	serv.SetServerConf(servConf)
 	ctr.SaveToDb()
