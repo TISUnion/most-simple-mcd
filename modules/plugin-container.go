@@ -13,7 +13,7 @@ type PluginContainer struct {
 	globalPlugins map[string]plugin_interface.Plugin
 
 	// 单服务端插件（一个服务端会对应一个实例）
-	singlePlugins map[string]plugin_interface.Plugin
+	plugins map[string]plugin_interface.Plugin
 
 	// 锁
 	lock *sync.Mutex
@@ -30,7 +30,7 @@ func (c *PluginContainer) DestructCallBack() {
 
 func (c *PluginContainer) InitCallBack() {
 	c.globalPlugins = make(map[string]plugin_interface.Plugin)
-	c.singlePlugins = make(map[string]plugin_interface.Plugin)
+	c.plugins = make(map[string]plugin_interface.Plugin)
 	c.managers = make([]plugin_interface.PluginManager, 0)
 	c.lock = &sync.Mutex{}
 }
@@ -44,7 +44,7 @@ func (c *PluginContainer) RegisterPlugin(p plugin_interface.Plugin) {
 			return
 		}
 	}
-	for _, pl := range c.singlePlugins {
+	for _, pl := range c.plugins {
 		if pl.GetName() == newPname {
 			return
 		}
@@ -53,7 +53,7 @@ func (c *PluginContainer) RegisterPlugin(p plugin_interface.Plugin) {
 	if p.IsGlobal() {
 		c.globalPlugins[p.GetId()] = p
 	} else {
-		c.singlePlugins[p.GetId()] = p
+		c.plugins[p.GetId()] = p
 	}
 
 	// 分发给各插件管理器
@@ -66,7 +66,7 @@ func (c *PluginContainer) RegisterPlugin(p plugin_interface.Plugin) {
 	}
 }
 
-func (c *PluginContainer) NewPluginManager(server server.MinecraftServer) plugin_interface.PluginManager {
+func (c *PluginContainer) NewPluginManager(mcServer server.MinecraftServer) plugin_interface.PluginManager {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	allplugins := make(map[string]plugin_interface.Plugin)
@@ -74,14 +74,15 @@ func (c *PluginContainer) NewPluginManager(server server.MinecraftServer) plugin
 		allplugins[p.GetId()] = p
 	}
 
-	for _, p := range c.singlePlugins {
+	for _, p := range c.plugins {
 		newP := p.NewInstance()
 		allplugins[newP.GetId()] = newP
+		newP.Init(mcServer)
 	}
 	pm := &PluginManager{
 		allPlugins:  allplugins,
 		ablePlugins: allplugins,
-		mcServ:      server,
+		mcServ:      mcServer,
 	}
 	RegisterCallBack(pm)
 	c.managers = append(c.managers, pm)

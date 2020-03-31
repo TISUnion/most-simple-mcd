@@ -7,8 +7,11 @@ import (
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"net"
+	"regexp"
 	"strconv"
 )
+
+const parseMessageRGX = `\[(\d+:\d+:\d+)]\s+\[Server thread/INFO\]:\s+[<|\[]{1}(.+)[>|\]]{1}\s+(.+)`
 
 // 致命错误，退出程序
 func PanicError(msg string, err error) {
@@ -25,6 +28,21 @@ func NewConfParam(Name, ConfVal, description string, level int, IsAlterable bool
 		Description:    description,
 		IsAlterable:    IsAlterable,
 	}
+}
+
+// 解析mc玩家发言
+func ParseMessage(originMsg []byte) *json_struct.ReciveMessage {
+	re := regexp.MustCompile(parseMessageRGX)
+	match := re.FindStringSubmatch(string(originMsg))
+	if len(match) == 4 {
+		return &json_struct.ReciveMessage{
+			Player:     match[2],
+			Time:       match[1],
+			Speak:      match[3],
+			OriginData: originMsg,
+		}
+	}
+	return &json_struct.ReciveMessage{OriginData: originMsg}
 }
 
 // 去除数组内相同的元素（set化）
