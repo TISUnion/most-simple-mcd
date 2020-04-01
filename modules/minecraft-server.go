@@ -139,8 +139,6 @@ func (m *MinecraftServer) GetServerConf() *json_struct.ServerConf {
 
 func (m *MinecraftServer) SetServerConf(c *json_struct.ServerConf)  {
 	m.ServerConf = c
-	// 修改完配置后，要重新初始化服务端cmd对象
-	m.resetParams()
 }
 
 func (m *MinecraftServer) SetMemory(memory int) {
@@ -203,6 +201,8 @@ func (m *MinecraftServer) runProcess() error {
 func (m *MinecraftServer) Start() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
+	// 重置cmd对象
+	m.resetParams()
 	if m.State != constant.MC_STATE_STOP {
 		return nil
 	}
@@ -229,8 +229,6 @@ func (m *MinecraftServer) Stop() error {
 	m.State = constant.MC_STATE_STOPING
 	<-m.stopTagChan
 	m.State = constant.MC_STATE_STOP
-	// 重置cmd对象
-	m.resetParams()
 	return nil
 }
 
@@ -464,8 +462,12 @@ func (m *MinecraftServer) validateEula() error {
 }
 
 func (m *MinecraftServer) resetParams() {
-	_ = m.stdin.Close()
-	_ = m.stdout.Close()
+	if m.stdin != nil {
+		_ = m.stdin.Close()
+	}
+	if m.stdout!= nil {
+		_ = m.stdout.Close()
+	}
 	// 重新拼接运行命令
 	if len(m.CmdStr) == 0 {
 		m.CmdStr = utils.GetCommandArr(m.Memory, m.RunPath)
@@ -473,7 +475,6 @@ func (m *MinecraftServer) resetParams() {
 	m.CmdObj = exec.Command(m.CmdStr[0], m.CmdStr[1:]...)
 	m.stdin, _ = m.CmdObj.StdinPipe()
 	m.stdout, _ = m.CmdObj.StdoutPipe()
-	m.State = constant.MC_STATE_STOP
 	m.CmdObj.Dir = filepath.Dir(m.RunPath)
 	if m.monitorServer != nil {
 		// 关闭这个监控器
@@ -510,22 +511,8 @@ func (m *MinecraftServer) initLocalIps() {
 // NewMinecraftServer
 // 新建一个mc服务端进程
 func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServer {
-	cmdObj := exec.Command(serverConf.CmdStr[0], serverConf.CmdStr[1:]...)
-	stdin, err := cmdObj.StdinPipe()
-	if err != nil {
-		return nil
-	}
-	stdout, err := cmdObj.StdoutPipe()
-	if err != nil {
-		return nil
-	}
-	// 设置工作区间
-	cmdObj.Dir = filepath.Dir(serverConf.RunPath)
 	minecraftServer := &MinecraftServer{
 		ServerConf:  serverConf,
-		CmdObj:      cmdObj,
-		stdin:       stdin,
-		stdout:      stdout,
 		lock:        &sync.Mutex{},
 		messageChan: make(chan *json_struct.ReciveMessage, 10),
 		logger:      GetLogContainerInstance().AddLog(serverConf.EntryId),
