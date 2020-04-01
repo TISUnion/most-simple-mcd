@@ -111,7 +111,9 @@ func (g *GinServer) resourceWebsocketBroadcast(ctx context.Context, serv server.
 					// 删除无用ws
 					g.resourceWsPool[serverId] = append(g.resourceWsPool[serverId][:i], g.resourceWsPool[serverId][i+1:len(g.resourceWsPool[serverId])]...)
 					ws.Close()
-					i--
+					if i < len(g.resourceWsPool[serverId]) {
+						i--
+					}
 				}
 			}
 			g.lockeResourceWsPool.Unlock()
@@ -153,7 +155,9 @@ func (g *GinServer) stdoutWebsocketBroadcast(serverId string) {
 				// 删除无用ws
 				g.stdoutWsPool[serverId] = append(g.stdoutWsPool[serverId][:i], g.stdoutWsPool[serverId][i+1:len(g.stdoutWsPool[serverId])]...)
 				stdoutWs.Close()
-				i--
+				if i < len(g.stdoutWsPool[serverId]) {
+					i--
+				}
 			}
 		}
 		g.lockeStdoutWsPool.Unlock()
