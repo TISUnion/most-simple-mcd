@@ -18,13 +18,15 @@ import (
 var ginServerInstance *GinServer
 
 type GinServer struct {
-	router         *gin.Engine
-	httpServer     *http.Server
-	port           int
-	lock           *sync.Mutex
-	resourceWsPool map[string][]*websocket.Conn
-	stdoutWsPool   map[string][]*websocket.Conn
-	stdoutChans    map[string]chan *json_struct.ReciveMessage
+	router              *gin.Engine
+	httpServer          *http.Server
+	port                int
+	lock                *sync.Mutex
+	resourceWsPool      map[string][]*websocket.Conn
+	stdoutWsPool        map[string][]*websocket.Conn
+	stdoutChans         map[string]chan *json_struct.ReciveMessage
+	lockeResourceWsPool *sync.Mutex
+	lockeStdoutWsPool   *sync.Mutex
 }
 
 func (g *GinServer) GetRouter() *gin.Engine {
@@ -82,6 +84,8 @@ func (g *GinServer) appendResourceWsToPool(ctx context.Context, serverId string,
 		ws.Close()
 		return
 	}
+	g.lockeResourceWsPool.Lock()
+	defer g.lockeResourceWsPool.Unlock()
 	if _, ok := g.resourceWsPool[serverId]; !ok {
 		childCtx, cancelFunc := context.WithCancel(ctx)
 		go g.resourceWebsocketBroadcast(childCtx, mcServ, cancelFunc)
@@ -101,7 +105,7 @@ func (g *GinServer) resourceWebsocketBroadcast(ctx context.Context, serv server.
 			if len(g.resourceWsPool[serverId]) == 0 {
 				cancelFunc()
 			}
-			// 使用临时数组进行循环，防止删除后越界
+			g.lockeResourceWsPool.Lock()
 			for i, ws := range g.resourceWsPool[serverId] {
 				if err := ws.WriteJSON(resourceMsg); err != nil {
 					// 删除无用ws
@@ -110,9 +114,12 @@ func (g *GinServer) resourceWebsocketBroadcast(ctx context.Context, serv server.
 					i--
 				}
 			}
+			g.lockeResourceWsPool.Unlock()
 		case <-ctx.Done():
+			g.lockeResourceWsPool.Lock()
 			delete(g.resourceWsPool, serverId)
 			serv.StopMonitorServer()
+			g.lockeResourceWsPool.Unlock()
 			return
 		}
 	}
@@ -127,6 +134,8 @@ func (g *GinServer) appendStdWsToPool(serverId string, ws *websocket.Conn) {
 		ws.Close()
 		return
 	}
+	g.lockeStdoutWsPool.Lock()
+	defer g.lockeStdoutWsPool.Unlock()
 	g.stdoutWsPool[serverId] = append(g.stdoutWsPool[serverId], ws)
 	if _, ok := g.stdoutChans[serverId]; !ok {
 		g.stdoutChans[serverId] = make(chan *json_struct.ReciveMessage, 10)
@@ -138,7 +147,7 @@ func (g *GinServer) appendStdWsToPool(serverId string, ws *websocket.Conn) {
 func (g *GinServer) stdoutWebsocketBroadcast(serverId string) {
 	for {
 		msg := <-g.stdoutChans[serverId]
-		// 使用临时数组进行循环，防止删除后越界
+		g.lockeStdoutWsPool.Lock()
 		for i, stdoutWs := range g.stdoutWsPool[serverId] {
 			if err := stdoutWs.WriteJSON(msg); err != nil {
 				// 删除无用ws
@@ -147,6 +156,7 @@ func (g *GinServer) stdoutWebsocketBroadcast(serverId string) {
 				i--
 			}
 		}
+		g.lockeStdoutWsPool.Unlock()
 	}
 }
 
@@ -206,10 +216,12 @@ func GetGinServerInstance() server.GinServer {
 	httpServer := getHttpServerObj(port, router)
 
 	ginServerInstance = &GinServer{
-		router:     router,
-		httpServer: httpServer,
-		port:       port,
-		lock:       &sync.Mutex{},
+		router:              router,
+		httpServer:          httpServer,
+		port:                port,
+		lock:                &sync.Mutex{},
+		lockeResourceWsPool: &sync.Mutex{},
+		lockeStdoutWsPool:   &sync.Mutex{},
 	}
 	RegisterCallBack(ginServerInstance)
 	return ginServerInstance

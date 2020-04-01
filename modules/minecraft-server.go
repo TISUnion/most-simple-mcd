@@ -279,6 +279,8 @@ func (m *MinecraftServer) reciveMessageToChan() {
 	for {
 		everyBuff, err := m.resiveOneMessage()
 		if err != nil {
+			m.State = constant.MC_STATE_STOP
+			WriteLogToDefault(err.Error(), constant.LOG_ERROR)
 			return
 		}
 		msg := utils.ParseMessage(everyBuff)
