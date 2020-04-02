@@ -79,12 +79,20 @@ func ParseCharacter(data []byte) ([]byte, error) {
 // 获取系统空闲端口
 // 如果port为0，则表示随机获取一个空闲端口，不为0则为指定端口
 func GetFreePort(port int) (int, error) {
-	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("localhost:%d", port))
+	addrIp4, err := net.ResolveTCPAddr("tcp4", fmt.Sprintf("localhost:%d", port))
 	if err != nil {
 		return 0, err
 	}
-
-	l, err := net.ListenTCP("tcp", addr)
+	addrIp6, err := net.ResolveTCPAddr("tcp6", fmt.Sprintf("localhost:%d", port))
+	if err != nil {
+		return 0, err
+	}
+    // mac 中同一端口可以支持2种ip方式被不同socket监听
+	l, err := net.ListenTCP("tcp4", addrIp4)
+	if err != nil {
+		return 0, err
+	}
+	l, err = net.ListenTCP("tcp6", addrIp6)
 	if err != nil {
 		return 0, err
 	}

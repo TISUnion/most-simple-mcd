@@ -35,6 +35,9 @@ type MinecraftContainer interface {
 	// 添加服务端
 	AddServer(*json_struct.ServerConf)
 
+	// 处理服务端文件
+	HandleMcFile(string, string, int, int) *json_struct.ServerConf
+
 	// StopAll
 	// 关闭所有mc服务器
 	StopAll() error
