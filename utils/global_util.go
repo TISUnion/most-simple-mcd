@@ -88,16 +88,17 @@ func GetFreePort(port int) (int, error) {
 		return 0, err
 	}
     // mac 中同一端口可以支持2种ip方式被不同socket监听
-	l, err := net.ListenTCP("tcp4", addrIp4)
+	l4, err := net.ListenTCP("tcp4", addrIp4)
 	if err != nil {
 		return 0, err
 	}
-	l, err = net.ListenTCP("tcp6", addrIp6)
+	defer l4.Close()
+	l6, err := net.ListenTCP("tcp6", addrIp6)
 	if err != nil {
 		return 0, err
 	}
-	defer l.Close()
-	return l.Addr().(*net.TCPAddr).Port, nil
+	defer l6.Close()
+	return l4.Addr().(*net.TCPAddr).Port, nil
 }
 
 // Int转int32

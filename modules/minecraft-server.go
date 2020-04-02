@@ -137,7 +137,7 @@ func (m *MinecraftServer) GetServerConf() *json_struct.ServerConf {
 	return m.ServerConf
 }
 
-func (m *MinecraftServer) SetServerConf(c *json_struct.ServerConf)  {
+func (m *MinecraftServer) SetServerConf(c *json_struct.ServerConf) {
 	m.ServerConf = c
 }
 
@@ -381,17 +381,28 @@ func (m *MinecraftServer) _command(c string) error {
 // 校验mc的端口
 func (m *MinecraftServer) validatePort() (int, error) {
 	runDir := filepath.Dir(m.RunPath)
+	// 新建mc配置文件
 	mcConfPath := filepath.Join(runDir, constant.MC_CONF_NAME)
 	if f, e := utils.CreateFile(mcConfPath); e == nil {
 		f.Close()
 	}
-	cfg, err := ini.Load(mcConfPath)
+	cfg, _ := ini.Load(mcConfPath)
 	var realPort int
-	// 没有配置文件或者配置不完整
-	if err != nil || !cfg.Section("").HasKey(constant.PORT_TEXT) {
-		realPort = constant.DEFAULT_PORT
+	if m.Port != 0 {
+		realPort = m.Port
+		realPortStr := strconv.Itoa(realPort)
+		sec, _ := cfg.GetSection(ini.DefaultSection)
+		if sec.HasKey(constant.MC_PORT_TEXT) {
+			sec.Key(constant.MC_PORT_TEXT).SetValue(realPortStr)
+		} else {
+			_, _ = sec.NewKey(constant.MC_PORT_TEXT, realPortStr)
+		}
+		err := cfg.SaveTo(mcConfPath)
+		if err != nil {
+			WriteLogToDefault(err.Error(), constant.LOG_ERROR)
+		}
 	} else {
-		realPort, _ = cfg.Section("").Key(constant.PORT_TEXT).Int()
+		realPort = constant.DEFAULT_PORT
 	}
 	// 开启的服务端的端口已被占用,修修改
 	if p, _ := utils.GetFreePort(realPort); p == 0 {
@@ -410,16 +421,13 @@ func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int) (int,
 	// 如果可以自动更换端口就自动更换端口
 	if isChange, _ := strconv.ParseBool(GetConfVal(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT)); isChange {
 		unusedPort, _ := utils.GetFreePort(port)
-		sec, err := cfg.GetSection(ini.DefaultSection)
-		if err != nil {
-			return 0, err
-		}
+		sec, _ := cfg.GetSection(ini.DefaultSection)
 		unusedPortStr := strconv.Itoa(unusedPort)
 		// 重新配置文件
-		if sec.HasKey(constant.PORT_TEXT) {
-			sec.Key(constant.PORT_TEXT).SetValue(unusedPortStr)
+		if sec.HasKey(constant.MC_PORT_TEXT) {
+			sec.Key(constant.MC_PORT_TEXT).SetValue(unusedPortStr)
 		} else {
-			_, _ = sec.NewKey(constant.PORT_TEXT, unusedPortStr)
+			_, _ = sec.NewKey(constant.MC_PORT_TEXT, unusedPortStr)
 		}
 		if err := cfg.SaveTo(path); err != nil {
 			return 0, err
@@ -467,7 +475,7 @@ func (m *MinecraftServer) resetParams() {
 	if m.stdin != nil {
 		_ = m.stdin.Close()
 	}
-	if m.stdout!= nil {
+	if m.stdout != nil {
 		_ = m.stdout.Close()
 	}
 	// 重新拼接运行命令
@@ -498,7 +506,7 @@ func (m *MinecraftServer) initLocalIps() {
 	if err != nil {
 		return
 	}
-	ips := make ([]string, 0)
+	ips := make([]string, 0)
 	for _, address := range addrs {
 		// 检查ip地址判断是否回环地址
 		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
