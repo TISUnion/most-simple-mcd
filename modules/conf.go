@@ -183,6 +183,7 @@ func (c *Conf) GetConfVal(key string) string {
 }
 
 func (c *Conf) Init(terminalConfs map[string]*string) {
+
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -255,6 +256,8 @@ func (c *Conf) InitCallBack() {
 	terminalConfs := InitFlag()
 	c.Init(terminalConfs)
 	c.ChangeConfCallBack()
+	// 创建tmp目录
+	utils.CreatDir(c.GetConfVal(constant.TMP_PATH))
 }
 
 // 获取配置实例

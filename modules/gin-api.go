@@ -88,10 +88,15 @@ func addUpToContainer(c *gin.Context) {
 	}
 
 	dst := filepath.Join(GetConfVal(constant.TMP_PATH), header.Filename)
-	// gin 简单做了封装,拷贝了文件流
 	if err := c.SaveUploadedFile(header, dst); err != nil {
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
-		WriteLogToDefault(constant.COPY_FILE_ERROR, constant.LOG_ERROR)
+		WriteLogToDefault(constant.COPY_FILE_ERROR+err.Error(), constant.LOG_ERROR)
+		return
+	}
+	ext := filepath.Ext(header.Filename)
+	fmt.Println(ext)
+	if ext != ".jar" {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}
 	ctr := GetMinecraftServerContainerInstance()
@@ -103,6 +108,7 @@ func addUpToContainer(c *gin.Context) {
 	}
 	mcCfg := ctr.HandleMcFile(dst, name, port, memory)
 	ctr.AddServer(mcCfg)
+	ctr.SaveToDb()
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 
@@ -353,13 +359,14 @@ func getLog(c *gin.Context) {
 // 删除临时文件
 func delTmpFlie(c *gin.Context) {
 	err := os.RemoveAll(GetConfVal(constant.TMP_PATH))
+	// 创建tmp目录
+	utils.CreatDir(GetConfVal(constant.TMP_PATH))
 	if err != nil {
 		WriteLogToDefault(err.Error(), constant.LOG_ERROR)
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_SYSTEM_ERROR, constant.HTTP_SYSTEM_ERROR_MESSAGE, ""))
 		return
 	}
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
-
 }
 
 // 服务端操作
