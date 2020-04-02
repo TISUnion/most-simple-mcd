@@ -65,15 +65,16 @@ const (
 
 // mc服务端常量
 const (
-	EULA_FILE_NAME   = "eula.txt"
-	EULA             = "eula"
-	TRUE_STR         = "true"
-	MC_CONF_NAME     = "server.properties"
-	MC_PORT_TEXT     = "server-port"
-	MC_SERVER_DIR    = "minecraft-servers"
-	MC_SERVER_BACK   = "minecraft-servers-back"
-	MC_SERVER_DB_KEY = "minecraft:server:configs"
-	DEFAULT_PORT     = 25565
+	EULA_FILE_NAME    = "eula.txt"
+	EULA              = "eula"
+	TRUE_STR          = "true"
+	MC_CONF_NAME      = "server.properties"
+	MC_PORT_TEXT      = "server-port"
+	MC_SERVER_DIR     = "minecraft-servers"
+	MC_SERVER_BACK    = "minecraft-servers-back"
+	MC_SERVER_DB_KEY  = "minecraft:server:configs"
+	MC_DEFAULT_PORT   = 25565
+	MC_DEFAULT_MEMORY = 1024
 
 	MC_STATE_STOPING  = -2
 	MC_STATE_STARTIND = -1
@@ -118,4 +119,8 @@ const (
 	ALL_COMMAND_TYPE    = 3 //插件、服务端都运行
 	LOG_DIR             = "logs"
 	GIN_LOG_NAME        = "gin-server"
+	UPLOAD_FILE_NAME    = "file"
+	UPLOAD_PORT_TEXT    = "port"
+	UPLOAD_MEMORY_TEXT  = "memory"
+	UPLOAD_NAME_TEXT    = "name"
 )

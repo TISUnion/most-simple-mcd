@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
@@ -69,11 +70,40 @@ func RegisterRouter() {
 		// 获取日志
 		v1.GET("/log/download", getLog)
 		v1.POST("/tmp/files", delTmpFlie)
+		// 获取上传服务端文件，并注入到容器中
+		v1.POST("upload/server", addUpToContainer)
 	}
 	// websocket实时监听服务端耗费资源
 	router.GET("/server/resources/listen", serversResourcesListen)
 	// websocket实时获取服务器输出
 	router.GET("/server/std/listen", serversStdListen)
+}
+
+func addUpToContainer(c *gin.Context) {
+	header, err := c.FormFile(constant.UPLOAD_FILE_NAME)
+	if err != nil {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		WriteLogToDefault(constant.PARSE_FILE_ERROR+err.Error(), constant.LOG_ERROR)
+		return
+	}
+
+	dst := filepath.Join(GetConfVal(constant.TMP_PATH), header.Filename)
+	// gin 简单做了封装,拷贝了文件流
+	if err := c.SaveUploadedFile(header, dst); err != nil {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+		WriteLogToDefault(constant.COPY_FILE_ERROR, constant.LOG_ERROR)
+		return
+	}
+	ctr := GetMinecraftServerContainerInstance()
+	port, _ := strconv.Atoi(c.DefaultPostForm(constant.UPLOAD_PORT_TEXT, strconv.Itoa(constant.MC_DEFAULT_PORT)))
+	name := c.DefaultPostForm(constant.UPLOAD_NAME_TEXT, header.Filename)
+	memory, _ := strconv.Atoi(c.DefaultPostForm(constant.UPLOAD_MEMORY_TEXT, strconv.Itoa(constant.MC_DEFAULT_MEMORY)))
+	if memory == 0 {
+		memory = constant.MC_DEFAULT_MEMORY
+	}
+	mcCfg := ctr.HandleMcFile(dst, name, port, memory)
+	ctr.AddServer(mcCfg)
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 
 // 用户登录

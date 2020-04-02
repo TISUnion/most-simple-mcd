@@ -155,7 +155,7 @@ func (m *MinecraftServerContainer) _getAllServerConf() []*json_struct.ServerConf
 // 把根据配置添加服务
 func (m *MinecraftServerContainer) AddServer(config *json_struct.ServerConf) {
 	if config.Memory <= 0 {
-		config.Memory = 1024
+		config.Memory = constant.MC_DEFAULT_MEMORY
 	}
 	if len(config.CmdStr) == 0 {
 		config.CmdStr = utils.GetCommandArr(config.Memory, config.RunPath)
@@ -225,7 +225,10 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 func (m *MinecraftServerContainer) loadDbServer() {
 	serversConf := m.getServerConfFromDb()
 	for _, v := range serversConf {
-		m.AddServer(v)
+		// 只有没有被删除的服务端才会加入容器中
+		if utils.ExistsResource(v.RunPath) {
+			m.AddServer(v)
+		}
 	}
 }
 

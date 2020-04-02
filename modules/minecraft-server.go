@@ -402,7 +402,7 @@ func (m *MinecraftServer) validatePort() (int, error) {
 			WriteLogToDefault(err.Error(), constant.LOG_ERROR)
 		}
 	} else {
-		realPort = constant.DEFAULT_PORT
+		realPort = constant.MC_DEFAULT_PORT
 	}
 	// 开启的服务端的端口已被占用,修修改
 	if p, _ := utils.GetFreePort(realPort); p == 0 {
