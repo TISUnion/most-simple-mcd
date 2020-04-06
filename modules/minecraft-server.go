@@ -163,6 +163,9 @@ func (m *MinecraftServer) InitCallBack() {
 	// 初始化ip
 	m.initLocalIps()
 
+	// 创建插件管理器
+	m.pluginManager = GetPluginContainerInstance().NewPluginManager(m)
+
 	m.stopTagChan = make(chan struct{})
 }
 
@@ -203,6 +206,8 @@ func (m *MinecraftServer) Start() error {
 	defer m.lock.Unlock()
 	// 重置cmd对象
 	m.resetParams()
+	// 开启服务端回调
+	m.pluginManager.OpenMcServerCallBack()
 	if m.State != constant.MC_STATE_STOP {
 		return nil
 	}
@@ -211,8 +216,6 @@ func (m *MinecraftServer) Start() error {
 		m.State = constant.MC_STATE_STOP
 		return err
 	}
-	// 创建插件管理器
-	m.pluginManager = GetPluginContainerInstance().NewPluginManager(m)
 	return nil
 }
 
@@ -229,6 +232,8 @@ func (m *MinecraftServer) Stop() error {
 	m.State = constant.MC_STATE_STOPING
 	<-m.stopTagChan
 	m.State = constant.MC_STATE_STOP
+	// 关闭服务端回调
+	m.pluginManager.CloseMcServerCallBack()
 	return nil
 }
 
