@@ -62,6 +62,8 @@ func RegisterRouter() {
 		v1.POST("/server", operateServer)
 		// 操作插件
 		v1.POST("/plugin", operatePlugin)
+		// 获取一个配置
+		v1.GET("/config/val", getConfigVal)
 
 		// 修改服务端参数
 		v1.POST("/server/info", updateServerInfo)
@@ -69,6 +71,7 @@ func RegisterRouter() {
 		v1.POST("/server/run/command", runCommand)
 		// 获取日志
 		v1.GET("/log/download", getLog)
+		// 删除临时文件
 		v1.POST("/tmp/files", delTmpFlie)
 		// 获取上传服务端文件，并注入到容器中
 		v1.POST("upload/server", addUpToContainer)
@@ -95,7 +98,7 @@ func addUpToContainer(c *gin.Context) {
 	}
 	ext := filepath.Ext(header.Filename)
 	fmt.Println(ext)
-	if ext != ".jar" {
+	if ext != constant.JAR_SUF {
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}
@@ -452,6 +455,17 @@ func updateUserData(c *gin.Context) {
 	jsonStr, _ := json.Marshal(reqInfo)
 	SetFromDatabase(constant.DEFAULT_ACCOUNT_DB_KEY, string(jsonStr))
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
+}
+
+// 获取一个配置
+func getConfigVal(c *gin.Context) {
+	configName := c.Query(constant.QUERY_NAME)
+	conf := GetConfInstance().GetConfigObj()
+	valconf, ok := conf[configName]
+	if !ok {
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
+	}
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", valconf))
 }
 
 // 获取配置内容

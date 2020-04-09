@@ -16,6 +16,7 @@ const (
 	I18N                                 = "i18n"                        // 国际化
 	IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT = "mc_server_port_auto_change"  // 是否自动更换mc服务器重复使用的端口
 	MONITOR_INTERVAL                     = "monitor_interval"            // 进程资源读取间隔，单位为秒
+	WEBSOCKET_HOST                       = "websocket_host"              // websocket 连接host
 )
 
 // 配置说明
@@ -32,6 +33,7 @@ const (
 	I18N_DESCREPTION                                 = "国际化"
 	MONITOR_INTERVAL_DESCREPTION                     = "进程资源读取间隔，单位: 秒"
 	TMP_PATH_DESCREPTION                             = "临时文件存放目录"
+	WEBSOCKET_HOST_DESCREPTION                       = "websocket的连接host"
 )
 
 // 配置常量
@@ -104,11 +106,14 @@ const (
 	DEFAULT_ACCOUNT             = "admin"
 	DEFAULT_PASSWORD            = "123456"
 	QUERY_ID                    = "id"
+	QUERY_NAME                  = "name"
 	QUERY_TYPE                  = "type"
 
 	LOG_TYPE_SERVER  = "1"
 	LOG_TYPE_GIN     = "2"
 	LOG_TYPE_DEFAULT = "3"
+
+	JAR_SUF = ".jar"
 )
 
 // 各模块常量

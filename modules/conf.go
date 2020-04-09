@@ -59,6 +59,7 @@ func ConfInit() {
 	RegisterConfig(constant.MONITOR_INTERVAL, "2s", constant.MONITOR_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL, true)
 	RegisterConfig(constant.I18N, "zh", constant.I18N_DESCREPTION, constant.CONF_DEFAULT_LEVEL, true)
 	RegisterConfig(constant.TMP_PATH, filepath.Join(GetConfVal(constant.WORKSPACE), "tmp"), constant.TMP_PATH_DESCREPTION, constant.CONF_DEFAULT_LEVEL, false)
+	RegisterConfig(constant.WEBSOCKET_HOST, "localhost", constant.WEBSOCKET_HOST_DESCREPTION, constant.CONF_DEFAULT_LEVEL, true)
 }
 
 // loadFilePath

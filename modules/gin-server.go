@@ -96,7 +96,14 @@ func (g *GinServer) appendResourceWsToPool(ctx context.Context, serverId string,
 
 func (g *GinServer) resourceWebsocketBroadcast(ctx context.Context, serv server.MinecraftServer, cancelFunc context.CancelFunc) {
 	serv.StartMonitorServer()
-	resouceChan := serv.GetServerMonitor().GetMessageChan()
+	var resouceChan chan *json_struct.MonitorMessage
+	monitorServer := serv.GetServerMonitor()
+	if serv.GetServerMonitor() == nil {
+		cancelFunc()
+	} else {
+		resouceChan = monitorServer.GetMessageChan()
+	}
+
 	serverId := serv.GetServerConf().EntryId
 	var resourceMsg *json_struct.MonitorMessage
 	for {
@@ -119,8 +126,10 @@ func (g *GinServer) resourceWebsocketBroadcast(ctx context.Context, serv server.
 			g.lockeResourceWsPool.Unlock()
 		case <-ctx.Done():
 			g.lockeResourceWsPool.Lock()
-			delete(g.resourceWsPool, serverId)
-			serv.StopMonitorServer()
+			g.resourceWsPool = make(map[string][]*websocket.Conn)
+			if monitorServer != nil {
+				serv.StopMonitorServer()
+			}
 			g.lockeResourceWsPool.Unlock()
 			return
 		}
