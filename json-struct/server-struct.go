@@ -97,3 +97,9 @@ type OperatePlugin struct {
 	// 操作类型：1. 启动  2. 停止
 	OperateType int `json:"operate_type"`
 }
+
+// 插件命令行解析对象
+type PluginCommand struct {
+	Command string
+	Params []string
+}

@@ -9,6 +9,7 @@ import (
 	"net"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 const parseMessageRGX = `\[(\d+:\d+:\d+)]\s+\[Server thread/INFO\]:\s+[<|\[]{1}(.+)[>|\]]{1}\s+(.+)`
@@ -35,14 +36,27 @@ func ParseMessage(originMsg []byte) *json_struct.ReciveMessage {
 	re := regexp.MustCompile(parseMessageRGX)
 	match := re.FindStringSubmatch(string(originMsg))
 	if len(match) == 4 {
+		fmt.Println(match)
 		return &json_struct.ReciveMessage{
 			Player:     match[2],
 			Time:       match[1],
-			Speak:      match[3],
+			Speak:      strings.ToLower(match[3]),
 			OriginData: originMsg,
 		}
 	}
 	return &json_struct.ReciveMessage{OriginData: originMsg}
+}
+
+// 解析mc玩家发言插件命令
+func ParsePluginCommand(msg string) *json_struct.PluginCommand {
+	ctx := strings.Fields(msg)
+	res := &json_struct.PluginCommand{
+		Command: ctx[0],
+	}
+	if len(ctx) > 1 {
+		res.Params = ctx[1:]
+	}
+	return res
 }
 
 // 去除数组内相同的元素（set化）
@@ -87,7 +101,7 @@ func GetFreePort(port int) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-    // mac 中同一端口可以支持2种ip方式被不同socket监听
+	// mac 中同一端口可以支持2种ip方式被不同socket监听
 	l4, err := net.ListenTCP("tcp4", addrIp4)
 	if err != nil {
 		return 0, err
