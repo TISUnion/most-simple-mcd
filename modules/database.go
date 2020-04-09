@@ -72,8 +72,6 @@ func (d *DataBase) SetWiteTTL(k string, v string, t time.Duration) {
 }
 
 func getDataBaseObj(name string) _interface.Database {
-	lock.Lock()
-	defer lock.Unlock()
 	db := newDataBase(name)
 	if db == nil {
 		return nil
@@ -82,16 +80,22 @@ func getDataBaseObj(name string) _interface.Database {
 }
 
 func GetFromDatabase(key string) string {
+	lock.Lock()
+	defer lock.Unlock()
 	db := getDataBaseObj(constant.DEFAULT_DATABASE_NAME)
 	return db.Get(key)
 }
 
 func SetFromDatabase(key string, value string) {
+	lock.Lock()
+	defer lock.Unlock()
 	db := getDataBaseObj(constant.DEFAULT_DATABASE_NAME)
 	db.Set(key, value)
 }
 
 func SetWiteTTLFromDatabase(key string, value string, t time.Duration) {
+	lock.Lock()
+	defer lock.Unlock()
 	db := getDataBaseObj(constant.DEFAULT_DATABASE_NAME)
 	db.SetWiteTTL(key, value, t)
 }
