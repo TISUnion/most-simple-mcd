@@ -59,15 +59,24 @@ type MinecraftServer struct {
 	// 插件管理器
 	pluginManager plugin.PluginManager
 
-	// 其他模块订阅服务的消息推送管道
-	subscribeMessageChans []chan *json_struct.ReciveMessage
-
 	// 接收关闭服务器信号管道
 	stopTagChan chan struct{}
 
 	// Logger
 	// 服务端对应日志
 	logger _interface.Log
+
+	// 其他模块订阅服务的消息推送管道
+	subscribeMessageChans []chan *json_struct.ReciveMessage
+
+	// 服务端关闭回调
+	mcCloseCallback []func(string)
+
+	// 服务端开启回调
+	mcOpenCallback []func(string)
+
+	// 服务端保存回调（执行save-all后调用)
+	mcSaveCallback []func(string)
 }
 
 func (m *MinecraftServer) BanPlugin(pluginId string) {
@@ -173,6 +182,24 @@ func (m *MinecraftServer) DestructCallBack() {
 	_ = m.Stop()
 }
 
+func (m *MinecraftServer) RegisterCloseCallback(c func(string)) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	m.mcCloseCallback = append(m.mcCloseCallback, c)
+}
+
+func (m *MinecraftServer) RegisterOpenCallback(c func(string)) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	m.mcOpenCallback = append(m.mcOpenCallback, c)
+}
+
+func (m *MinecraftServer) RegisterSaveCallback(c func(string)) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	m.mcSaveCallback = append(m.mcSaveCallback, c)
+}
+
 // 启动进程
 func (m *MinecraftServer) runProcess() error {
 	// 校验eula
@@ -206,8 +233,7 @@ func (m *MinecraftServer) Start() error {
 	defer m.lock.Unlock()
 	// 重置cmd对象
 	m.resetParams()
-	// 开启服务端回调
-	m.pluginManager.OpenMcServerCallBack()
+
 	if m.State != constant.MC_STATE_STOP {
 		return nil
 	}
@@ -215,6 +241,10 @@ func (m *MinecraftServer) Start() error {
 	if err := m.runProcess(); err != nil {
 		m.State = constant.MC_STATE_STOP
 		return err
+	}
+	// 运行开启回调
+	for _, f := range m.mcOpenCallback {
+		f(m.EntryId)
 	}
 	return nil
 }
@@ -232,8 +262,10 @@ func (m *MinecraftServer) Stop() error {
 	m.State = constant.MC_STATE_STOPING
 	<-m.stopTagChan
 	m.State = constant.MC_STATE_STOP
-	// 关闭服务端回调
-	m.pluginManager.CloseMcServerCallBack()
+	// 运行关闭回调
+	for _, f := range m.mcCloseCallback {
+		f(m.EntryId)
+	}
 	return nil
 }
 
@@ -307,6 +339,13 @@ func (m *MinecraftServer) handleMessage() {
 			m.getGameType(msg.OriginData)
 		}
 
+		// 分发给各已订阅模块
+		go func() {
+			for _, c := range m.subscribeMessageChans {
+				c <- msg
+			}
+		}()
+
 		// 正在启动
 		if m.State == constant.MC_STATE_STARTIND {
 			m.sureServerStart(msg.OriginData)
@@ -319,16 +358,12 @@ func (m *MinecraftServer) handleMessage() {
 			continue // 如果还没关闭，就不分发消息
 		}
 
+		// 如果是保存服务端就调用回调
+		go m.sureServerSave(msg.OriginData)
+
 		// 分发给插件
 		go func() {
 			m.pluginManager.HandleMessage(msg)
-		}()
-
-		// 分发给各已订阅模块
-		go func() {
-			for _, c := range m.subscribeMessageChans {
-				c <- msg
-			}
 		}()
 	}
 }
@@ -366,6 +401,18 @@ func (m *MinecraftServer) sureServerStop(data []byte) {
 	if len(match) > 0 {
 		m.State = constant.MC_STATE_START
 		m.stopTagChan <- struct{}{}
+	}
+}
+
+// 判断服务端是否已保存
+func (m *MinecraftServer) sureServerSave(data []byte) {
+	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Saved the world")
+	match := reg.Find(data)
+	// 如果已关闭则发送关闭信息
+	if len(match) > 0 {
+		for _, f := range m.mcSaveCallback {
+			f(m.EntryId)
+		}
 	}
 }
 

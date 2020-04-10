@@ -49,4 +49,13 @@ type MinecraftServer interface {
 
 	// 写入服务器的日志
 	WriteLog(string, string)
+
+	// 注册服务端关闭回调, 传入服务端id
+	RegisterCloseCallback(func(string))
+
+	// 注册服务端开启回调, 传入服务端id
+	RegisterOpenCallback(func(string))
+
+	// 注册服务端保存回调, 传入服务端id
+	RegisterSaveCallback(func(string))
 }

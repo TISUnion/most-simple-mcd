@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	"github.com/olekukonko/tablewriter"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"net"
 	"regexp"
@@ -57,6 +59,26 @@ func ParsePluginCommand(msg string) *json_struct.PluginCommand {
 		res.Params = ctx[1:]
 	}
 	return res
+}
+
+// 格式化数据为表格
+func FormateTable(header []string, data [][]string) string{
+	buf := bytes.NewBufferString("")
+	table := tablewriter.NewWriter(buf)
+	table.SetHeader(header)
+	for _, v := range data {
+		table.Append(v)
+	}
+	table.Render()
+	return buf.String()
+}
+
+// 字符串超出长度截断，加深略号
+func Ellipsis(str string, l int) string{
+	if len(str) > l {
+		return str[:l+1]
+	}
+	return str
 }
 
 // 去除数组内相同的元素（set化）

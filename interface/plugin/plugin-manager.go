@@ -24,12 +24,6 @@ type PluginManager interface {
 	// 处理投递消息
 	HandleMessage(*json_struct.ReciveMessage)
 
-	// 通知添加插件(已拥有，则不添加)，可用于动态
+	// 通知添加插件(已拥有，则不添加)，可用于动态添加插件
 	AddPlugin(Plugin)
-
-	// 关闭服务端回调
-	CloseMcServerCallBack()
-
-	// 开启服务端回调
-	OpenMcServerCallBack()
 }

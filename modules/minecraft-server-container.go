@@ -36,6 +36,22 @@ type MinecraftServerContainer struct {
 
 	// 操作锁
 	lock *sync.Mutex
+
+	// 个时间段的回调
+	mcCallbacks map[string]func(string)
+}
+
+// TODO
+func (m *MinecraftServerContainer) RegisterAllServerCloseCallback(func(string)) {
+
+}
+
+func (m *MinecraftServerContainer) RegisterAllServerOpenCallback(func(string)) {
+	panic("implement me")
+}
+
+func (m *MinecraftServerContainer) RegisterAllServerSaveCallback(func(string)) {
+	panic("implement me")
 }
 
 func (m *MinecraftServerContainer) ChangeConfCallBack() {}

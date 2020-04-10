@@ -89,6 +89,10 @@ const (
 
 	MC_PLUGIN_START = 1
 	MC_PLUGIN_STOP  = 2
+
+	MC_OPEN_CALLBACK  = "open"
+	MC_CLOSE_CALLBACK = "close"
+	MC_SAVE_CALLBACK  = "save"
 )
 
 // DB常量

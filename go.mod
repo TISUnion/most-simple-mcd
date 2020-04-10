@@ -19,6 +19,7 @@ require (
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mholt/archiver/v3 v3.3.0
+	github.com/olekukonko/tablewriter v0.0.4 // indirect
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v2.20.1+incompatible

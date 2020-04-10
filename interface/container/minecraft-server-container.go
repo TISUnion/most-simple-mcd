@@ -47,4 +47,13 @@ type MinecraftContainer interface {
 
 	// 所有服务端配置保存到数据库中
 	SaveToDb()
+
+	// 注册所有服务端关闭回调, 传入服务端id
+	RegisterAllServerCloseCallback(func(string))
+
+	// 注册所有服务端开启回调, 传入服务端id
+	RegisterAllServerOpenCallback(func(string))
+
+	// 注册所有服务端保存回调, 传入服务端id
+	RegisterAllServerSaveCallback(func(string))
 }

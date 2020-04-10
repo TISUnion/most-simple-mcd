@@ -20,18 +20,6 @@ type PluginManager struct {
 	lock *sync.Mutex
 }
 
-func (m *PluginManager) CloseMcServerCallBack() {
-	for _, p := range m.ablePlugins {
-		p.Stop()
-	}
-}
-
-func (m *PluginManager) OpenMcServerCallBack() {
-	for _, p := range m.ablePlugins {
-		p.Start()
-	}
-}
-
 func (m *PluginManager) ChangeConfCallBack() {
 }
 
