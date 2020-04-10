@@ -20,7 +20,7 @@ const (
 	pluginCommand     = "!!repeat"
 	isGlobal          = false
 	helpDescription   = "使用!!repeat后会复读"
-	help              = "help"
+	help              = "-p"
 )
 
 func (r *RereadChickenPlugin) GetDescription() string {

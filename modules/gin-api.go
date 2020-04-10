@@ -445,8 +445,8 @@ func updateUserData(c *gin.Context) {
 	if reqInfo.Account != "" {
 		adminObj.Account = reqInfo.Account
 	}
-	if reqInfo.Avatar != "" {
-		adminObj.Avatar = reqInfo.Avatar
+	if reqInfo.Nickname != "" {
+		adminObj.Nickname = reqInfo.Nickname
 	}
 	if reqInfo.Password != "" {
 		adminObj.Password = utils.Md5(reqInfo.Password)

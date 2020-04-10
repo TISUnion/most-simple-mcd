@@ -15,8 +15,8 @@ const (
 	pluginDescription = "备份存档，运行备份存档镜像"
 	pluginCommand     = "!!mirror"
 	isGlobal          = true
-	helpDescription   = "使用!!repeat后会复读"
-	help              = "help"
+	helpDescription   = "!!mirror list 查看所有镜像服务器\\n!!mirror save [自定义备份镜像名称] 保存一份当前服务器的镜像\\n!!mirror start [备份镜像id] 开启镜像服务器\\n!!mirror stop [备份镜像id] 关闭镜像服务器"
+	help              = "-p"
 )
 
 type MirrorServerPlugin struct {
@@ -70,7 +70,7 @@ func (p *MirrorServerPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 		return
 	}
 	if len(com.Params) == 0 || com.Params[0] == help {
-		_ = mcServer.Command(fmt.Sprintf("/tell %s %s"))
+		_ = mcServer.Command(fmt.Sprintf("/tell %s %s", message.Player, helpDescription))
 	} else {
 
 	}
