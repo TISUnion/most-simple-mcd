@@ -17,3 +17,4 @@ main
 main.go
 *.jar
 compress-file
+pack-data.go

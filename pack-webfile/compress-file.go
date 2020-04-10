@@ -6,6 +6,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/TISUnion/most-simple-mcd/utils"
 	"github.com/klauspost/compress/flate"
 	"github.com/mholt/archiver/v3"
 	"io/ioutil"
@@ -17,10 +18,17 @@ import (
 /**
 将前端编译好的文件写入到go文件中，达到把静态文件打包到exe中的 目地
 */
+
+const TMPL = `package pack_webfile
+
+var PackCompressData = []byte{}
+`
+
 func main() {
 	originWebDir := "web-admin/dist/*"
 	compressFileName := "webfile.zip"
 	codeFileName := "pack-webfile/pack-data.go"
+	initCodeFile(codeFileName)
 	originWebDirFiles, _ := filepath.Glob(originWebDir)
 	z := archiver.Zip{
 		CompressionLevel:       flate.DefaultCompression,
@@ -66,5 +74,14 @@ func main() {
 				_ = os.Remove(compressFileName)
 			}
 		}
+	}
+}
+
+func initCodeFile(path string) {
+	file, _ := utils.CreateFile(path)
+	var codeFileContent []byte
+	n, _ := file.Read(codeFileContent)
+	if n == 0 {
+		file.Write([]byte(TMPL))
 	}
 }
