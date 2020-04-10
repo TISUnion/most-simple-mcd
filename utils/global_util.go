@@ -40,7 +40,7 @@ func ParseMessage(originMsg []byte) *json_struct.ReciveMessage {
 		return &json_struct.ReciveMessage{
 			Player:     match[2],
 			Time:       match[1],
-			Speak:      strings.ToLower(match[3]),
+			Speak:      match[3],
 			OriginData: originMsg,
 		}
 	}
@@ -51,7 +51,7 @@ func ParseMessage(originMsg []byte) *json_struct.ReciveMessage {
 func ParsePluginCommand(msg string) *json_struct.PluginCommand {
 	ctx := strings.Fields(msg)
 	res := &json_struct.PluginCommand{
-		Command: ctx[0],
+		Command: strings.ToLower(ctx[0]),
 	}
 	if len(ctx) > 1 {
 		res.Params = ctx[1:]

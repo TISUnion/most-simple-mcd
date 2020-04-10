@@ -76,7 +76,7 @@ func (p *MirrorServerPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 	}
 }
 
-// -------------非全局插件需实现方式--------------
+// -------------非全局插件需实现方法--------------
 func (p *MirrorServerPlugin) Init(server server.MinecraftServer) {}
 
 func (p *MirrorServerPlugin) Start() {}

@@ -48,11 +48,13 @@ func (r *RereadChickenPlugin) HandleMessage(message *json_struct.ReciveMessage) 
 	if com.Command != pluginCommand {
 		return
 	}
+	tellMsg := ""
 	if len(com.Params) == 0 || com.Params[0] == help {
-		_ = r.mcServer.Command(fmt.Sprintf("/tell %s %s", message.Player, helpDescription))
+		tellMsg = helpDescription
 	} else {
-		_ = r.mcServer.Command(fmt.Sprintf("/tell %s %s", message.Player, com.Params[0]))
+		tellMsg = com.Params[0]
 	}
+	_ = r.mcServer.Command(fmt.Sprintf("/tell %s %s", message.Player, tellMsg))
 }
 func (r *RereadChickenPlugin) Init(mcServer server.MinecraftServer) {
 	r.mcServer = mcServer
