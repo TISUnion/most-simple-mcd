@@ -16,3 +16,4 @@ main
 *.exe
 main.go
 *.jar
+compress-file
