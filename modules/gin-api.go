@@ -442,7 +442,6 @@ func updateUserData(c *gin.Context) {
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_SYSTEM_ERROR, constant.HTTP_SYSTEM_ERROR_MESSAGE, ""))
 		return
 	}
-
 	if reqInfo.Account != "" {
 		adminObj.Account = reqInfo.Account
 	}
@@ -450,10 +449,12 @@ func updateUserData(c *gin.Context) {
 		adminObj.Avatar = reqInfo.Avatar
 	}
 	if reqInfo.Password != "" {
-		reqInfo.Password = utils.Md5(reqInfo.Password)
+		adminObj.Password = utils.Md5(reqInfo.Password)
 	}
-	jsonStr, _ := json.Marshal(reqInfo)
+	jsonStr, _ := json.Marshal(adminObj)
 	SetFromDatabase(constant.DEFAULT_ACCOUNT_DB_KEY, string(jsonStr))
+	// 清空token
+	SetFromDatabase(constant.DEFAULT_TOKEN_DB_KEY, "")
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 
