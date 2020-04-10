@@ -382,6 +382,11 @@ func (m *MinecraftServer) _command(c string) error {
 	return err
 }
 
+// 执行tell命令
+func (m *MinecraftServer) TellCommand(player string, msg string) error {
+	return m._command(fmt.Sprintf("/tell %s %s", player, msg))
+}
+
 // validatePort
 // 校验mc的端口
 func (m *MinecraftServer) validatePort() (int, error) {

@@ -8,7 +8,7 @@ type MinecraftServer interface {
 	Command(string) error //执行命令
 
 	// 执行tell命令
-	TellCommand(string) error //执行tell命令
+	TellCommand(string, string) error //执行tell命令
 
 	// 修改内存使用阈值（单位M）
 	// 为0表示不修改

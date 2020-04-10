@@ -1,7 +1,6 @@
 package reread_chicken
 
 import (
-	"fmt"
 	plugin_interface "github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
@@ -54,7 +53,7 @@ func (r *RereadChickenPlugin) HandleMessage(message *json_struct.ReciveMessage) 
 	} else {
 		tellMsg = com.Params[0]
 	}
-	_ = r.mcServer.Command(fmt.Sprintf("/tell %s %s", message.Player, tellMsg))
+	_ = r.mcServer.TellCommand(message.Player, tellMsg)
 }
 func (r *RereadChickenPlugin) Init(mcServer server.MinecraftServer) {
 	r.mcServer = mcServer
