@@ -97,7 +97,6 @@ func addUpToContainer(c *gin.Context) {
 		return
 	}
 	ext := filepath.Ext(header.Filename)
-	fmt.Println(ext)
 	if ext != constant.JAR_SUF {
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
@@ -110,8 +109,7 @@ func addUpToContainer(c *gin.Context) {
 		memory = constant.MC_DEFAULT_MEMORY
 	}
 	mcCfg := ctr.HandleMcFile(dst, name, port, memory)
-	ctr.AddServer(mcCfg)
-	ctr.SaveToDb()
+	ctr.AddServer(mcCfg, true)
 	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", ""))
 }
 

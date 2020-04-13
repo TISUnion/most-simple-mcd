@@ -102,4 +102,5 @@ type OperatePlugin struct {
 type PluginCommand struct {
 	Command string
 	Params []string
+	ParamMap map[string]string
 }

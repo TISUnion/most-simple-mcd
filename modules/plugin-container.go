@@ -61,6 +61,8 @@ func (c *PluginContainer) RegisterPlugin(p plugin_interface.Plugin) {
 		var newPl plugin_interface.Plugin
 		if !p.IsGlobal() {
 			newPl = p.NewInstance()
+		} else {
+			newPl = p
 		}
 		m.AddPlugin(newPl)
 	}

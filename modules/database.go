@@ -103,7 +103,6 @@ func SetWiteTTLFromDatabase(key string, value string, t time.Duration) {
 func newDataBase(name string) _interface.Database {
 	if badgerDb, err := badger.Open(newDataBaseOptions(name)); err != nil {
 		WriteLogToDefault(fmt.Sprintf("打开数据库失败，因为：%v", err))
-		fmt.Println(err)
 		return nil
 	} else {
 		return &DataBase{badgerDb, name}

@@ -33,7 +33,7 @@ type MinecraftContainer interface {
 	GetAllServerConf() []*json_struct.ServerConf
 
 	// 添加服务端
-	AddServer(*json_struct.ServerConf)
+	AddServer(*json_struct.ServerConf, bool)
 
 	// 处理服务端文件
 	HandleMcFile(string, string, int, int) *json_struct.ServerConf

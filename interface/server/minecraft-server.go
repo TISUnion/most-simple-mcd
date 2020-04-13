@@ -10,6 +10,9 @@ type MinecraftServer interface {
 	// 执行tell命令
 	TellCommand(string, string) error //执行tell命令
 
+	// 执行say命令
+	SayCommand(string) error //执行say命令
+
 	// 修改内存使用阈值（单位M）
 	// 为0表示不修改
 	SetMemory(int)

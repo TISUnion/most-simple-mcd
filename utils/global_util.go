@@ -38,7 +38,6 @@ func ParseMessage(originMsg []byte) *json_struct.ReciveMessage {
 	re := regexp.MustCompile(parseMessageRGX)
 	match := re.FindStringSubmatch(string(originMsg))
 	if len(match) == 4 {
-		fmt.Println(match)
 		return &json_struct.ReciveMessage{
 			Player:     match[2],
 			Time:       match[1],
@@ -62,7 +61,7 @@ func ParsePluginCommand(msg string) *json_struct.PluginCommand {
 }
 
 // 格式化数据为表格
-func FormateTable(header []string, data [][]string) string{
+func FormateTable(header []string, data [][]string) string {
 	buf := bytes.NewBufferString("")
 	table := tablewriter.NewWriter(buf)
 	table.SetHeader(header)
@@ -70,11 +69,11 @@ func FormateTable(header []string, data [][]string) string{
 		table.Append(v)
 	}
 	table.Render()
-	return buf.String()
+	return "\\n"+strings.ReplaceAll(buf.String(), "\n", "\\n")
 }
 
 // 字符串超出长度截断，加深略号
-func Ellipsis(str string, l int) string{
+func Ellipsis(str string, l int) string {
 	if len(str) > l {
 		return str[:l+1]
 	}

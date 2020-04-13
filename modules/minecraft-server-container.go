@@ -37,30 +37,46 @@ type MinecraftServerContainer struct {
 	// 操作锁
 	lock *sync.Mutex
 
-	// 个时间段的回调
-	mcCallbacks map[string]func(string)
+	// 各时间段的回调
+	mcCallbacks map[string][]func(string)
 }
 
-// TODO
-func (m *MinecraftServerContainer) RegisterAllServerCloseCallback(func(string)) {
+// 统一注册关闭回调
+func (m *MinecraftServerContainer) RegisterAllServerCloseCallback(f func(string)) {
+	m.mcCallbacks[constant.MC_CLOSE_CALLBACK] = append(m.mcCallbacks[constant.MC_CLOSE_CALLBACK], f)
+	for _, mcS := range m.minecraftServers {
+		mcS.RegisterCloseCallback(f)
+	}
+}
+
+// 统一注册开启回调
+func (m *MinecraftServerContainer) RegisterAllServerOpenCallback(f func(string)) {
+	m.mcCallbacks[constant.MC_OPEN_CALLBACK] = append(m.mcCallbacks[constant.MC_OPEN_CALLBACK], f)
+	for _, mcS := range m.minecraftServers {
+		mcS.RegisterOpenCallback(f)
+	}
+}
+
+// 统一注册保存回调
+func (m *MinecraftServerContainer) RegisterAllServerSaveCallback(f func(string)) {
+	m.mcCallbacks[constant.MC_SAVE_CALLBACK] = append(m.mcCallbacks[constant.MC_SAVE_CALLBACK], f)
+	for _, mcS := range m.minecraftServers {
+		mcS.RegisterSaveCallback(f)
+	}
+}
+
+func (m *MinecraftServerContainer) ChangeConfCallBack() {
 
 }
 
-func (m *MinecraftServerContainer) RegisterAllServerOpenCallback(func(string)) {
-	panic("implement me")
+func (m *MinecraftServerContainer) DestructCallBack() {
+
 }
-
-func (m *MinecraftServerContainer) RegisterAllServerSaveCallback(func(string)) {
-	panic("implement me")
-}
-
-func (m *MinecraftServerContainer) ChangeConfCallBack() {}
-
-func (m *MinecraftServerContainer) DestructCallBack() {}
 
 func (m *MinecraftServerContainer) InitCallBack() {
 	m.loadDbServer()
 	m.loadLocalServer()
+	m.mcCallbacks = make(map[string][]func(string))
 }
 
 func (m *MinecraftServerContainer) GetServerById(id string) (server.MinecraftServer, bool) {
@@ -168,8 +184,8 @@ func (m *MinecraftServerContainer) _getAllServerConf() []*json_struct.ServerConf
 	return result
 }
 
-// 把根据配置添加服务
-func (m *MinecraftServerContainer) AddServer(config *json_struct.ServerConf) {
+// 把根据配置添加服务端
+func (m *MinecraftServerContainer) AddServer(config *json_struct.ServerConf, isSave bool) {
 	if config.Memory <= 0 {
 		config.Memory = constant.MC_DEFAULT_MEMORY
 	}
@@ -180,10 +196,26 @@ func (m *MinecraftServerContainer) AddServer(config *json_struct.ServerConf) {
 	mcServer := NewMinecraftServer(config)
 
 	entryId := mcServer.GetServerEntryId()
+
 	// 加入map
 	m.minecraftServers[entryId] = mcServer
 	m.stopServers[entryId] = mcServer
 
+	// 注册回调
+	for _, fCb := range m.mcCallbacks[constant.MC_OPEN_CALLBACK] {
+		mcServer.RegisterOpenCallback(fCb)
+	}
+
+	for _, fCb := range m.mcCallbacks[constant.MC_CLOSE_CALLBACK] {
+		mcServer.RegisterCloseCallback(fCb)
+	}
+
+	for _, fCb := range m.mcCallbacks[constant.MC_SAVE_CALLBACK] {
+		mcServer.RegisterSaveCallback(fCb)
+	}
+	if isSave {
+		m._saveToDb()
+	}
 }
 
 // 获取所有服务端对象实例
@@ -232,7 +264,7 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 	jarspath, _ := filepath.Glob(fmt.Sprintf("%s/*.jar", path))
 	// 读取当前目录下的所有jar文件
 	for _, v := range jarspath {
-		m.AddServer(m.HandleMcFile(v, "", 0, 0))
+		m.AddServer(m.HandleMcFile(v, "", 0, 0), false)
 	}
 	m._saveToDb()
 }
@@ -243,7 +275,7 @@ func (m *MinecraftServerContainer) loadDbServer() {
 	for _, v := range serversConf {
 		// 只有没有被删除的服务端才会加入容器中
 		if utils.ExistsResource(v.RunPath) {
-			m.AddServer(v)
+			m.AddServer(v, false)
 		}
 	}
 }

@@ -3,6 +3,7 @@
 go.sum
 logs/*
 minecraft-servers/*
+minecraft-mirrors/*
 minecraft-servers-back/*
 minecraft-contains/*
 databases/*
