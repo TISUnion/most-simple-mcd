@@ -75,7 +75,7 @@ func FormateTable(header []string, data [][]string) string {
 // 字符串超出长度截断，加深略号
 func Ellipsis(str string, l int) string {
 	if len(str) > l {
-		return str[:l+1]
+		return str[:l+1]+"..."
 	}
 	return str
 }

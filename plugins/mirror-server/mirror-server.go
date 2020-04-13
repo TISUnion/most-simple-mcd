@@ -27,7 +27,7 @@ const (
 
 // self
 const (
-	maxLen        = 8
+	maxLen        = 5
 	MC_MIRROR_DIR = "minecraft-mirrors"
 )
 
@@ -68,6 +68,9 @@ func (p *MirrorServerPlugin) InitCallBack() {
 	// 注册保存回调
 	p.mcContainer = modules.GetMinecraftServerContainerInstance()
 	p.mcContainer.RegisterAllServerSaveCallback(p.saveCallback)
+
+	// 获取已有镜像
+	p.getMirrors()
 }
 
 func (p *MirrorServerPlugin) GetId() string {
@@ -105,7 +108,7 @@ func (p *MirrorServerPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 		return
 	}
 	if len(com.Params) == 0 {
-		//_ = mcServer.TellCommand(message.Player, helpDescription)
+		_ = mcServer.TellCommand(message.Player, helpDescription)
 	} else {
 		p.paramsHandle(message.Player, com, mcServer)
 	}
@@ -119,9 +122,7 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 			mcConf := mcMs.GetServerConf()
 			data = append(data, []string{utils.Ellipsis(mcConf.EntryId, maxLen), mcConf.Name, strconv.Itoa(mcConf.Memory), mcConf.Version, stateMap[mcConf.State]})
 		}
-		//_ = mcServer.TellCommand(player, utils.FormateTable(listHead, data))
-		fmt.Println(utils.FormateTable(listHead, data))
-		_ = mcServer.SayCommand(utils.FormateTable(listHead, data))
+		_ = mcServer.TellCommand(player, utils.FormateTable(listHead, data))
 	case "save", "-s":
 		if len(pc.Params) < 2 {
 			return
@@ -143,9 +144,9 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 			Memory:   constant.MC_DEFAULT_MEMORY,
 		}
 		p.mcContainer.AddServer(mirrorSrvConf, true)
+		p.getMirrors()
 	default:
-		//_ = mcServer.TellCommand(player, helpDescription)
-		_ = mcServer.SayCommand(helpDescription)
+		_ = mcServer.TellCommand(player, helpDescription)
 	}
 }
 
@@ -182,6 +183,15 @@ func (p *MirrorServerPlugin) buildMirror(conf *json_struct.ServerConf, id string
 		return "", false
 	}
 	return mirrorRunPath, true
+}
+
+func (p *MirrorServerPlugin) getMirrors()  {
+	allMcSrv :=  p.mcContainer.GetAllServerObj()
+	for _, mcMS := range allMcSrv{
+		if mcMS.GetServerConf().IsMirror {
+			p.mirrors = append(p.mirrors, mcMS)
+		}
+	}
 }
 
 // -------------非全局插件需实现方法--------------
