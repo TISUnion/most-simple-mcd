@@ -15,7 +15,6 @@ test.*
 conf/*
 main
 *.exe
-main.go
 *.jar
 compress-file
 pack-data.go
