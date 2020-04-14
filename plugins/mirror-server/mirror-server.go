@@ -22,7 +22,7 @@ const (
 	pluginDescription = "备份存档，运行备份存档镜像"
 	pluginCommand     = "!!mirror"
 	isGlobal          = true
-	helpDescription   = "\\n使用方式：!!mirror list|-l 查看所有镜像服务器\\n!!mirror save|-s <自定义备份镜像名称> 保存一份当前服务器的镜像\\n!!mirror start|-s <备份镜像id> 开启镜像服务器\\n!!mirror stop|-p <备份镜像id> 关闭镜像服务器"
+	helpDescription   = "\\n使用方式：!!mirror list|-l 查看所有镜像服务器\\n!!mirror save|-s <自定义备份镜像名称> 保存一份当前服务器的镜像\\n!!mirror start|-st <备份镜像id> 开启镜像服务器\\n!!mirror stop|-sp <备份镜像id> 关闭镜像服务器"
 )
 
 // self
@@ -37,8 +37,8 @@ var (
 )
 
 type MirrorServerPlugin struct {
-	mcContainer  container.MinecraftContainer
-	mirrors      []server.MinecraftServer
+	mcContainer container.MinecraftContainer
+	mirrors     []server.MinecraftServer
 	// 服务端是否保存状态储存 false: 不储存 true：期望储存
 	mcSaveState map[string]bool
 	// 通知保存完成管道
@@ -103,8 +103,8 @@ func (p *MirrorServerPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 	if com.Command != pluginCommand {
 		return
 	}
-	mcServer, ok := modules.GetMinecraftServerContainerInstance().GetServerById(message.ServerId)
-	if !ok {
+	mcServer, err := modules.GetMinecraftServerContainerInstance().GetServerById(message.ServerId)
+	if err != nil {
 		return
 	}
 	if len(com.Params) == 0 {
@@ -125,8 +125,10 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 		_ = mcServer.TellCommand(player, utils.FormateTable(listHead, data))
 	case "save", "-s":
 		if len(pc.Params) < 2 {
+			_ = mcServer.TellCommand(player, "缺少备份名称！")
 			return
 		}
+		_ = mcServer.TellCommand(player, "开始备份......")
 		name := pc.Params[1]
 		mcServerConf := mcServer.GetServerConf()
 		p.saveServer(mcServerConf.EntryId, mcServer)
@@ -145,6 +147,37 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 		}
 		p.mcContainer.AddServer(mirrorSrvConf, true)
 		p.getMirrors()
+		_ = mcServer.TellCommand(player, name+" 备份完成！")
+	case "start", "-st":
+		if len(pc.Params) < 2 {
+			_ = mcServer.TellCommand(player, "缺少启动服务端id！")
+			return
+		}
+		id := pc.Params[1]
+		if err := p.mcContainer.StartById(id); err != nil {
+			if err == modules.REPEAT_ID {
+				_ = mcServer.TellCommand(player, "请输入完整的ID！")
+			} else {
+				_ = mcServer.TellCommand(player, "ID不存在！")
+			}
+			return
+		}
+		_ = mcServer.TellCommand(player, "启动成功，可通过-l查看服务端是否完成启动")
+	case "stop", "-sp":
+		if len(pc.Params) < 2 {
+			_ = mcServer.TellCommand(player, "缺少启动服务端id！")
+			return
+		}
+		id := pc.Params[1]
+		if err := p.mcContainer.StopById(id); err != nil {
+			if err == modules.REPEAT_ID {
+				_ = mcServer.TellCommand(player, "请输入完整的ID！")
+			} else {
+				_ = mcServer.TellCommand(player, "ID不存在！")
+			}
+			return
+		}
+		_ = mcServer.TellCommand(player, "关闭成功，可通过-l查看服务端是否完成关闭")
 	default:
 		_ = mcServer.TellCommand(player, helpDescription)
 	}
@@ -185,9 +218,9 @@ func (p *MirrorServerPlugin) buildMirror(conf *json_struct.ServerConf, id string
 	return mirrorRunPath, true
 }
 
-func (p *MirrorServerPlugin) getMirrors()  {
-	allMcSrv :=  p.mcContainer.GetAllServerObj()
-	for _, mcMS := range allMcSrv{
+func (p *MirrorServerPlugin) getMirrors() {
+	allMcSrv := p.mcContainer.GetAllServerObj()
+	for _, mcMS := range allMcSrv {
 		if mcMS.GetServerConf().IsMirror {
 			p.mirrors = append(p.mirrors, mcMS)
 		}

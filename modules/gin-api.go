@@ -241,8 +241,8 @@ func getServerState(c *gin.Context) {
 		return
 	}
 	ctr := GetMinecraftServerContainerInstance()
-	serv, ok := ctr.GetServerById(serverId)
-	if !ok {
+	serv, err := ctr.GetServerById(serverId)
+	if err != nil {
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}
@@ -258,8 +258,8 @@ func serverDetail(c *gin.Context) {
 		return
 	}
 	ctr := GetMinecraftServerContainerInstance()
-	serv, ok := ctr.GetServerById(serverId)
-	if !ok {
+	serv, err := ctr.GetServerById(serverId)
+	if err != nil {
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}
@@ -279,8 +279,8 @@ func updateServerInfo(c *gin.Context) {
 		return
 	}
 	ctr := GetMinecraftServerContainerInstance()
-	serv, ok := ctr.GetServerById(reqInfo.EntryId)
-	if !ok {
+	serv, err := ctr.GetServerById(reqInfo.EntryId)
+	if err != nil {
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}
@@ -335,8 +335,8 @@ func getLog(c *gin.Context) {
 	switch type_ {
 	case constant.LOG_TYPE_SERVER:
 		ctr := GetMinecraftServerContainerInstance()
-		serv, ok := ctr.GetServerById(id)
-		if !ok {
+		serv, err := ctr.GetServerById(id)
+		if err != nil {
 			c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 			return
 		}
@@ -407,8 +407,8 @@ func operatePlugin(c *gin.Context) {
 	}
 	opType := opp.OperateType
 	ctr := GetMinecraftServerContainerInstance()
-	serv, ok := ctr.GetServerById(opp.ServerId)
-	if !ok {
+	serv, err := ctr.GetServerById(opp.ServerId)
+	if err != nil {
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}

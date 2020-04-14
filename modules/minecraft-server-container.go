@@ -19,8 +19,9 @@ import (
 var minecraftServerContainer *MinecraftServerContainer
 
 var (
-	NO_SERVER = errors.New("id没有对应的服务器")
-	REPEAT_ID = errors.New("id段冲突")
+	NO_SERVER  = errors.New("id没有对应的服务器")
+	REPEAT_ID  = errors.New("id段冲突")
+	NOT_MIRROR = errors.New("不是镜像服务端")
 )
 
 type MinecraftServerContainer struct {
@@ -81,24 +82,24 @@ func (m *MinecraftServerContainer) InitCallBack() {
 	m.mcCallbacks = make(map[string][]func(string))
 }
 
-func (m *MinecraftServerContainer) GetServerById(id string) (server.MinecraftServer, bool) {
+func (m *MinecraftServerContainer) GetServerById(id string) (server.MinecraftServer, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	return m._getServerById(id)
 }
 
-func (m *MinecraftServerContainer) _getServerById(id string) (server.MinecraftServer, bool) {
+func (m *MinecraftServerContainer) _getServerById(id string) (server.MinecraftServer, error) {
 	if len(id) < constant.UUID_LENGTH {
 		abId, err := m._getServerLikeId(id)
 		if err != nil {
-			return nil, false
+			return nil, err
 		}
 		id = abId
 	}
 	if minecraftServer, ok := m.minecraftServers[id]; ok {
-		return minecraftServer, ok
+		return minecraftServer, nil
 	}
-	return nil, false
+	return nil, NO_SERVER
 }
 
 // 非完全匹配id
@@ -116,21 +117,30 @@ func (m *MinecraftServerContainer) _getServerLikeId(id string) (string, error) {
 	return aRes[0], nil
 }
 
-func (m *MinecraftServerContainer) GetMirrorServerById(id string) (server.MinecraftServer, bool) {
+func (m *MinecraftServerContainer) GetMirrorServerById(id string) (server.MinecraftServer, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	return m._getServerById(id)
+	mcS, err := m._getServerById(id)
+	if err != nil {
+		return nil, err
+	}
+	if mcS.GetServerConf().IsMirror {
+		return mcS, nil
+	} else {
+		return nil, NOT_MIRROR
+	}
+
 }
 
 // 根据id启动服务端
 func (m *MinecraftServerContainer) StartById(id string) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	minecraftServer, ok := m._getServerById(id)
-	if !ok {
-		return NO_SERVER
+	minecraftServer, err := m._getServerById(id)
+	if err != nil {
+		return err
 	}
-	err := minecraftServer.Start()
+	err = minecraftServer.Start()
 	if err != nil {
 		return err
 	}
@@ -162,11 +172,11 @@ func (m *MinecraftServerContainer) StartAll() error {
 func (m *MinecraftServerContainer) StopById(id string) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	minecraftServer, ok := m._getServerById(id)
-	if !ok {
-		return NO_SERVER
+	minecraftServer, err := m._getServerById(id)
+	if err != nil {
+		return err
 	}
-	err := minecraftServer.Stop()
+	err = minecraftServer.Stop()
 	if err != nil {
 		return err
 	}
@@ -179,11 +189,11 @@ func (m *MinecraftServerContainer) StopById(id string) error {
 func (m *MinecraftServerContainer) RestartById(id string) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	minecraftServer, ok := m._getServerById(id)
-	if !ok {
-		return NO_SERVER
+	minecraftServer, err := m._getServerById(id)
+	if err != nil {
+		return err
 	}
-	err := minecraftServer.Restart()
+	err = minecraftServer.Restart()
 	if err != nil {
 		return err
 	}

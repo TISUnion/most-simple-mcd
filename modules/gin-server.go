@@ -79,8 +79,8 @@ func (g *GinServer) appendResourceWsToPool(ctx context.Context, serverId string,
 	g.lock.Lock()
 	defer g.lock.Unlock()
 	mcContainer := GetMinecraftServerContainerInstance()
-	mcServ, ok := mcContainer.GetServerById(serverId)
-	if !ok {
+	mcServ, err := mcContainer.GetServerById(serverId)
+	if err != nil {
 		ws.Close()
 		return
 	}
@@ -140,8 +140,8 @@ func (g *GinServer) appendStdWsToPool(serverId string, ws *websocket.Conn) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 	mcContainer := GetMinecraftServerContainerInstance()
-	mcServ, ok := mcContainer.GetServerById(serverId)
-	if !ok {
+	mcServ, err := mcContainer.GetServerById(serverId)
+	if err != nil {
 		ws.Close()
 		return
 	}
@@ -188,8 +188,8 @@ func (g *GinServer) listenStdinFromWs(serverId string, ws *websocket.Conn) {
 
 func RunOneCommand(serverId, command string, commandType int) bool {
 	mcContainer := GetMinecraftServerContainerInstance()
-	mcServ, ok := mcContainer.GetServerById(serverId)
-	if !ok {
+	mcServ, err := mcContainer.GetServerById(serverId)
+	if err != nil {
 		return false
 	}
 	// TODO 分发给各插件

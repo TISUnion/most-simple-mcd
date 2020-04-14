@@ -12,10 +12,10 @@ type MinecraftContainer interface {
 	// 回调
 	_interface.CallBack
 	// 根据id获取服务端实例
-	GetServerById(string) (server.MinecraftServer, bool)
+	GetServerById(string) (server.MinecraftServer, error)
 
 	// 根据id获取镜像服务端实例 TODO 镜像插件
-	GetMirrorServerById(string) (server.MinecraftServer, bool)
+	GetMirrorServerById(string) (server.MinecraftServer, error)
 
 	// 根据id开启服务端
 	StartById(string) error
