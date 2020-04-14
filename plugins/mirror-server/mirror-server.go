@@ -154,30 +154,34 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 			return
 		}
 		id := pc.Params[1]
-		if err := p.mcContainer.StartById(id); err != nil {
+		if mirrorSvr, err := p.mcContainer.GetMirrorServerById(id); err != nil {
 			if err == modules.REPEAT_ID {
 				_ = mcServer.TellCommand(player, "请输入完整的ID！")
 			} else {
 				_ = mcServer.TellCommand(player, "ID不存在！")
 			}
 			return
+		} else {
+			p.mcContainer.StartById(mirrorSvr.GetServerEntryId())
+			_ = mcServer.TellCommand(player, "启动成功，可通过-l查看服务端是否完成启动")
 		}
-		_ = mcServer.TellCommand(player, "启动成功，可通过-l查看服务端是否完成启动")
 	case "stop", "-sp":
 		if len(pc.Params) < 2 {
 			_ = mcServer.TellCommand(player, "缺少启动服务端id！")
 			return
 		}
 		id := pc.Params[1]
-		if err := p.mcContainer.StopById(id); err != nil {
+		if mirrorSvr, err := p.mcContainer.GetMirrorServerById(id); err != nil {
 			if err == modules.REPEAT_ID {
 				_ = mcServer.TellCommand(player, "请输入完整的ID！")
 			} else {
 				_ = mcServer.TellCommand(player, "ID不存在！")
 			}
 			return
+		} else {
+			p.mcContainer.StopById(mirrorSvr.GetServerEntryId())
+			_ = mcServer.TellCommand(player, "关闭成功，可通过-l查看服务端是否完成关闭")
 		}
-		_ = mcServer.TellCommand(player, "关闭成功，可通过-l查看服务端是否完成关闭")
 	default:
 		_ = mcServer.TellCommand(player, helpDescription)
 	}
