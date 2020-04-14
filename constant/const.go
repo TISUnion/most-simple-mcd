@@ -77,6 +77,7 @@ const (
 	MC_SERVER_DB_KEY  = "minecraft:server:configs"
 	MC_DEFAULT_PORT   = 25565
 	MC_DEFAULT_MEMORY = 1024
+	UUID_LENGTH       = 36
 
 	MC_STATE_STOPING  = -2
 	MC_STATE_STARTIND = -1

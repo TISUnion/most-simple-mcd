@@ -12,6 +12,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -19,6 +20,7 @@ var minecraftServerContainer *MinecraftServerContainer
 
 var (
 	NO_SERVER = errors.New("id没有对应的服务器")
+	REPEAT_ID = errors.New("id段冲突")
 )
 
 type MinecraftServerContainer struct {
@@ -86,10 +88,32 @@ func (m *MinecraftServerContainer) GetServerById(id string) (server.MinecraftSer
 }
 
 func (m *MinecraftServerContainer) _getServerById(id string) (server.MinecraftServer, bool) {
+	if len(id) < constant.UUID_LENGTH {
+		abId, err := m._getServerLikeId(id)
+		if err != nil {
+			return nil, false
+		}
+		id = abId
+	}
 	if minecraftServer, ok := m.minecraftServers[id]; ok {
 		return minecraftServer, ok
 	}
 	return nil, false
+}
+
+// 非完全匹配id
+func (m *MinecraftServerContainer) _getServerLikeId(id string) (string, error) {
+	aCfg := m._getAllServerConf()
+	aRes := make([]string, 1)
+	for _, sCfg := range aCfg {
+		if strings.Contains(sCfg.EntryId, id) {
+			aRes = append(aRes, sCfg.EntryId)
+		}
+	}
+	if len(aRes) > 1 {
+		return "", REPEAT_ID
+	}
+	return aRes[0], nil
 }
 
 func (m *MinecraftServerContainer) GetMirrorServerById(id string) (server.MinecraftServer, bool) {
