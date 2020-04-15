@@ -14,7 +14,7 @@ const (
 	pluginDescription = "提供最基础的命令"
 	pluginCommand     = "!!server"
 	isGlobal          = false
-	helpDescription   = "\\n!!server help|-l <命令> 帮助信息加具体命令查看命令帮助，不加显示所有命令列表\\n!!server info -if 查看当前服务端信息\\"
+	helpDescription   = "\\n!!server help|-l <命令> 帮助信息加具体命令查看命令帮助，不加显示所有命令列表\\n!!server info|-if 查看当前服务端信息\\n!!server infos|-ifs 查看所有服务端信息\\n!!server plugins|-ps 查看插件列表"
 )
 
 type BasicPlugin struct {
