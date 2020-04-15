@@ -85,6 +85,10 @@ func (p *MirrorServerPlugin) GetDescription() string {
 	return pluginDescription
 }
 
+func (p *MirrorServerPlugin) GetHelpDescription() string {
+	return helpDescription
+}
+
 func (p *MirrorServerPlugin) GetCommandName() string {
 	return pluginCommand
 }

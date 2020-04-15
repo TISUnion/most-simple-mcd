@@ -15,8 +15,11 @@ type Plugin interface {
 	// 获取插件名称
 	GetName() string
 
-	// 获取说明
+	// 获取简介
 	GetDescription() string
+
+	// 获取使用说明
+	GetHelpDescription() string
 
 	// 获取命令
 	GetCommandName() string

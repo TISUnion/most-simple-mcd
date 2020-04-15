@@ -70,11 +70,12 @@ type ReciveMessage struct {
 
 // 插件信息
 type PluginInfo struct {
-	Name        string `json:"name"`
-	Id          string `json:"id"`
-	IsBan       bool   `json:"is_ban"`
-	CommandName string `json:"command_name"`
-	Description string `json:"description"`
+	Name            string `json:"name"`
+	Id              string `json:"id"`
+	IsBan           bool   `json:"is_ban"`
+	CommandName     string `json:"command_name"`
+	Description     string `json:"description"`
+	HelpDescription string `json:"help_description"`
 }
 
 // 服务器详情
@@ -100,7 +101,7 @@ type OperatePlugin struct {
 
 // 插件命令行解析对象
 type PluginCommand struct {
-	Command string
-	Params []string
+	Command  string
+	Params   []string
 	ParamMap map[string]string
 }

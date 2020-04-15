@@ -27,6 +27,10 @@ func (r *RereadChickenPlugin) GetDescription() string {
 	return pluginDescription
 }
 
+func (p *RereadChickenPlugin) GetHelpDescription() string {
+	return helpDescription
+}
+
 func (r *RereadChickenPlugin) GetCommandName() string {
 	return pluginCommand
 }
