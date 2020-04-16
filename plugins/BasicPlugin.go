@@ -142,8 +142,28 @@ func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand)
 			p.mcServer.TellCommand(player, "重启失败")
 		}
 	case "help", "-l":
+		aPlcfg := p.mcServer.GetPluginsInfo()
+		var (
+			header []string
+			data   [][]string
+		)
 		if len(pc.Params) < 2 {
+			header = []string{"命令", "简介"}
+			data = make([][]string, 0)
+			for _, plcfg := range aPlcfg {
+				data = append(data, []string{plcfg.CommandName, plcfg.Description})
+			}
 
+		} else {
+			cmd := pc.Params[1]
+			header = []string{"命令", "简介", "用法"}
+			data = make([][]string, 0)
+			for _, plcfg := range aPlcfg {
+				if plcfg.CommandName == cmd {
+					data = append(data, []string{plcfg.CommandName, plcfg.Description, plcfg.HelpDescription})
+				}
+			}
 		}
+		p.mcServer.TellCommand(player, utils.FormateTable(header, data))
 	}
 }
