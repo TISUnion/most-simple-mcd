@@ -87,17 +87,18 @@ func (m *MinecraftServer) UnbanPlugin(pluginId string) {
 	m.pluginManager.UnbanPlugin(pluginId)
 }
 
-// TODO 添加命令帮助信息
+// 获取插件信息
 func (m *MinecraftServer) GetPluginsInfo() []*json_struct.PluginInfo {
 	res := make([]*json_struct.PluginInfo, 0)
 	ablePlugins := m.pluginManager.GetAblePlugins()
 	for _, p := range ablePlugins {
 		res = append(res, &json_struct.PluginInfo{
-			Name:        p.GetName(),
-			Id:          p.GetId(),
-			IsBan:       false,
-			CommandName: p.GetCommandName(),
-			Description: p.GetDescription(),
+			Name:            p.GetName(),
+			Id:              p.GetId(),
+			IsBan:           false,
+			CommandName:     p.GetCommandName(),
+			Description:     p.GetDescription(),
+			HelpDescription: p.GetHelpDescription(),
 		})
 	}
 	disablePlugins := m.pluginManager.GetDisablePlugins()
@@ -108,6 +109,7 @@ func (m *MinecraftServer) GetPluginsInfo() []*json_struct.PluginInfo {
 			IsBan:       true,
 			CommandName: p.GetCommandName(),
 			Description: p.GetDescription(),
+			HelpDescription: p.GetHelpDescription(),
 		})
 	}
 	return res
