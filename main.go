@@ -58,5 +58,7 @@ func main() {
 	}
 	fmt.Println("启动成功！")
 	fmt.Println("管理后台url: " + webManageUrl)
+	fmt.Println("初始账号: " + constant.DEFAULT_ACCOUNT)
+	fmt.Println("初始密码: " + constant.DEFAULT_PASSWORD)
 	select {}
 }
