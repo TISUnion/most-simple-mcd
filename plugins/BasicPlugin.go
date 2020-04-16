@@ -17,7 +17,7 @@ const (
 	pluginDescription = "提供最基础的命令"
 	pluginCommand     = "!!server"
 	isGlobal          = false
-	helpDescription   = "\\n!!server help|-l <命令> 帮助信息加具体命令查看命令帮助，不加显示所有命令列表\\n!!server info|-if 查看当前服务端信息\\n!!server infos|-ifs 查看所有服务端信息\\n!!server plugins|-ps 查看插件列表\\n!!server stop|-sp 停止当前服务端\\n!!server restart|-rst 重启当前服务端"
+	helpDescription   = "\\n!!server help|-l <命令> 帮助信息加具体命令查看命令帮助，不加显示所有命令列表\\n!!server info|-if 查看当前服务端信息\\n!!server infos|-ifs 查看所有服务端信息\\n!!server plugins|-ps 查看插件列表\\n!!server stop|-sp 停止当前服务端\\n!!server restart|-rst 重启当前服务端\\n!!server ban|-bn <命令> 禁止使用命令\\n!!server unban|-ubn <命令> 解除禁止使用命令"
 )
 
 // self
@@ -165,5 +165,7 @@ func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand)
 			}
 		}
 		p.mcServer.TellCommand(player, utils.FormateTable(header, data))
+	case "ban", "-bn":
+	case "unban", "-ubn":
 	}
 }
