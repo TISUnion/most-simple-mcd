@@ -31,5 +31,3 @@ func main() {
 	_ = modules.GetGinServerInstance().Start()
 	select {}
 }
-
-type myHandler struct{}
