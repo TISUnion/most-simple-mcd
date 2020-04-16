@@ -2,18 +2,20 @@ package modules
 
 import (
 	"flag"
-	"sync"
 )
 
-var onceLock = &sync.Once{}
+var (
+	terminalConfs map[string]*string
+)
 
-func InitFlag() (terminalConfs map[string]*string) {
-	onceLock.Do(func() {
-		terminalConfs = make(map[string]*string)
-		for name, confParam := range DefaultConfParam {
-			terminalConfs[name] = flag.String(name, "", confParam.Description)
-		}
-		flag.Parse()
-	})
-	return
+func InitFlag() map[string]*string {
+	if terminalConfs != nil {
+		return terminalConfs
+	}
+	terminalConfs = make(map[string]*string)
+	for name, confParam := range DefaultConfParam {
+		terminalConfs[name] = flag.String(name, "", confParam.Description)
+	}
+	flag.Parse()
+	return terminalConfs
 }

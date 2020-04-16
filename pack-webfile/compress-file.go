@@ -6,7 +6,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/TISUnion/most-simple-mcd/utils"
 	"github.com/klauspost/compress/flate"
 	"github.com/mholt/archiver/v3"
 	"io/ioutil"
@@ -53,7 +52,6 @@ func main() {
 		compressFileDataStr = buff.String()
 		compressFileDataStr = compressFileDataStr[:len(compressFileDataStr)-1]
 		compressFileDataStr = fmt.Sprintf("{%s}", compressFileDataStr)
-		//fmt.Println(compressFileDataStr)
 		if codeData, err := ioutil.ReadFile(codeFileName); err != nil {
 			panic(err)
 		} else {
@@ -78,10 +76,7 @@ func main() {
 }
 
 func initCodeFile(path string) {
-	file, _ := utils.CreateFile(path)
-	var codeFileContent []byte
-	n, _ := file.Read(codeFileContent)
-	if n == 0 {
-		file.Write([]byte(TMPL))
-	}
+	os.Remove(path)
+	file, _ := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0666);
+	file.Write([]byte(TMPL))
 }

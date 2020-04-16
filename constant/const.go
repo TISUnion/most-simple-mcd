@@ -103,6 +103,7 @@ const (
 
 // web后台常量
 const (
+	LOACALHOST_URL              = "http://localhost"
 	COMPRESS_FILE_NAME          = "webfile.zip"
 	Web_FILE_DIR_NAME           = "web-static-file"
 	DEFAULT_ACCOUNT_DB_KEY      = "web:admin:account"
@@ -123,14 +124,19 @@ const (
 
 // 各模块常量
 const (
-	TIME_FORMAT         = "2006-01-02 15:04:05"
-	PLUGIN_COMMAND_TYPE = 1 //插件运行命令
-	SERVER_COMMAND_TYPE = 2 //服务端运行命令
-	ALL_COMMAND_TYPE    = 3 //插件、服务端都运行
-	LOG_DIR             = "logs"
-	GIN_LOG_NAME        = "gin-server"
-	UPLOAD_FILE_NAME    = "file"
-	UPLOAD_PORT_TEXT    = "port"
-	UPLOAD_MEMORY_TEXT  = "memory"
-	UPLOAD_NAME_TEXT    = "name"
+	TIME_FORMAT                     = "2006-01-02 15:04:05"
+	DEFAULT_MANAGE_HTTP_SERVER_PORT = 80
+	PLUGIN_COMMAND_TYPE             = 1 //插件运行命令
+	SERVER_COMMAND_TYPE             = 2 //服务端运行命令
+	ALL_COMMAND_TYPE                = 3 //插件、服务端都运行
+	LOG_DIR                         = "logs"
+	GIN_LOG_NAME                    = "gin-server"
+	UPLOAD_FILE_NAME                = "file"
+	UPLOAD_PORT_TEXT                = "port"
+	UPLOAD_MEMORY_TEXT              = "memory"
+	UPLOAD_NAME_TEXT                = "name"
+
+	OS_WINDOWS = "windows"
+	OS_LINUX   = "linux"
+	OS_DARWIN  = "darwin"
 )

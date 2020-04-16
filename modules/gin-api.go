@@ -26,6 +26,8 @@ func RegisterRouter() {
 	router.POST("/user/login", userLogin)
 	// 用户注销
 	router.POST("/user/logout", userLogout)
+	// 静态后台管理前端文件
+	router.Use(static.Serve("/", static.LocalFile(filepath.Join(GetConfVal(constant.WORKSPACE), constant.Web_FILE_DIR_NAME), true)))
 	// 静态日志文件
 	router.Use(static.Serve("/static/file/logs", static.LocalFile(filepath.Join(GetConfVal(constant.WORKSPACE), constant.LOG_DIR), true)))
 

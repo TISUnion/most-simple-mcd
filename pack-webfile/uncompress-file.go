@@ -23,6 +23,8 @@ func UnCompress() error {
 	fl.Close()
 
 	uncompressFilepath := filepath.Join(currentPath, constant.Web_FILE_DIR_NAME)
+	// 删除旧的
+	os.RemoveAll(uncompressFilepath)
 	err = utils.UnCompressDir(compressFilepath, uncompressFilepath)
 	if err != nil {
 		utils.PanicError("无法解压管理后台文件", err)

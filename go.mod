@@ -10,6 +10,7 @@ require (
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/gorilla/websocket v1.4.1
@@ -24,6 +25,7 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v2.20.1+incompatible
 	github.com/smartystreets/goconvey v1.6.4 // indirect
+	golang.org/x/image v0.0.0-20200119044424-58c23975cae1 // indirect
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect
 	golang.org/x/sys v0.0.0-20200212091648-12a6c2dcc1e4 // indirect
 	golang.org/x/text v0.3.2

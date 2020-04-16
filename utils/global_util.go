@@ -5,11 +5,14 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/TISUnion/most-simple-mcd/constant"
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"github.com/olekukonko/tablewriter"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"net"
+	"os/exec"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -69,15 +72,27 @@ func FormateTable(header []string, data [][]string) string {
 		table.Append(v)
 	}
 	table.Render()
-	return "\\n"+strings.ReplaceAll(buf.String(), "\n", "\\n")
+	return "\\n" + strings.ReplaceAll(buf.String(), "\n", "\\n")
 }
 
 // 字符串超出长度截断，加深略号
 func Ellipsis(str string, l int) string {
 	if len(str) > l {
-		return str[:l+1]+"..."
+		return str[:l+1] + "..."
 	}
 	return str
+}
+
+// 打开浏览器
+func OpenBrowser(url string) {
+	switch runtime.GOOS {
+	case constant.OS_DARWIN:
+		exec.Command(`open`, url).Start()
+	case constant.OS_LINUX:
+		exec.Command(`xdg-open`, url).Start()
+	case constant.OS_WINDOWS:
+		exec.Command(`cmd`, `/c`, `start`, url).Start()
+	}
 }
 
 // 去除数组内相同的元素（set化）
