@@ -90,9 +90,7 @@ func (l *Log) writeToFile() {
 			} else {
 				data = l.getLogMsg(msg.Level, msg.Message)
 			}
-			if _, err := l.FileObj.WriteString(data); err != nil {
-				utils.PanicError(constant.WRITE_LOG_FAILED, err)
-			}
+			_, _ = l.FileObj.WriteString(data)
 			l.lock.Unlock()
 		}
 	}
