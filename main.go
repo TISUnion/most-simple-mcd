@@ -5,17 +5,30 @@ import (
 	_ "fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/modules"
+	pack_webfile "github.com/TISUnion/most-simple-mcd/pack-webfile"
+	"github.com/TISUnion/most-simple-mcd/plugins"
 	"github.com/TISUnion/most-simple-mcd/utils"
+	"gopkg.in/ini.v1"
 	"runtime"
 )
 
+// 初始化
+func ModuleInit() {
+	go modules.ExitHandle()
+	ini.PrettyFormat = false
+	plugins.RegisterPlugin()
+	// 解压前端静态文件
+	_ = pack_webfile.UnCompress()
+	modules.GetMinecraftServerContainerInstance()
+	_ = modules.GetGinServerInstance().Start()
+}
 
 func main() {
 	// 打印banner
 	fmt.Println(modules.DrawBanner("M C D"))
 
 	// 启动各服务
-	modules.ModuleInit()
+	ModuleInit()
 
 	// 打印信息
 	webManageUrl := modules.GetWebManageUrl()

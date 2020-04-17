@@ -76,8 +76,12 @@ func RegisterRouter() {
 		// 删除临时文件
 		v1.POST("/tmp/files", delTmpFlie)
 		// 获取上传服务端文件，并注入到容器中
-		v1.POST("upload/server", addUpToContainer)
+		v1.POST("/upload/server", addUpToContainer)
 
+		// 关闭mcd
+		v1.POST("/close", func(c *gin.Context) {
+			SendExitSign()
+		})
 	}
 	// websocket实时监听服务端耗费资源
 	router.GET("/server/resources/listen", serversResourcesListen)

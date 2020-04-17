@@ -3,9 +3,6 @@ package modules
 import (
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
-	pack_webfile "github.com/TISUnion/most-simple-mcd/pack-webfile"
-	"github.com/TISUnion/most-simple-mcd/plugins"
-	"gopkg.in/ini.v1"
 	"os"
 	"os/signal"
 	"strconv"
@@ -15,7 +12,7 @@ import (
 var ExitChan chan os.Signal
 
 // 优雅的处理退出
-func exitHandle() {
+func ExitHandle() {
 	// 退出信号管道
 	ExitChan = make(chan os.Signal)
 	signal.Notify(ExitChan, os.Interrupt, os.Kill, syscall.SIGQUIT, syscall.SIGTERM)
@@ -37,15 +34,4 @@ func GetWebManageUrl() string {
 		url = fmt.Sprintf("%s:%s", url, portStr)
 	}
 	return url
-}
-
-// 初始化
-func ModuleInit() {
-	go exitHandle()
-	ini.PrettyFormat = false
-	plugins.RegisterPlugin()
-	// 解压前端静态文件
-	_ = pack_webfile.UnCompress()
-	GetMinecraftServerContainerInstance()
-	_ = GetGinServerInstance().Start()
 }
