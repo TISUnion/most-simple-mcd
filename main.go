@@ -49,11 +49,10 @@ func main() {
 	moduleInit()
 	modules.GetMinecraftServerContainerInstance()
 	_ = modules.GetGinServerInstance().Start()
+	webManageUrl := getWebManageUrl()
 
 	// 如果是windows就自动打开浏览器
-	//if runtime.GOOS == constant.OS_WINDOWS {
-	webManageUrl := getWebManageUrl()
-	if runtime.GOOS == constant.OS_DARWIN {
+	if runtime.GOOS == constant.OS_WINDOWS {
 		utils.OpenBrowser(webManageUrl)
 	}
 	fmt.Println("启动成功！")

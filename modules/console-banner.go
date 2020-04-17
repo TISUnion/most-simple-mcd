@@ -56,7 +56,7 @@ func DrawBanner(text string) string {
 		return ""
 	}
 	//灰度替换字符
-	base := "TiS"
+	base := "$TIS"
 	image1, _ := png.Decode(pngBuf)
 	bounds := image1.Bounds() //获取图像的边界信息
 	logo := ""                //存储最终的字符画string

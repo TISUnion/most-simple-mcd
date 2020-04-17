@@ -77,6 +77,7 @@ func RegisterRouter() {
 		v1.POST("/tmp/files", delTmpFlie)
 		// 获取上传服务端文件，并注入到容器中
 		v1.POST("upload/server", addUpToContainer)
+
 	}
 	// websocket实时监听服务端耗费资源
 	router.GET("/server/resources/listen", serversResourcesListen)
@@ -411,6 +412,7 @@ func operatePlugin(c *gin.Context) {
 	ctr := GetMinecraftServerContainerInstance()
 	serv, err := ctr.GetServerById(opp.ServerId)
 	if err != nil {
+		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}

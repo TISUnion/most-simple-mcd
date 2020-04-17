@@ -72,18 +72,21 @@ func (c *PluginContainer) NewPluginManager(mcServer server.MinecraftServer) plug
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	allplugins := make(map[string]plugin_interface.Plugin)
+	ableplugins := make(map[string]plugin_interface.Plugin)
 	for _, p := range c.globalPlugins {
 		allplugins[p.GetId()] = p
+		ableplugins[p.GetId()] = p
 	}
 
 	for _, p := range c.plugins {
 		newP := p.NewInstance()
 		allplugins[newP.GetId()] = newP
+		ableplugins[newP.GetId()] = newP
 		newP.Init(mcServer)
 	}
 	pm := &PluginManager{
 		allPlugins:  allplugins,
-		ablePlugins: allplugins,
+		ablePlugins: ableplugins,
 		mcServ:      mcServer,
 	}
 	RegisterCallBack(pm)

@@ -166,6 +166,34 @@ func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand)
 		}
 		p.mcServer.TellCommand(player, utils.FormateTable(header, data))
 	case "ban", "-bn":
+		if len(pc.Params) < 2 {
+			p.mcServer.TellCommand(player, "请输入命令")
+			return
+		}
+		cmd := pc.Params[1]
+		cmdObj := p.getPluginBYCmd(cmd)
+		if cmdObj != nil {
+			p.mcServer.BanPlugin(cmdObj.Id)
+		}
 	case "unban", "-ubn":
+		if len(pc.Params) < 2 {
+			p.mcServer.TellCommand(player, "请输入命令")
+			return
+		}
+		cmd := pc.Params[1]
+		cmdObj := p.getPluginBYCmd(cmd)
+		if cmdObj != nil {
+			p.mcServer.UnbanPlugin(cmdObj.Id)
+		}
 	}
+}
+
+func (p *BasicPlugin) getPluginBYCmd(cmd string) *json_struct.PluginInfo {
+	aPlcfg := p.mcServer.GetPluginsInfo()
+	for _, plcfg := range aPlcfg {
+		if cmd == plcfg.CommandName {
+			return plcfg
+		}
+	}
+	return nil
 }
