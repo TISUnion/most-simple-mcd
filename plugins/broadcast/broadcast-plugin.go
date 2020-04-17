@@ -90,3 +90,5 @@ func (p *BroadcastPlugin) paramsHandle(player string, pc *json_struct.PluginComm
 		}
 	}
 }
+
+var BroadcastPluginObj = &BroadcastPlugin{}
