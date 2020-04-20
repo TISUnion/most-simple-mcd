@@ -430,11 +430,10 @@ func (m *MinecraftServer) _command(c string) error {
 }
 
 func (m *MinecraftServer) RunCommand(cmd string, params ...string) error {
-	cmdStr := fmt.Sprintf("/%s", cmd)
 	for _, param := range params {
-		cmdStr += fmt.Sprintf(" %s", param)
+		cmd += fmt.Sprintf(" %s", param)
 	}
-	return m._command(cmdStr)
+	return m._command(cmd)
 }
 
 // 执行tell命令

@@ -198,5 +198,4 @@ func (p *BasicPlugin) getPluginBYCmd(cmd string) *json_struct.PluginInfo {
 	return nil
 }
 
-
 var BasicPluginObj = &BasicPlugin{}

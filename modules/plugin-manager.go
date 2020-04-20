@@ -39,7 +39,6 @@ func (m *PluginManager) GetDisablePlugins() map[string]plugin_interface.Plugin {
 	return m.disablePlugins
 }
 
-
 func (m *PluginManager) BanPlugin(pluginId string) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
@@ -65,7 +64,8 @@ func (m *PluginManager) UnbanPlugin(pluginId string) {
 	m.ablePlugins[pluginId] = m.allPlugins[pluginId]
 	if !m.allPlugins[pluginId].IsGlobal() {
 		m.allPlugins[pluginId].Start()
-	}}
+	}
+}
 
 func (m *PluginManager) HandleMessage(msg *json_struct.ReciveMessage) {
 	for _, p := range m.ablePlugins {
@@ -83,6 +83,7 @@ func (m *PluginManager) AddPlugin(p plugin_interface.Plugin) {
 			return
 		}
 	}
+	p.Init(m.mcServ)
 	m.allPlugins[p.GetId()] = p
 	m.ablePlugins[p.GetId()] = p
 }
