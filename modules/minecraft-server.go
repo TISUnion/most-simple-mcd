@@ -293,6 +293,7 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 	buff = buff[:n]
 	if err != nil {
 		errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
+		m.sureServerStop()
 		return []byte{}, errors.New(errMsg)
 	}
 	// 如果一次的数据为1024，就多次获取
@@ -302,6 +303,7 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 			subN, subErr := m.stdout.Read(buff)
 			if subErr != nil {
 				errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
+				m.sureServerStop()
 				return []byte{}, errors.New(errMsg)
 			}
 			subBuff = subBuff[:subN]
@@ -358,7 +360,6 @@ func (m *MinecraftServer) handleMessage() {
 
 		// 正在关闭
 		if m.State == constant.MC_STATE_STOPING {
-			m.sureServerStop(msg.OriginData)
 			continue // 如果还没关闭，就不分发消息
 		}
 
@@ -373,15 +374,15 @@ func (m *MinecraftServer) handleMessage() {
 }
 
 func (m *MinecraftServer) getVersion(data []byte) {
-	reg, _ := regexp.Compile("(([0-9]*\\.[0-9]*\\.{0,1}[0-9]*)+)")
-	ves := reg.Find(data)
-	if len(ves) > 0 {
-		m.Version = string(ves)
+	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Starting minecraft server version ([0-9]*\\.?[0-9]*\\.?[0-9]*\\.?)")
+	ves := reg.FindSubmatch(data)
+	if len(ves) > 1 {
+		m.Version = string(ves[1])
 	}
 }
 
 func (m *MinecraftServer) getGameType(data []byte) {
-	reg, _ := regexp.Compile("Default game type: (?P<type>[a-zA-Z]+)")
+	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Default game type: (?P<type>[a-zA-Z]+)")
 	match := reg.FindSubmatch(data)
 	if len(match) > 1 {
 		m.GameType = string(match[1])
@@ -390,7 +391,7 @@ func (m *MinecraftServer) getGameType(data []byte) {
 
 // 判断服务端是否已经启动
 func (m *MinecraftServer) sureServerStart(data []byte) {
-	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Done \\(.*\\)! For help, type \"help\" or \"\\?\"")
+	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Done \\(.*\\)! For help, type \"help\"")
 	match := reg.Find(data)
 	if len(match) > 0 {
 		m.State = constant.MC_STATE_START
@@ -398,14 +399,9 @@ func (m *MinecraftServer) sureServerStart(data []byte) {
 }
 
 // 判断服务端是否已经关闭
-func (m *MinecraftServer) sureServerStop(data []byte) {
-	reg, _ := regexp.Compile("\\[Server Shutdown Thread/INFO\\]")
-	match := reg.Find(data)
-	// 如果已关闭则发送关闭信息
-	if len(match) > 0 {
-		m.State = constant.MC_STATE_START
-		m.stopTagChan <- struct{}{}
-	}
+func (m *MinecraftServer) sureServerStop() {
+	m.State = constant.MC_STATE_START
+	m.stopTagChan <- struct{}{}
 }
 
 // 判断服务端是否已保存
