@@ -4,14 +4,23 @@ import json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 
 type MinecraftServer interface {
 	BasicServer
-	// 执行命令
+	// 执行传入命令
 	Command(string) error //执行命令
 
+	// 第一个参数为命令，之后的命令参数
+	RunCommand(string, ...string) error
+
+	// 执行tellraw命令
+	// 第二个参数为string 自动封装成json
+	// 为utils.TellrowMessage 则调用站json方法
+	// 非string，自动转为json字符串
+	TellrawCommand(string, interface{}) error
+
 	// 执行tell命令
-	TellCommand(string, string) error //执行tell命令
+	TellCommand(string, string) error
 
 	// 执行say命令
-	SayCommand(string) error //执行say命令
+	SayCommand(string) error
 
 	// 修改内存使用阈值（单位M）
 	// 为0表示不修改

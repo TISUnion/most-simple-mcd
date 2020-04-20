@@ -17,7 +17,7 @@ const (
 	pluginDescription = "提供最基础的命令"
 	pluginCommand     = "!!server"
 	isGlobal          = false
-	helpDescription   = "\\n!!server help|-l <命令> 帮助信息加具体命令查看命令帮助，不加显示所有命令列表\\n!!server info|-if 查看当前服务端信息\\n!!server infos|-ifs 查看所有服务端信息\\n!!server plugins|-ps 查看插件列表\\n!!server stop|-sp 停止当前服务端\\n!!server restart|-rst 重启当前服务端\\n!!server ban|-bn <命令> 禁止使用命令\\n!!server unban|-ubn <命令> 解除禁止使用命令"
+	helpDescription   = "!!server help|-l <命令> 帮助信息加具体命令查看命令帮助，不加显示所有命令列表\n!!server info|-if 查看当前服务端信息\n!!server infos|-ifs 查看所有服务端信息\n!!server plugins|-ps 查看插件列表\n!!server stop|-sp 停止当前服务端\n!!server restart|-rst 重启当前服务端\n!!server ban|-bn <命令> 禁止使用命令\n!!server unban|-ubn <命令> 解除禁止使用命令"
 )
 
 // self
@@ -92,7 +92,7 @@ func (p *BasicPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 		return
 	}
 	if len(commandObj.Params) == 0 {
-		_ = p.mcServer.TellCommand(message.Player, helpDescription)
+		_ = p.mcServer.TellrawCommand(message.Player, helpDescription)
 	} else {
 		p.paramsHandle(message.Player, commandObj)
 	}
@@ -108,7 +108,7 @@ func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand)
 		header := []string{"id", "名称", "端口", "内存(单位：M)", "版本", "模式"}
 		cfg := p.mcServer.GetServerConf()
 		data := [][]string{{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.Itoa(cfg.Port), strconv.Itoa(cfg.Memory), cfg.Version, cfg.GameType}}
-		p.mcServer.TellCommand(player, utils.FormateTable(header, data))
+		p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
 	case "infos", "-ifs":
 		header := []string{"id", "名称", "端口", "内存(单位：M)", "版本", "模式", "运行状态"}
 		ctr := modules.GetMinecraftServerContainerInstance()
@@ -120,7 +120,7 @@ func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand)
 				data = append(data, []string{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.Itoa(cfg.Port), strconv.Itoa(cfg.Memory), cfg.Version, cfg.GameType, stateMap[cfg.State]})
 			}
 		}
-		p.mcServer.TellCommand(player, utils.FormateTable(header, data))
+		p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
 	case "plugins", "-ps":
 		aPlcfg := p.mcServer.GetPluginsInfo()
 		header := []string{"名称", "是否启用", "命令", "简介"}
@@ -132,14 +132,14 @@ func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand)
 			}
 			data = append(data, []string{plcfg.Name, isBanStr, plcfg.CommandName, plcfg.Description})
 		}
-		p.mcServer.TellCommand(player, utils.FormateTable(header, data))
+		p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
 	case "stop", "-sp":
 		if err := modules.GetMinecraftServerContainerInstance().StopById(p.mcServer.GetServerEntryId()); err != nil {
-			p.mcServer.TellCommand(player, "关闭失败")
+			p.mcServer.TellrawCommand(player, "关闭失败")
 		}
 	case "restart", "-rst":
 		if err := modules.GetMinecraftServerContainerInstance().RestartById(p.mcServer.GetServerEntryId()); err != nil {
-			p.mcServer.TellCommand(player, "重启失败")
+			p.mcServer.TellrawCommand(player, "重启失败")
 		}
 	case "help", "-l":
 		aPlcfg := p.mcServer.GetPluginsInfo()
@@ -164,10 +164,10 @@ func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand)
 				}
 			}
 		}
-		p.mcServer.TellCommand(player, utils.FormateTable(header, data))
+		p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
 	case "ban", "-bn":
 		if len(pc.Params) < 2 {
-			p.mcServer.TellCommand(player, "请输入命令")
+			p.mcServer.TellrawCommand(player, "请输入命令")
 			return
 		}
 		cmd := pc.Params[1]
@@ -177,7 +177,7 @@ func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand)
 		}
 	case "unban", "-ubn":
 		if len(pc.Params) < 2 {
-			p.mcServer.TellCommand(player, "请输入命令")
+			p.mcServer.TellrawCommand(player, "请输入命令")
 			return
 		}
 		cmd := pc.Params[1]

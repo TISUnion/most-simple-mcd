@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
@@ -104,11 +105,11 @@ func (m *MinecraftServer) GetPluginsInfo() []*json_struct.PluginInfo {
 	disablePlugins := m.pluginManager.GetDisablePlugins()
 	for _, p := range disablePlugins {
 		res = append(res, &json_struct.PluginInfo{
-			Name:        p.GetName(),
-			Id:          p.GetId(),
-			IsBan:       true,
-			CommandName: p.GetCommandName(),
-			Description: p.GetDescription(),
+			Name:            p.GetName(),
+			Id:              p.GetId(),
+			IsBan:           true,
+			CommandName:     p.GetCommandName(),
+			Description:     p.GetDescription(),
 			HelpDescription: p.GetHelpDescription(),
 		})
 	}
@@ -432,13 +433,36 @@ func (m *MinecraftServer) _command(c string) error {
 	return err
 }
 
+func (m *MinecraftServer) RunCommand(cmd string, params ...string) error {
+	cmdStr := fmt.Sprintf("/%s", cmd)
+	for _, param := range params {
+		cmdStr += fmt.Sprintf(" %s", param)
+	}
+	return m._command(cmdStr)
+}
+
 // 执行tell命令
 func (m *MinecraftServer) TellCommand(player string, msg string) error {
-	return m._command(fmt.Sprintf("/tell %s %s", player, msg))
+	return m.RunCommand("/tell", player, msg)
+}
+
+// 执行tellraw命令
+func (m *MinecraftServer) TellrawCommand(player string, msg interface{}) error {
+	rawmsg := ""
+	switch msg.(type) {
+	case string:
+		rawmsg = utils.NewTellrowMessage().SetText(msg.(string)).JSON()
+	case utils.TellrowMessage:
+		rawmsg = msg.(utils.TellrowMessage).JSON()
+	default:
+		rawmsgbyte, _ := json.Marshal(msg)
+		rawmsg = string(rawmsgbyte)
+	}
+	return m.RunCommand("/tellraw", player, rawmsg)
 }
 
 func (m *MinecraftServer) SayCommand(msg string) error {
-	return m._command(fmt.Sprintf("/say %s", msg))
+	return m.RunCommand("/say", msg)
 }
 
 // validatePort
@@ -543,9 +567,7 @@ func (m *MinecraftServer) resetParams() {
 		_ = m.stdout.Close()
 	}
 	// 重新拼接运行命令
-	if len(m.CmdStr) == 0 {
-		m.CmdStr = utils.GetCommandArr(m.Memory, m.RunPath)
-	}
+	m.CmdStr = utils.GetCommandArr(m.Memory, m.RunPath)
 	m.CmdObj = exec.Command(m.CmdStr[0], m.CmdStr[1:]...)
 	m.stdin, _ = m.CmdObj.StdinPipe()
 	m.stdout, _ = m.CmdObj.StdoutPipe()

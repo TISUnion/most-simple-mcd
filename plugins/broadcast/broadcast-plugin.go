@@ -2,6 +2,7 @@ package broadcast
 
 import (
 	"fmt"
+	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
@@ -15,7 +16,7 @@ const (
 	pluginDescription = "全服广播，使你成为全服最靓的仔"
 	pluginCommand     = "!!broadcast"
 	isGlobal          = true
-	helpDescription   = "\\n使用方式：!!broadcast <广播内容>"
+	helpDescription   = "使用方式：!!broadcast <广播内容>"
 )
 
 type BroadcastPlugin struct {
@@ -67,7 +68,7 @@ func (p *BroadcastPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 		return
 	}
 	if len(com.Params) == 0 {
-		_ = mcServer.TellCommand(message.Player, helpDescription)
+		_ = mcServer.TellrawCommand(message.Player, helpDescription)
 	} else {
 		p.paramsHandle(message.Player, com, mcServer)
 	}
@@ -80,13 +81,13 @@ func (p *BroadcastPlugin) Stop() {}
 func (p *BroadcastPlugin) paramsHandle(player string, pc *json_struct.PluginCommand, mcServer server.MinecraftServer) {
 	switch pc.Params[0] {
 	case "help", "-h":
-		_ = mcServer.TellCommand(player, helpDescription)
+		_ = mcServer.TellrawCommand(player, helpDescription)
 	default:
 		broadcast := fmt.Sprintf("[%s]<%s> %s", mcServer.GetServerConf().Name, player, pc.Params[0])
 		ctr := modules.GetMinecraftServerContainerInstance()
 		aMcSrv := ctr.GetAllServerObj()
 		for _, mcS := range aMcSrv {
-			_ = mcS.SayCommand(broadcast)
+			_ = mcS.TellrawCommand(constant.MC_ALL_PLAYER, broadcast)
 		}
 	}
 }

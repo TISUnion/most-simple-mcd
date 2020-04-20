@@ -3,6 +3,10 @@ git submodule init
 git submodule update
 echo ---------------下载git子模块成功-----------------
 
+:: 安装前端依赖
+npm -prefix web-admin install
+echo ---------------安装前端依赖成功-------------------
+
 :: 编译前端模块
 npm -prefix web-admin run  build:prod
 echo ---------------打包前端模块成功-------------------

@@ -72,7 +72,7 @@ func FormateTable(header []string, data [][]string) string {
 		table.Append(v)
 	}
 	table.Render()
-	return "\\n" + strings.ReplaceAll(buf.String(), "\n", "\\n")
+	return buf.String()
 }
 
 // 字符串超出长度截断，加深略号

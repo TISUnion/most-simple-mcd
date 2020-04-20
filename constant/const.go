@@ -75,6 +75,7 @@ const (
 	MC_SERVER_DIR     = "minecraft-servers"
 	MC_SERVER_BACK    = "minecraft-servers-back"
 	MC_SERVER_DB_KEY  = "minecraft:server:configs"
+	MC_ALL_PLAYER     = "@a"
 	MC_DEFAULT_PORT   = 25565
 	MC_DEFAULT_MEMORY = 1024
 	UUID_LENGTH       = 36

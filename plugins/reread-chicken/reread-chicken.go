@@ -57,7 +57,7 @@ func (r *RereadChickenPlugin) HandleMessage(message *json_struct.ReciveMessage) 
 	} else {
 		tellMsg = com.Params[0]
 	}
-	_ = r.mcServer.TellCommand(message.Player, tellMsg)
+	_ = r.mcServer.TellrawCommand(message.Player, tellMsg)
 }
 func (r *RereadChickenPlugin) Init(mcServer server.MinecraftServer) {
 	r.mcServer = mcServer
