@@ -9,3 +9,4 @@
 
 ## dev-0.01-20200420-2
 1. 修复tellraw无法使用bug
+2. 修复npm install安装目录错误
