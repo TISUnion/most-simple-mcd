@@ -6,6 +6,7 @@ import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/container"
 	"github.com/TISUnion/most-simple-mcd/utils"
+	"os"
 	"path/filepath"
 	"sync"
 	"time"
@@ -85,7 +86,10 @@ func (l *LogContainer) CompressLogJobFunc() {
 		if fileObj, err := utils.CreateFile(logPath); err != nil {
 			utils.PanicError(constant.CREATE_LOG_FAILED, err)
 		} else {
-			_ = k.CompressLogs("")
+			// 如果压缩成功，就删除原日志文件
+			if err := k.CompressLogs(""); err == nil {
+				os.RemoveAll(k.Path)
+			}
 			fileObj.Close()
 			k.Path = logPath
 			// 重载file对象，调函数是为了加锁
