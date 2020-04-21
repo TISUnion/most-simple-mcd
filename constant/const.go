@@ -110,7 +110,7 @@ const (
 	DEFAULT_ACCOUNT_DB_KEY      = "web:admin:account"
 	DEFAULT_TOKEN_DB_KEY        = "web:admin:token"
 	DEFAULT_TOKEN_DB_KEY_EXPIRE = 4 * time.Hour
-	DEFAULT_ACCOUNT             = "admin"
+	DEFAULT_ACCOUNT             = "steve"
 	DEFAULT_PASSWORD            = "123456"
 	QUERY_ID                    = "id"
 	QUERY_NAME                  = "name"
