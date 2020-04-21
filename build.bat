@@ -1,3 +1,5 @@
+chcp 65001
+
 :: 更新子模块
 git submodule init
 git submodule update
