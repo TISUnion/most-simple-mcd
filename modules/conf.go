@@ -216,12 +216,12 @@ func (c *Conf) SetConfParam(Name, ConfVal, description string, level int) {
 }
 
 // 注册配置
-func (c *Conf) RegisterConfParam(Name, ConfVal, description string, level int, IsAlterable bool) {
-	if _, ok := c.confs[Name]; !ok {
-		c.ConfKeys = append(c.ConfKeys, Name)
-		c.confs[Name] = &json_struct.ConfParam{
+func (c *Conf) RegisterConfParam(confKey, ConfVal, description string, level int, IsAlterable bool) {
+	if _, ok := c.confs[confKey]; !ok {
+		c.ConfKeys = append(c.ConfKeys, confKey)
+		c.confs[confKey] = &json_struct.ConfParam{
 			ConfVal:        ConfVal,
-			Name:           Name,
+			Name:           confKey,
 			Level:          level,
 			Description:    description,
 			DefaultConfVal: ConfVal,
@@ -291,9 +291,9 @@ func setIniCfg(data map[string]*json_struct.ConfParam) *ini.File {
 func GetConfVal(confKey string) string {
 	return GetConfInstance().GetConfVal(confKey)
 }
-
-func RegisterConfig(Name, ConfVal, description string, level int, IsAlterable bool) {
+// 注册配置
+func RegisterConfig(confKey, ConfVal, description string, level int, IsAlterable bool) {
 	conObj := GetConfInstance()
-	DefaultConfParam[Name] = utils.NewConfParam(Name, ConfVal, description, level, IsAlterable)
-	conObj.RegisterConfParam(Name, ConfVal, description, level, IsAlterable)
+	DefaultConfParam[confKey] = utils.NewConfParam(confKey, ConfVal, description, level, IsAlterable)
+	conObj.RegisterConfParam(confKey, ConfVal, description, level, IsAlterable)
 }

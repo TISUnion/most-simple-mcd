@@ -1,5 +1,6 @@
 ### TODO
 - 添加here插件
+- godoc注释完善
 - 编写golang/protobuf插件
     - 根据proto自动生成对应的gin路由
     - 根据proto自动生成接口文档

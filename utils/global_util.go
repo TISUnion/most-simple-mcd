@@ -25,11 +25,11 @@ func PanicError(msg string, err error) {
 }
 
 // 创建confParam实例
-func NewConfParam(Name, ConfVal, description string, level int, IsAlterable bool) *json_struct.ConfParam {
+func NewConfParam(confKey, ConfVal, description string, level int, IsAlterable bool) *json_struct.ConfParam {
 	return &json_struct.ConfParam{
 		ConfVal:        ConfVal,
 		DefaultConfVal: ConfVal,
-		Name:           Name,
+		Name:           confKey,
 		Level:          level,
 		Description:    description,
 		IsAlterable:    IsAlterable,
