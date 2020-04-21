@@ -14,7 +14,7 @@ type MinecraftContainer interface {
 	// 根据id获取服务端实例
 	GetServerById(string) (server.MinecraftServer, error)
 
-	// 根据id获取镜像服务端实例 TODO 镜像插件
+	// 根据id获取镜像服务端实例
 	GetMirrorServerById(string) (server.MinecraftServer, error)
 
 	// 根据id开启服务端
@@ -35,7 +35,7 @@ type MinecraftContainer interface {
 	// 添加服务端
 	AddServer(*json_struct.ServerConf, bool)
 
-	// 处理服务端文件
+	// 生成服务端参数对象
 	HandleMcFile(string, string, int, int) *json_struct.ServerConf
 
 	// StopAll
@@ -48,12 +48,12 @@ type MinecraftContainer interface {
 	// 所有服务端配置保存到数据库中
 	SaveToDb()
 
-	// 注册所有服务端关闭回调, 传入服务端id
+	// 注册所有服务端关闭回调, 回调函数会传入服务端id
 	RegisterAllServerCloseCallback(func(string))
 
-	// 注册所有服务端开启回调, 传入服务端id
+	// 注册所有服务端开启回调, 回调函数会传入服务端id
 	RegisterAllServerOpenCallback(func(string))
 
-	// 注册所有服务端保存回调, 传入服务端id
+	// 注册所有服务端保存回调, 回调函数会传入服务端id
 	RegisterAllServerSaveCallback(func(string))
 }

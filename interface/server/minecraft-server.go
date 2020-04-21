@@ -7,16 +7,19 @@ type MinecraftServer interface {
 	// 执行传入命令
 	Command(string) error //执行命令
 
-	// 第一个参数为命令，之后的命令参数
+	// 第一个参数为命令，之后的为命令参数
 	RunCommand(string, ...string) error
 
 	// 执行tellraw命令
-	// 第二个参数为string 自动封装成json
-	// 为utils.TellrowMessage 则调用站json方法
+	// 第一个参数为发送对象
+	// 第二个参数若为string 自动封装成json
+	// 为utils.TellrowMessage 则调用json方法
 	// 非string，自动转为json字符串
 	TellrawCommand(string, interface{}) error
 
 	// 执行tell命令
+	// 第一个参数为发送对象
+	// 第二个参数为发送内容
 	TellCommand(string, string) error
 
 	// 执行say命令
@@ -60,14 +63,16 @@ type MinecraftServer interface {
 	StopMonitorServer()
 
 	// 写入服务器的日志
+	// 第一个参数为日志内容
+	// 第二个参数为日志等级
 	WriteLog(string, string)
 
-	// 注册服务端关闭回调, 传入服务端id
+	// 注册服务端关闭回调, 回调传入服务端id
 	RegisterCloseCallback(func(string))
 
-	// 注册服务端开启回调, 传入服务端id
+	// 注册服务端开启回调, 回调传入服务端id
 	RegisterOpenCallback(func(string))
 
-	// 注册服务端保存回调, 传入服务端id
+	// 注册服务端保存回调, 回调传入服务端id
 	RegisterSaveCallback(func(string))
 }
