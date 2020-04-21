@@ -22,8 +22,6 @@ type Log interface {
 	CallBack
 	// WriteLog
 	// 写入日志
-	// 第一个string为日志等级分为：debug、info、warn、error、fatal，依次递增
-	// 第二个string为写入日志内容，无需加入日志格式
 	WriteLog(*LogMsgType)
 
 	// SetLogLevel
