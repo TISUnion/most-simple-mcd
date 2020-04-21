@@ -191,7 +191,11 @@ func WriteLogToDefault(params ...string) {
 	GetLogContainerInstance().WriteLog(params...)
 }
 
-// 写入默认自定义管道日志帮助函数
+// 写入自定义管道日志帮助函数
 func WriteLogToChannels(msg string, level string, channels []string) {
 	GetLogContainerInstance().WriteLogOnChannels(msg, level, channels)
+}
+
+func AddLog(name string, params ...string) _interface.Log {
+	return GetLogContainerInstance().AddLog(name, params...)
 }

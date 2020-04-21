@@ -221,7 +221,7 @@ func GetGinServerInstance() server.GinServer {
 	port, _ := strconv.Atoi(portStr)
 
 	// 添加日志
-	logger := GetLogContainerInstance().AddLog(constant.GIN_LOG_NAME)
+	logger := AddLog(constant.GIN_LOG_NAME)
 	gin.DefaultWriter = logger
 	gin.SetMode(gin.ReleaseMode)
 

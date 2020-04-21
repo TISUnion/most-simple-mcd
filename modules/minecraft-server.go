@@ -606,7 +606,7 @@ func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServ
 		ServerConf:  serverConf,
 		lock:        &sync.Mutex{},
 		messageChan: make(chan *json_struct.ReciveMessage, 10),
-		logger:      GetLogContainerInstance().AddLog(serverConf.EntryId),
+		logger:      AddLog(serverConf.EntryId),
 	}
 	RegisterCallBack(minecraftServer)
 	return minecraftServer

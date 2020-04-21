@@ -134,7 +134,7 @@ func newDataBaseOptions(name string) badger.Options {
 		ValueLogMaxEntries: 1000000,
 		ValueThreshold:     32,
 		Truncate:           false,
-		Logger:             GetLogContainerInstance().AddLog("db-"+name, constant.LOG_DEBUG),
+		Logger:             AddLog("db-"+name, constant.LOG_DEBUG),
 		LogRotatesToFlush:  2,
 	}
 }
