@@ -127,3 +127,11 @@ func GetJobContainerInstance() container.JobContainer {
 	RegisterCallBack(JobContainerObj)
 	return JobContainerObj
 }
+
+func RegisterJob(name string, interval string, handle func(), isStart bool) error{
+	JobContainerObj.RegisterJob(name, interval, handle)
+	if isStart {
+		return JobContainerObj.StartJob(name)
+	}
+	return nil
+}

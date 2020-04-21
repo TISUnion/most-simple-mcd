@@ -60,10 +60,7 @@ func (m *MonitorServer) _start() error {
 
 	interval := GetConfVal(constant.MONITOR_INTERVAL)
 	cronStr := fmt.Sprintf("@every %s", interval)
-	jobC := GetJobContainerInstance()
-	jobC.RegisterJob(m.jobName, cronStr, m.GetMonitorMessage)
-	_ = jobC.StartJob(m.jobName)
-	return nil
+	return RegisterJob(m.jobName, cronStr, m.GetMonitorMessage, true)
 }
 
 func (m *MonitorServer) GetMonitorMessage() {

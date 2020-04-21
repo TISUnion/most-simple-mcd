@@ -142,8 +142,7 @@ func (l *LogContainer) ChangeConfCallBack() {
 		l.logSaveInterval = logSaveInterval
 		jobContainer.StopJob(constant.EVERYDAY_JOB_NAME)
 		// 重新注册定时清理日志任务
-		jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, logSaveInterval, l.CompressLogJobFunc)
-		_ = jobContainer.StartJob(constant.EVERYDAY_JOB_NAME)
+		_ = RegisterJob(constant.EVERYDAY_JOB_NAME, logSaveInterval, l.CompressLogJobFunc, true)
 	}
 }
 
@@ -162,13 +161,11 @@ func (l *LogContainer) InitCallBack() {
 	LogLevel[constant.LOG_ERROR] = 4
 	LogLevel[constant.LOG_FATAL] = 5
 
-	jobContainer := GetJobContainerInstance()
 	// 创建默认日志
 	l.AddLog(constant.DEFAULT_LOG_NAME, constant.LOG_INFO)
 
 	// 初始化定时清理日志任务
-	jobContainer.RegisterJob(constant.EVERYDAY_JOB_NAME, GetConfVal(constant.LOG_SAVE_INTERVAL), l.CompressLogJobFunc)
-	_ = jobContainer.StartJob(constant.EVERYDAY_JOB_NAME)
+	_ = RegisterJob(constant.EVERYDAY_JOB_NAME, GetConfVal(constant.LOG_SAVE_INTERVAL), l.CompressLogJobFunc, true)
 }
 
 func GetLogContainerInstance() container.LogContainer {
