@@ -4,7 +4,7 @@ git submodule update
 echo "---------------下载git子模块成功------------------"
 
 #安装前端依赖
-npm -prefix ./web-admin install
+npm install ./web-admin -S -g
 echo "---------------安装前端依赖成功-------------------"
 
 #编译前端模块
