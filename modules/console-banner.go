@@ -15,15 +15,6 @@ func createImage(textName string) *bytes.Buffer {
 	resultPNG := bytes.NewBufferString("")
 	//创建位图,坐标x,y,长宽x,y
 	img := image.NewNRGBA(image.Rect(0, 0, 120, 33))
-	/*
-	   // 画背景,这里可根据喜好画出背景颜色
-	   for y := 0; y < dy; y++ {
-	       for x := 0; x < dx; x++ {
-	           //设置某个点的颜色，依次是 RGBA
-	           img.Set(x, y, color.RGBA{uint8(x), uint8(y), 0, 255})
-	       }
-	   }
-	*/
 	// 字体数据，为了方便打包进执行文件，这里直接暴力写入代码中。
 	fontBytes := constant.CONSOLE_FONT
 	font, err := freetype.ParseFont(fontBytes)

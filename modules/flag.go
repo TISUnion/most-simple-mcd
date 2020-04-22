@@ -91,7 +91,6 @@ func CliInteraction() {
 		helpDescription = "插件使用方法"
 
 		enName = strings.Title(enName)
-		fmt.Println(enName)
 		err := CreatePluginTmplFile(dirname, enName, zhName, description, command, helpDescription, isGlobal)
 		if err != nil {
 			color.Error.Println("生成失败，因为 ", err)
