@@ -8,9 +8,9 @@ import (
 	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"github.com/TISUnion/most-simple-mcd/utils"
+	uuid "github.com/satori/go.uuid"
 )
 
-// tmpl
 const (
 	pluginName        = "全服广播插件"
 	pluginDescription = "全服广播，使你成为全服最靓的仔"
@@ -21,19 +21,6 @@ const (
 
 type BroadcastPlugin struct {
 	id string
-}
-
-func (p *BroadcastPlugin) ChangeConfCallBack() {}
-
-func (p *BroadcastPlugin) DestructCallBack() {}
-
-func (p *BroadcastPlugin) InitCallBack() {}
-
-func (p *BroadcastPlugin) GetId() string {
-	return p.id
-}
-func (p *BroadcastPlugin) GetName() string {
-	return pluginName
 }
 
 func (p *BroadcastPlugin) GetDescription() string {
@@ -51,9 +38,31 @@ func (p *BroadcastPlugin) GetCommandName() string {
 func (p *BroadcastPlugin) IsGlobal() bool {
 	return isGlobal
 }
-func (p *BroadcastPlugin) Init(server server.MinecraftServer) {}
 
-func (p *BroadcastPlugin) NewInstance() plugin.Plugin { return nil }
+func (p *BroadcastPlugin) GetId() string {
+	return p.id
+}
+
+func (p *BroadcastPlugin) GetName() string {
+	return pluginName
+}
+
+func (p *BroadcastPlugin) Init(mcServer server.MinecraftServer) {
+
+}
+
+/* ------------------回调接口-------------------- */
+func (p *BroadcastPlugin) ChangeConfCallBack() {}
+func (p *BroadcastPlugin) DestructCallBack()   {}
+func (p *BroadcastPlugin) InitCallBack()       {}
+
+/* --------------------------------------------- */
+
+/* ---------非全局插件，服务端启动，关闭回调--------- */
+func (p *BroadcastPlugin) Start() {}
+func (p *BroadcastPlugin) Stop()  {}
+
+/* --------------------------------------------- */
 
 func (p *BroadcastPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 	if message.Player == "" {
@@ -74,10 +83,6 @@ func (p *BroadcastPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 	}
 }
 
-func (p *BroadcastPlugin) Start() {}
-
-func (p *BroadcastPlugin) Stop() {}
-
 func (p *BroadcastPlugin) paramsHandle(player string, pc *json_struct.PluginCommand, mcServer server.MinecraftServer) {
 	switch pc.Params[0] {
 	case "help", "-h":
@@ -92,4 +97,19 @@ func (p *BroadcastPlugin) paramsHandle(player string, pc *json_struct.PluginComm
 	}
 }
 
-var BroadcastPluginObj = &BroadcastPlugin{}
+func (*BroadcastPlugin) NewInstance() plugin.Plugin {
+	return nil
+}
+
+var BroadcastPluginObj plugin.Plugin
+
+func GetBroadcastPluginInstance() plugin.Plugin {
+	if BroadcastPluginObj != nil {
+		return BroadcastPluginObj
+	}
+	BroadcastPluginObj = &BroadcastPlugin{
+		id: uuid.NewV4().String(),
+	}
+	modules.RegisterCallBack(BroadcastPluginObj)
+	return BroadcastPluginObj
+}

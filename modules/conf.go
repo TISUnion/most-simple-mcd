@@ -64,10 +64,10 @@ func ConfInit() {
 
 // loadFilePath
 // 获取配置文件目录
-func (c *Conf) loadFilePath(terminalConfs map[string]*string) {
+func (c *Conf) loadFilePath(terminalConfs map[string]string) {
 	// 根据优先级获取配置文件目录
-	if path, ok := terminalConfs[constant.CONF_PATH]; ok && *path != "" {
-		c.SetConfParam(constant.CONF_PATH, *path, constant.CONF_PATH_DESCREPTION, constant.CONF_TERMINAL_LEVEL)
+	if path, ok := terminalConfs[constant.CONF_PATH]; ok && path != "" {
+		c.SetConfParam(constant.CONF_PATH, path, constant.CONF_PATH_DESCREPTION, constant.CONF_TERMINAL_LEVEL)
 	} else if path := os.Getenv(constant.CONF_PATH); path != "" {
 		c.SetConfParam(constant.CONF_PATH, path, constant.CONF_PATH_DESCREPTION, constant.CONF_ENVIRONMENT_LEVEL)
 	}
@@ -152,11 +152,11 @@ func (c *Conf) loadEnvConf() {
 
 // loadTerminalConf
 // 加载命令行配置
-func (c *Conf) loadTerminalConf(terminalConfs map[string]*string) {
+func (c *Conf) loadTerminalConf(terminalConfs map[string]string) {
 	if terminalConfs != nil {
 		for k, v := range terminalConfs {
-			if *v != "" {
-				c.SetConfParam(k, *v, "", constant.CONF_TERMINAL_LEVEL)
+			if v != "" {
+				c.SetConfParam(k, v, "", constant.CONF_TERMINAL_LEVEL)
 			}
 		}
 	}
@@ -183,7 +183,7 @@ func (c *Conf) GetConfVal(key string) string {
 	return ""
 }
 
-func (c *Conf) Init(terminalConfs map[string]*string) {
+func (c *Conf) Init(terminalConfs map[string]string) {
 
 	c.lock.Lock()
 	defer c.lock.Unlock()

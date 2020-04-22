@@ -16,17 +16,13 @@ import (
 	"sync"
 )
 
-// tmpl
 const (
 	pluginName        = "镜像插件"
 	pluginDescription = "备份存档，运行备份存档镜像"
 	pluginCommand     = "!!mirror"
 	isGlobal          = true
 	helpDescription   = "使用方式：!!mirror list|-l 查看所有镜像服务器\n!!mirror save|-s <自定义备份镜像名称> 保存一份当前服务器的镜像\n!!mirror start|-st <备份镜像id> 开启镜像服务器\n!!mirror stop|-sp <备份镜像id> 关闭镜像服务器"
-)
 
-// self
-const (
 	maxLen        = 5
 	MC_MIRROR_DIR = "minecraft-mirrors"
 )
@@ -47,13 +43,38 @@ type MirrorServerPlugin struct {
 	lock      *sync.Mutex
 }
 
-func (p *MirrorServerPlugin) ChangeConfCallBack() {
+func (p *MirrorServerPlugin) GetDescription() string {
+	return pluginDescription
 }
 
-func (p *MirrorServerPlugin) DestructCallBack() {
+func (p *MirrorServerPlugin) GetHelpDescription() string {
+	return helpDescription
 }
 
-func (p *MirrorServerPlugin) InitCallBack() {
+func (p *MirrorServerPlugin) GetCommandName() string {
+	return pluginCommand
+}
+
+func (p *MirrorServerPlugin) IsGlobal() bool {
+	return isGlobal
+}
+
+func (p *MirrorServerPlugin) GetId() string {
+	return p.id
+}
+
+func (p *MirrorServerPlugin) GetName() string {
+	return pluginName
+}
+
+func (p *MirrorServerPlugin) Init(mcServer server.MinecraftServer) {
+
+}
+
+/* ------------------回调接口-------------------- */
+func (p *MirrorServerPlugin) ChangeConfCallBack() {}
+func (p *MirrorServerPlugin) DestructCallBack()   {}
+func (p *MirrorServerPlugin) InitCallBack()       {
 	p.mcSaveState = make(map[string]bool)
 	stateMap = make(map[int]string)
 	p.savedChan = make(chan struct{})
@@ -73,31 +94,13 @@ func (p *MirrorServerPlugin) InitCallBack() {
 	p.getMirrors()
 }
 
-func (p *MirrorServerPlugin) GetId() string {
-	return p.id
-}
+/* --------------------------------------------- */
 
-func (p *MirrorServerPlugin) GetName() string {
-	return pluginName
-}
+/* ---------非全局插件，服务端启动，关闭回调--------- */
+func (p *MirrorServerPlugin) Start() {}
+func (p *MirrorServerPlugin) Stop()  {}
 
-func (p *MirrorServerPlugin) GetDescription() string {
-	return pluginDescription
-}
-
-func (p *MirrorServerPlugin) GetHelpDescription() string {
-	return helpDescription
-}
-
-func (p *MirrorServerPlugin) GetCommandName() string {
-	return pluginCommand
-}
-
-func (p *MirrorServerPlugin) IsGlobal() bool {
-	return isGlobal
-}
-
-func (p *MirrorServerPlugin) NewInstance() plugin.Plugin { return nil }
+/* --------------------------------------------- */
 
 func (p *MirrorServerPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 	if message.Player == "" {
@@ -191,22 +194,6 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 	}
 }
 
-// 保存服务端（save-all）
-func (p *MirrorServerPlugin) saveServer(id string, mcServer server.MinecraftServer) {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-	p.mcSaveState[id] = true
-	_ = mcServer.Command("/save-all")
-	<-p.savedChan
-}
-
-func (p *MirrorServerPlugin) saveCallback(id string) {
-	if p.mcSaveState[id] {
-		p.savedChan <- struct{}{}
-		p.mcSaveState[id] = false
-	}
-}
-
 // 构建镜像
 func (p *MirrorServerPlugin) buildMirror(conf *json_struct.ServerConf, id string) (path string, ok bool) {
 	serverPath, filename := filepath.Split(conf.RunPath)
@@ -226,6 +213,22 @@ func (p *MirrorServerPlugin) buildMirror(conf *json_struct.ServerConf, id string
 	return mirrorRunPath, true
 }
 
+// 保存服务端（save-all）
+func (p *MirrorServerPlugin) saveServer(id string, mcServer server.MinecraftServer) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	p.mcSaveState[id] = true
+	_ = mcServer.Command("/save-all")
+	<-p.savedChan
+}
+
+func (p *MirrorServerPlugin) saveCallback(id string) {
+	if p.mcSaveState[id] {
+		p.savedChan <- struct{}{}
+		p.mcSaveState[id] = false
+	}
+}
+
 func (p *MirrorServerPlugin) getMirrors() {
 	allMcSrv := p.mcContainer.GetAllServerObj()
 	for _, mcMS := range allMcSrv {
@@ -235,24 +238,19 @@ func (p *MirrorServerPlugin) getMirrors() {
 	}
 }
 
-// -------------非全局插件需实现方法--------------
-func (p *MirrorServerPlugin) Init(server server.MinecraftServer) {}
+func (*MirrorServerPlugin) NewInstance() plugin.Plugin {
+	return nil
+}
 
-func (p *MirrorServerPlugin) Start() {}
-
-func (p *MirrorServerPlugin) Stop() {}
-
-// --------------------------------------------
-
-var mirrorServerPluginObj plugin.Plugin
+var MirrorServerPluginObj plugin.Plugin
 
 func GetMirrorServerPluginInstance() plugin.Plugin {
-	if mirrorServerPluginObj != nil {
-		return mirrorServerPluginObj
+	if MirrorServerPluginObj != nil {
+		return MirrorServerPluginObj
 	}
-	mirrorServerPluginObj = &MirrorServerPlugin{
+	MirrorServerPluginObj = &MirrorServerPlugin{
 		id: uuid.NewV4().String(),
 	}
-	modules.RegisterCallBack(mirrorServerPluginObj)
-	return mirrorServerPluginObj
+	modules.RegisterCallBack(MirrorServerPluginObj)
+	return MirrorServerPluginObj
 }

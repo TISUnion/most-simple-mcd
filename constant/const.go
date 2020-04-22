@@ -131,6 +131,7 @@ const (
 	SERVER_COMMAND_TYPE             = 2 //服务端运行命令
 	ALL_COMMAND_TYPE                = 3 //插件、服务端都运行
 	LOG_DIR                         = "logs"
+	PLUGIN_DIR                      = "plugins"
 	GIN_LOG_NAME                    = "gin-server"
 	UPLOAD_FILE_NAME                = "file"
 	UPLOAD_PORT_TEXT                = "port"
@@ -140,4 +141,8 @@ const (
 	OS_WINDOWS = "windows"
 	OS_LINUX   = "linux"
 	OS_DARWIN  = "darwin"
+
+	CLI_MODE  = "-cli"
+	PIX       = "-"
+	CMD_ERROR = "解析命令行出错"
 )
