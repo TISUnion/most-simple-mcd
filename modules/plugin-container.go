@@ -53,7 +53,7 @@ func (c *PluginContainer) RegisterPlugin(p plugin_interface.Plugin) {
 	if p.IsGlobal() {
 		c.globalPlugins[p.GetId()] = p
 	} else {
-		c.plugins[p.GetId()] = p
+		c.plugins[newPname] = p
 	}
 
 	// 分发给各插件管理器
