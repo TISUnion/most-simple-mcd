@@ -145,4 +145,9 @@ const (
 	CLI_MODE  = "-cli"
 	PIX       = "-"
 	CMD_ERROR = "解析命令行出错"
+
+	COMPARE_GT = 1
+	COMPARE_EQ = 0
+	COMPARE_LT = -1
+
 )

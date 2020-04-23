@@ -25,7 +25,7 @@ const (
 )
 
 type {{.ENName}}Plugin struct {
-	{{if .IsGlobal}}mcServer server.MinecraftServer{{end}}
+	{{if .IsGlobal}}{{else}}mcServer server.MinecraftServer{{end}}
     id       string
 }
 

@@ -165,6 +165,42 @@ func Uint64Tofloat64(ui uint64) float64 {
 	return f64
 }
 
+// 比较mc版本 1表示大于，0表示等于，-1表示小于
+func CompareMcVersion(mainVersion, compareVersion string) int {
+	if mainVersion == compareVersion {
+		return constant.COMPARE_EQ
+	}
+	aMainVersionStr := strings.Split(mainVersion, ".")
+	aCompareVersionStr := strings.Split(compareVersion, ".")
+	laMainVersionStr := len(aMainVersionStr)
+	laCompareVersionStr := len(aCompareVersionStr)
+	shortLen := 0
+	if laMainVersionStr > laCompareVersionStr {
+		shortLen = laCompareVersionStr
+	} else {
+		shortLen = laMainVersionStr
+	}
+
+	// 比对每个次版本
+	for i := 0; i < shortLen; i++ {
+		mainSubVersion, _ := strconv.ParseInt(aMainVersionStr[i], 10, 64)
+		compareSubVersion, _ := strconv.ParseInt(aCompareVersionStr[i], 10, 64)
+		if mainSubVersion > compareSubVersion {
+			return constant.COMPARE_GT
+		} else if mainSubVersion < compareSubVersion {
+			return constant.COMPARE_LT
+		}
+	}
+	// 比对最小版本
+	if laMainVersionStr > laCompareVersionStr {
+		return constant.COMPARE_GT
+	} else if laMainVersionStr < laCompareVersionStr {
+		return constant.COMPARE_LT
+	}
+
+	return constant.COMPARE_EQ
+}
+
 // 是否是UTF8编码
 func IsUTF8(data []byte) bool {
 	i := 0
