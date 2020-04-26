@@ -11,7 +11,7 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/gookit/color v1.2.5
-	github.com/gookit/gcli/v2 v2.2.0
+	github.com/gookit/gcli/v2 v2.2.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/klauspost/compress v1.10.5
 	github.com/mholt/archiver/v3 v3.3.0
