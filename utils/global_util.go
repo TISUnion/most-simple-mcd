@@ -116,11 +116,7 @@ func RemoveRepeatedElement(arr []string) []string {
 // 判断字符编码是否不是UTF8， 如果不是，尝试转成UTF8
 func ParseCharacter(data []byte) ([]byte, error) {
 	if !IsUTF8(data) {
-		if result, err := simplifiedchinese.GBK.NewDecoder().Bytes(data); err != nil {
-			return data, err
-		} else {
-			return result, nil
-		}
+		return GBK2UTF8(data)
 	}
 	return data, nil
 }
@@ -230,6 +226,24 @@ func IsUTF8(data []byte) bool {
 		}
 	}
 	return true
+}
+
+// UTF8转GBK
+func UTF82GBK(data []byte) ([]byte, error)  {
+	if result, err := simplifiedchinese.GBK.NewEncoder().Bytes(data); err != nil {
+		return data, err
+	} else {
+		return result, nil
+	}
+}
+
+// GBK转UTF8
+func GBK2UTF8(data []byte) ([]byte, error)  {
+	if result, err := simplifiedchinese.GBK.NewDecoder().Bytes(data); err != nil {
+		return data, err
+	} else {
+		return result, nil
+	}
 }
 
 // 获取cmd命令数组
