@@ -1,4 +1,5 @@
 ### TODO
+- 修复部分低版本服务端中文乱码
 - godoc注释完善
 - 编写golang/protobuf插件
     - 根据proto自动生成对应的gin路由
