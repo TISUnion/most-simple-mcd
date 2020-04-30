@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	json_struct "github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
 	"io/ioutil"

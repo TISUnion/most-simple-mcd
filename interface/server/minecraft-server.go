@@ -1,6 +1,6 @@
 package server
 
-import json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+import json_struct "github.com/TISUnion/most-simple-mcd/models"
 
 type MinecraftServer interface {
 	BasicServer

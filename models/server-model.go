@@ -1,4 +1,4 @@
-package json_struct
+package models
 
 // 服务器配置
 type ServerConf struct {

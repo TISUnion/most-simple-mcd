@@ -3,7 +3,7 @@ package container
 import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	json_struct "github.com/TISUnion/most-simple-mcd/models"
 )
 
 // MinecraftContainer

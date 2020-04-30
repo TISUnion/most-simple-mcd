@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	json_struct "github.com/TISUnion/most-simple-mcd/models"
 	"github.com/olekukonko/tablewriter"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"net"

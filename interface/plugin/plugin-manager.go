@@ -2,7 +2,7 @@ package plugin
 
 import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	json_struct "github.com/TISUnion/most-simple-mcd/models"
 )
 
 // 插件管理服务器，每个mc服务端都会有一个实例

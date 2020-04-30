@@ -1,4 +1,4 @@
-package json_struct
+package models
 
 // 用户信息
 type AdminUser struct {
@@ -26,7 +26,7 @@ type Config struct {
 }
 
 // 配置信息
-type ConfParam struct {
+type  ConfParam struct {
 	ConfVal        string `json:"config_val"`
 	DefaultConfVal string `json:"-"`
 	Name           string `json:"config_key"`

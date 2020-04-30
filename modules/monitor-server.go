@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	json_struct "github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/process"

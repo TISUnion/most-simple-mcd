@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	json_struct "github.com/TISUnion/most-simple-mcd/models"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"

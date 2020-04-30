@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	json_struct "github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"

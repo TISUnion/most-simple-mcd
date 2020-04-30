@@ -1,0 +1,257 @@
+syntax = "proto3";
+
+package most.simple.mcd;
+
+option go_package = "api";
+
+service User {
+    // 用户登录
+    rpc login (LoginReq) returns (LoginResp);
+    // 用户注销
+    rpc logout (LogoutReq) returns (LogoutResp);
+    // 获取用户信息
+    // `middleware: "auth"`
+    rpc info (InfoReq) returns (InfoResp);
+    // 更新用户信息
+    // `middleware: "auth"`
+    rpc update (UpdateReq) returns (UpdateResp);
+}
+
+service Server {
+    // 监听服务端消耗资源
+    rpc listenResource (ListenResourceReq) returns (ListenResourceResp);
+    // 服务器交互
+    rpc serverInteraction (ServerInteractionReq) returns (ServerInteractionResp);
+    // 获取服务端信息列表
+    // `middleware: "auth"`
+    rpc list (ListReq) returns (ListResp);
+    // 获取服务端信息列表
+    // `middleware: "auth"`
+    rpc getServerState (GetServerStateReq) returns (GetServerStateReq);
+    // 获取服务端详情
+    // `middleware: "auth"`
+    rpc detail (DetailReq) returns (DetailResp);
+    // 操作服务端
+    // `middleware: "auth"`
+    rpc operateServer (OperateServerReq) returns (OperateServerResp);
+    // 修改服务端参数
+    // `middleware: "auth"`
+    rpc updateServerInfo (UpdateServerInfoReq) returns (UpdateServerInfoResp);
+}
+
+// `middleware: "auth"`
+service Admin {
+    // 获取配置
+    rpc getConfig (GetConfigReq) returns (GetConfigResp);
+    // 修改配置
+    rpc updateConfig (UpdateConfigReq) returns (UpdateConfigResp);
+    // 服务端插件操作
+    rpc operatePlugin (OperatePluginReq) returns (OperatePluginResp);
+    // 服务端插件操作
+    rpc getConfigVal (GetConfigValReq) returns (GetConfigValResp);
+}
+
+message LoginReq {
+    // 账号
+    string account = 1;
+    // 密码
+    string password = 2;
+}
+
+message LoginResp {
+    // 登录态token
+    string token = 1;
+}
+
+message LogoutReq {
+}
+
+message LogoutResp {
+}
+
+message InfoReq {
+    // 登录态token
+    string token = 1;
+}
+
+message InfoResp {
+    // 账号
+    string account = 1;
+    // 密码
+    string password = 2;
+    // 昵称
+    string nickname = 3;
+    // 权限
+    repeated string roles = 4;
+    // 头像
+    string avatar = 5;
+}
+
+message UpdateReq {
+    // 账号
+    string account = 1;
+    // 密码
+    string password = 2;
+    // 昵称
+    string nickname = 3;
+    // 权限
+    repeated string roles = 4;
+    // 头像
+    string avatar = 5;
+}
+
+message UpdateResp {
+}
+
+message ListenResourceReq {
+    // 服务端id
+    string id = 1;
+}
+
+message ListenResourceResp {
+}
+
+message ServerInteractionReq {
+    // 服务端id
+    string id = 1;
+}
+
+message ServerInteractionResp {
+}
+
+message GetConfigReq {
+}
+
+message GetConfigResp {
+    repeated Config list = 1;
+}
+
+message UpdateConfigReq {
+    repeated Config configs = 1;
+}
+
+message UpdateConfigResp {
+}
+
+message ListReq {
+}
+
+message ListResp {
+    repeated ServerConf list = 1;
+}
+
+message GetServerStateReq {
+    // 服务端id
+    string id = 1;
+}
+
+message GetServerStateResp {
+    // 启动状态：0.未启动 1.启动  -1.正在启动 -2.正在关闭
+    int64 state = 1;
+}
+
+message DetailReq {
+    // 服务端id
+    string id = 1;
+}
+
+message DetailResp {
+    // 服务端详情
+    ServerConf servInfo = 1 [json_name = "server_info"];
+    // 插件信息
+    repeated PluginInfo pluginfo = 2 [json_name = "plugin_info"];
+}
+
+message OperateServerReq {
+    repeated string serverId = 1 [json_name = "id"];
+    // 操作类型：1. 启动  2. 停止  3.重启
+    int64 operateType = 2 [json_name = "operate_type"];
+}
+
+message OperateServerResp {
+
+}
+
+message OperatePluginReq {
+    // 服务端id
+    string serverId = 1 [json_name = "server_id"];
+    // 插件id
+    repeated string pluginId = 2 [json_name = "plugin_id"];
+    // 操作类型：1. 启动  2. 停止
+    int64 operateType = 3 [json_name = "operate_type"];
+}
+
+message OperatePluginResp {
+
+}
+
+message GetConfigValReq {
+    // 配置名称
+    string name = 1;
+}
+
+message GetConfigValResp {
+    Config config = 1;
+}
+
+message UpdateServerInfoReq {
+
+}
+
+message UpdateServerInfoResp {
+
+}
+
+message ServerConf {
+    string entryId = 1 [json_name = "id"];
+    // 服务器名称
+    string name = 2 [json_name = "name"];
+    // 执行的完整命令
+    repeated string nmdStr = 3 [json_name = "cmd_str"];
+    // 启动服务器端口
+    int64 port = 4 [json_name = "port"];
+    // 运行所在工作区间
+    string runPath = 5 [json_name = "run_rath"];
+    // 是否是镜像服务器
+    bool isMirror = 6 [json_name = "is_mirror"];
+    // 是否启动资源监听器
+    bool isStartMonitor = 7 [json_name = "is_start_monitor"];
+    // 使用内存大小，单位M
+    int64 memory = 8 [json_name = "memory"];
+    // 服务端版本
+    string version = 9 [json_name = "version"];
+    // 服务器模式
+    string gameType = 10 [json_name = "game_type"];
+    // 启动状态：0.未启动 1.启动  -1.正在启动 -2.正在关闭
+    int64 state = 11 [json_name = "state"];
+    // 本机的ip
+    repeated string ips = 12 [json_name = "ips"];
+}
+
+message PluginInfo {
+    // 插件名称
+    string name = 1 [json_name = "name"];
+    // 插件id
+    string id = 2 [json_name = "id"];
+    // 是否被禁用
+    bool isBan = 3 [json_name = "is_ban"];
+    // 使用命令
+    string commandName = 4 [json_name = "command_name"];
+    // 描述
+    string description = 5 [json_name = "description"];
+    // 使用帮助
+    string helpDescription = 6 [json_name = "help_description"];
+}
+
+message Config {
+    // 配置名称
+    string confVal = 1 [json_name = "config_val"];
+    // 配置值
+    string name = 3 [json_name = "config_key"];
+    // 配置等级
+    int64 level = 4 [json_name = "level"];
+    // 配置描述
+    string description = 5 [json_name = "description"];
+    // 是否在后台可修改
+    bool isAlterable = 6 [json_name = "is_alterable"];
+}

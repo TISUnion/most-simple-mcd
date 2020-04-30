@@ -8,7 +8,7 @@ import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	json_struct "github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
 	"io"
