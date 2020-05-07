@@ -3,7 +3,7 @@ package container
 import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 )
 
 // MinecraftContainer
@@ -30,13 +30,13 @@ type MinecraftContainer interface {
 	RestartById(string) error
 
 	// 获取所有服务端配置
-	GetAllServerConf() []*json_struct.ServerConf
+	GetAllServerConf() []*models.ServerConf
 
 	// 添加服务端
-	AddServer(*json_struct.ServerConf, bool)
+	AddServer(*models.ServerConf, bool)
 
 	// 生成服务端参数对象
-	HandleMcFile(string, string, int, int) *json_struct.ServerConf
+	HandleMcFile(string, string, int, int) *models.ServerConf
 
 	// StopAll
 	// 关闭所有mc服务器

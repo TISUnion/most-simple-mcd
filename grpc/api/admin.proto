@@ -1,0 +1,146 @@
+syntax = "proto3";
+
+package most.simple.mcd;
+
+option go_package = "api";
+
+// `middleware:"auth"`
+service Admin {
+    // 获取配置
+    rpc getConfig (GetConfigReq) returns (GetConfigResp);
+    // 修改配置
+    rpc updateConfig (UpdateConfigReq) returns (UpdateConfigResp);
+    // 服务端插件操作
+    rpc operatePlugin (OperatePluginReq) returns (OperatePluginResp);
+    // 服务端插件操作
+    rpc getConfigVal (GetConfigValReq) returns (GetConfigValResp);
+    // 向服务端执行一条命令
+    rpc runCommand (RunCommandReq) returns (RunCommandResp);
+    // 获取服务端日志
+    rpc getLog (GetLogReq) returns (GetLogResp);
+    // 删除临时文件
+    rpc delTmpFlie (DelTmpFlieReq) returns (DelTmpFlieResp);
+    // 获取上传服务端文件，并注入到容器中
+    rpc addUpToContainer (AddUpToContainerReq) returns (AddUpToContainerResp);
+    rpc closeMcd (CloseMcdReq) returns (CloseMcdResp);
+}
+
+
+message GetConfigReq {
+}
+
+message GetConfigResp {
+    message Record {
+        // 配置名称
+        string confVal = 1 [json_name = "config_val"];
+        // 配置值
+        string name = 3 [json_name = "config_key"];
+        // 配置等级
+        int64 level = 4 [json_name = "level"];
+        // 配置描述
+        string description = 5 [json_name = "description"];
+        // 是否在后台可修改
+        bool isAlterable = 6 [json_name = "is_alterable"];
+    }
+    repeated Record list = 1;
+}
+
+message UpdateConfigReq {
+    message Record {
+        // 配置名称
+        string confVal = 1 [json_name = "config_val"];
+        // 配置值
+        string name = 3 [json_name = "config_key"];
+        // 配置等级
+        int64 level = 4 [json_name = "level"];
+        // 配置描述
+        string description = 5 [json_name = "description"];
+        // 是否在后台可修改
+        bool isAlterable = 6 [json_name = "is_alterable"];
+    }
+    repeated Record list = 1;
+}
+
+message UpdateConfigResp {
+}
+
+
+message OperatePluginReq {
+    // 服务端id
+    string serverId = 1 [json_name = "server_id"];
+    // 插件id
+    repeated string pluginId = 2 [json_name = "plugin_id"];
+    // 操作类型：1. 启动  2. 停止
+    int64 operateType = 3 [json_name = "operate_type"];
+}
+
+message OperatePluginResp {
+
+}
+
+message GetConfigValReq {
+    // 配置名称
+    string name = 1;
+}
+
+message GetConfigValResp {
+    // 配置名称
+    string confVal = 1 [json_name = "config_val"];
+    // 配置值
+    string name = 3 [json_name = "config_key"];
+    // 配置等级
+    int64 level = 4 [json_name = "level"];
+    // 配置描述
+    string description = 5 [json_name = "description"];
+    // 是否在后台可修改
+    bool isAlterable = 6 [json_name = "is_alterable"];
+}
+
+
+message RunCommandReq {
+    // 命令
+    string command = 1;
+    // 服务端id
+    string serverId = 2 [json_name = "id"];
+    // 1：插件运行命令  2：服务端运行命令   3：插件、服务端都运行
+    int64 type = 3;
+}
+
+message RunCommandResp {
+
+}
+
+message GetLogReq {
+    // 日志类型 1. 根据id获取服务端日志 2. gin服务器日志 3. 默认全局日志
+    int64 type = 1;
+    // 如果根据id获取服务端日志，则需要传id
+    string id = 2;
+}
+
+message GetLogResp {
+
+}
+
+message DelTmpFlieReq {
+
+}
+
+message DelTmpFlieResp {
+
+}
+
+message AddUpToContainerReq {
+
+}
+
+message AddUpToContainerResp {
+
+}
+
+message CloseMcdReq {
+
+}
+
+message CloseMcdResp {
+
+}

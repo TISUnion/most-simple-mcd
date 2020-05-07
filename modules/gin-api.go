@@ -233,12 +233,6 @@ func serversStdListen(c *gin.Context) {
 	ListenStdinFromWs(serverId, ws)
 }
 
-// 获取服务端列表
-func serversInfoList(c *gin.Context) {
-	ctr := GetMinecraftServerContainerInstance()
-	confs := ctr.GetAllServerConf()
-	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", confs))
-}
 
 // 获取服务端运行状态
 func getServerState(c *gin.Context) {
@@ -349,18 +343,13 @@ func getLog(c *gin.Context) {
 		}
 		runPath := filepath.Dir(serv.GetServerConf().RunPath)
 		originFilePath = filepath.Join(runPath, constant.LOG_DIR)
-		// 压缩
-		_ = utils.CompressFile(originFilePath, filePath)
-
 	case constant.LOG_TYPE_GIN:
 		originFilePath = filepath.Join(GetConfVal(constant.WORKSPACE), constant.LOG_DIR, constant.GIN_LOG_NAME)
-		// 压缩
-		_ = utils.CompressFile(originFilePath, filePath)
 	case constant.LOG_TYPE_DEFAULT:
 		originFilePath = filepath.Join(GetConfVal(constant.WORKSPACE), constant.LOG_DIR, constant.DEFAULT_LOG_NAME)
-		// 压缩
-		_ = utils.CompressFile(originFilePath, filePath)
 	}
+	// 压缩
+	_ = utils.CompressFile(originFilePath, filePath)
 	c.FileAttachment(filePath, logName)
 }
 
