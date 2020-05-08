@@ -3,7 +3,7 @@ package modules
 import (
 	plugin_interface "github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"sync"
 )
 
@@ -67,7 +67,7 @@ func (m *PluginManager) UnbanPlugin(pluginId string) {
 	}
 }
 
-func (m *PluginManager) HandleMessage(msg *json_struct.ReciveMessage) {
+func (m *PluginManager) HandleMessage(msg *models.ReciveMessage) {
 	for _, p := range m.ablePlugins {
 		p.HandleMessage(msg)
 	}

@@ -39,7 +39,7 @@ type McServerGinServer interface {
 	List(ctx context.Context, req *ListReq) (resp *ListResp, err error)
 
 	// 获取服务端信息列表
-	GetServerState(ctx context.Context, req *GetServerStateReq) (resp *GetServerStateReq, err error)
+	GetServerState(ctx context.Context, req *GetServerStateReq) (resp *GetServerStateResp, err error)
 
 	// 获取服务端详情
 	Detail(ctx context.Context, req *DetailReq) (resp *DetailResp, err error)
@@ -60,6 +60,8 @@ func listenResource(c *gin.Context) {
 	}
 	resp, err := apiMcServerSvc.ListenResource(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -72,6 +74,8 @@ func serverInteraction(c *gin.Context) {
 	}
 	resp, err := apiMcServerSvc.ServerInteraction(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -84,18 +88,22 @@ func list(c *gin.Context) {
 	}
 	resp, err := apiMcServerSvc.List(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
 }
 
 func getServerState(c *gin.Context) {
-	p := new(GetServerStateReq)
+	p := new(GetServerStateResp)
 	if err := c.BindJSON(p); err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 	}
 	resp, err := apiMcServerSvc.GetServerState(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -108,6 +116,8 @@ func detail(c *gin.Context) {
 	}
 	resp, err := apiMcServerSvc.Detail(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -120,6 +130,8 @@ func operateServer(c *gin.Context) {
 	}
 	resp, err := apiMcServerSvc.OperateServer(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -132,6 +144,8 @@ func updateServerInfo(c *gin.Context) {
 	}
 	resp, err := apiMcServerSvc.UpdateServerInfo(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -150,6 +164,7 @@ func RegisterServerMcServerGinServer(e *gin.Engine, server McServerGinServer) {
 
 // 返回数据格式化
 func getResponse(c *gin.Context, data interface{}) gin.H {
+	responseData := make(map[string]interface{})
 	code, ok := c.Get("code")
 	if !ok {
 		code = 0
@@ -163,6 +178,7 @@ func getResponse(c *gin.Context, data interface{}) gin.H {
 	responseData["data"] = data
 	return responseData
 }
+
 var (
 	serverAuthMiddleware []gin.HandlerFunc
 )

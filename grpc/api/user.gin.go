@@ -48,6 +48,8 @@ func login(c *gin.Context) {
 	}
 	resp, err := apiUserSvc.Login(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -60,6 +62,8 @@ func logout(c *gin.Context) {
 	}
 	resp, err := apiUserSvc.Logout(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -72,6 +76,8 @@ func info(c *gin.Context) {
 	}
 	resp, err := apiUserSvc.Info(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -84,6 +90,8 @@ func update(c *gin.Context) {
 	}
 	resp, err := apiUserSvc.Update(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -99,6 +107,7 @@ func RegisterUserUserGinServer(e *gin.Engine, server UserGinServer) {
 
 // 返回数据格式化
 func getResponse(c *gin.Context, data interface{}) gin.H {
+	responseData := make(map[string]interface{})
 	code, ok := c.Get("code")
 	if !ok {
 		code = 0
@@ -112,6 +121,7 @@ func getResponse(c *gin.Context, data interface{}) gin.H {
 	responseData["data"] = data
 	return responseData
 }
+
 var (
 	userAuthMiddleware []gin.HandlerFunc
 )

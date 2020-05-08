@@ -67,6 +67,8 @@ func getConfig(c *gin.Context) {
 	}
 	resp, err := apiAdminSvc.GetConfig(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -79,6 +81,8 @@ func updateConfig(c *gin.Context) {
 	}
 	resp, err := apiAdminSvc.UpdateConfig(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -91,6 +95,8 @@ func operatePlugin(c *gin.Context) {
 	}
 	resp, err := apiAdminSvc.OperatePlugin(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -103,6 +109,8 @@ func getConfigVal(c *gin.Context) {
 	}
 	resp, err := apiAdminSvc.GetConfigVal(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -115,6 +123,8 @@ func runCommand(c *gin.Context) {
 	}
 	resp, err := apiAdminSvc.RunCommand(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -127,6 +137,8 @@ func getLog(c *gin.Context) {
 	}
 	resp, err := apiAdminSvc.GetLog(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -139,6 +151,8 @@ func delTmpFlie(c *gin.Context) {
 	}
 	resp, err := apiAdminSvc.DelTmpFlie(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -151,6 +165,8 @@ func addUpToContainer(c *gin.Context) {
 	}
 	resp, err := apiAdminSvc.AddUpToContainer(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -163,6 +179,8 @@ func closeMcd(c *gin.Context) {
 	}
 	resp, err := apiAdminSvc.CloseMcd(c, p)
 	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
 		c.JSON(http.StatusOK, getResponse(c, nil))
 	}
 	c.JSON(http.StatusOK, getResponse(c, resp))
@@ -183,6 +201,7 @@ func RegisterAdminAdminGinServer(e *gin.Engine, server AdminGinServer) {
 
 // 返回数据格式化
 func getResponse(c *gin.Context, data interface{}) gin.H {
+	responseData := make(map[string]interface{})
 	code, ok := c.Get("code")
 	if !ok {
 		code = 0
@@ -196,6 +215,7 @@ func getResponse(c *gin.Context, data interface{}) gin.H {
 	responseData["data"] = data
 	return responseData
 }
+
 var (
 	adminAuthMiddleware []gin.HandlerFunc
 )

@@ -7,7 +7,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/container"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
 	"os"
@@ -203,14 +203,14 @@ func (m *MinecraftServerContainer) RestartById(id string) error {
 }
 
 // 获取所有服务端的配置
-func (m *MinecraftServerContainer) GetAllServerConf() []*json_struct.ServerConf {
+func (m *MinecraftServerContainer) GetAllServerConf() []*models.ServerConf {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	return m._getAllServerConf()
 }
 
-func (m *MinecraftServerContainer) _getAllServerConf() []*json_struct.ServerConf {
-	result := make([]*json_struct.ServerConf, 0)
+func (m *MinecraftServerContainer) _getAllServerConf() []*models.ServerConf {
+	result := make([]*models.ServerConf, 0)
 	for _, v := range m.minecraftServers {
 		result = append(result, v.GetServerConf())
 	}
@@ -219,7 +219,7 @@ func (m *MinecraftServerContainer) _getAllServerConf() []*json_struct.ServerConf
 }
 
 // 把根据配置添加服务端
-func (m *MinecraftServerContainer) AddServer(config *json_struct.ServerConf, isSave bool) {
+func (m *MinecraftServerContainer) AddServer(config *models.ServerConf, isSave bool) {
 	if config.Memory <= 0 {
 		config.Memory = constant.MC_DEFAULT_MEMORY
 	}
@@ -258,7 +258,7 @@ func (m *MinecraftServerContainer) GetAllServerObj() map[string]server.Minecraft
 }
 
 // 处理mc服务端文件
-func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, memory int) *json_struct.ServerConf {
+func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, memory int) *models.ServerConf {
 	path, _ := utils.GetCurrentPath()
 	entryId := uuid.NewV4().String()
 	_, filename := filepath.Split(filePath)
@@ -281,7 +281,7 @@ func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, mem
 	}
 
 	// 生成config
-	return &json_struct.ServerConf{
+	return &models.ServerConf{
 		Name:    filename,
 		RunPath: serverDir,
 		EntryId: entryId,
@@ -315,9 +315,9 @@ func (m *MinecraftServerContainer) loadDbServer() {
 }
 
 // 读取数据库中的服务端配置
-func (m *MinecraftServerContainer) getServerConfFromDb() []*json_struct.ServerConf {
+func (m *MinecraftServerContainer) getServerConfFromDb() []*models.ServerConf {
 	serversConfStr := GetFromDatabase(constant.MC_SERVER_DB_KEY)
-	var serversConf []*json_struct.ServerConf
+	var serversConf []*models.ServerConf
 	_ = json.Unmarshal([]byte(serversConfStr), &serversConf)
 	// 默认服务端未启动
 	for _, c := range serversConf {

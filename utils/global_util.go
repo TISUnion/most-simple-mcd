@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/olekukonko/tablewriter"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"net"
@@ -25,8 +25,8 @@ func PanicError(msg string, err error) {
 }
 
 // 创建confParam实例
-func NewConfParam(confKey, ConfVal, description string, level int, IsAlterable bool) *json_struct.ConfParam {
-	return &json_struct.ConfParam{
+func NewConfParam(confKey, ConfVal, description string, level int, IsAlterable bool) *models.ConfParam {
+	return &models.ConfParam{
 		ConfVal:        ConfVal,
 		DefaultConfVal: ConfVal,
 		Name:           confKey,
@@ -37,24 +37,24 @@ func NewConfParam(confKey, ConfVal, description string, level int, IsAlterable b
 }
 
 // 解析mc玩家发言
-func ParseMessage(originMsg []byte) *json_struct.ReciveMessage {
+func ParseMessage(originMsg []byte) *models.ReciveMessage {
 	re := regexp.MustCompile(parseMessageRGX)
 	match := re.FindStringSubmatch(string(originMsg))
 	if len(match) == 4 {
-		return &json_struct.ReciveMessage{
+		return &models.ReciveMessage{
 			Player:     match[2],
 			Time:       match[1],
 			Speak:      match[3],
 			OriginData: originMsg,
 		}
 	}
-	return &json_struct.ReciveMessage{OriginData: originMsg}
+	return &models.ReciveMessage{OriginData: originMsg}
 }
 
 // 解析mc玩家发言插件命令
-func ParsePluginCommand(msg string) *json_struct.PluginCommand {
+func ParsePluginCommand(msg string) *models.PluginCommand {
 	ctx := strings.Fields(msg)
-	res := &json_struct.PluginCommand{
+	res := &models.PluginCommand{
 		Command: strings.ToLower(ctx[0]),
 	}
 	if len(ctx) > 1 {

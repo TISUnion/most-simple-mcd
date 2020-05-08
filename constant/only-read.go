@@ -10,7 +10,7 @@ var (
 import (
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	models "github.com/TISUnion/most-simple-mcd/json-struct"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
@@ -68,7 +68,7 @@ func (p *{{.ENName}}Plugin) Start()              {}
 func (p *{{.ENName}}Plugin) Stop()               {}
 /* --------------------------------------------- */
 
-func (p *{{.ENName}}Plugin) HandleMessage(message *json_struct.ReciveMessage) {
+func (p *{{.ENName}}Plugin) HandleMessage(message *models.ReciveMessage) {
 	if message.Player == "" {
 		return
 	}
@@ -89,7 +89,7 @@ func (p *{{.ENName}}Plugin) HandleMessage(message *json_struct.ReciveMessage) {
 	}
 }
 
-func (p *{{.ENName}}Plugin) paramsHandle(player string, pc *json_struct.PluginCommand{{if .IsGlobal}}, mcServer server.MinecraftServer{{end}}) {
+func (p *{{.ENName}}Plugin) paramsHandle(player string, pc *models.PluginCommand{{if .IsGlobal}}, mcServer server.MinecraftServer{{end}}) {
     switch pc.Params[0] {
     // write code...
     default:

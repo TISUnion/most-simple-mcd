@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -24,7 +24,7 @@ type GinServer struct {
 	lock                *sync.Mutex
 	resourceWsPool      map[string][]*websocket.Conn
 	stdoutWsPool        map[string][]*websocket.Conn
-	stdoutChans         map[string]chan *json_struct.ReciveMessage
+	stdoutChans         map[string]chan *models.ReciveMessage
 	lockeResourceWsPool *sync.Mutex
 	lockeStdoutWsPool   *sync.Mutex
 }
@@ -45,7 +45,7 @@ func (g *GinServer) InitCallBack() {
 	RegisterRouter()
 	g.resourceWsPool = make(map[string][]*websocket.Conn)
 	g.stdoutWsPool = make(map[string][]*websocket.Conn)
-	g.stdoutChans = make(map[string]chan *json_struct.ReciveMessage)
+	g.stdoutChans = make(map[string]chan *models.ReciveMessage)
 
 	//  启用gzip压缩
 	g.router.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -96,7 +96,7 @@ func (g *GinServer) appendResourceWsToPool(ctx context.Context, serverId string,
 
 func (g *GinServer) resourceWebsocketBroadcast(ctx context.Context, serv server.MinecraftServer, cancelFunc context.CancelFunc) {
 	serv.StartMonitorServer()
-	var resouceChan chan *json_struct.MonitorMessage
+	var resouceChan chan *models.MonitorMessage
 	monitorServer := serv.GetServerMonitor()
 	if serv.GetServerMonitor() == nil {
 		cancelFunc()
@@ -105,7 +105,7 @@ func (g *GinServer) resourceWebsocketBroadcast(ctx context.Context, serv server.
 	}
 
 	serverId := serv.GetServerConf().EntryId
-	var resourceMsg *json_struct.MonitorMessage
+	var resourceMsg *models.MonitorMessage
 	for {
 		select {
 		case resourceMsg = <-resouceChan:
@@ -149,7 +149,7 @@ func (g *GinServer) appendStdWsToPool(serverId string, ws *websocket.Conn) {
 	defer g.lockeStdoutWsPool.Unlock()
 	g.stdoutWsPool[serverId] = append(g.stdoutWsPool[serverId], ws)
 	if _, ok := g.stdoutChans[serverId]; !ok {
-		g.stdoutChans[serverId] = make(chan *json_struct.ReciveMessage, 10)
+		g.stdoutChans[serverId] = make(chan *models.ReciveMessage, 10)
 		mcServ.RegisterSubscribeMessageChan(g.stdoutChans[serverId])
 		go g.stdoutWebsocketBroadcast(serverId)
 	}
@@ -174,7 +174,7 @@ func (g *GinServer) stdoutWebsocketBroadcast(serverId string) {
 }
 
 func (g *GinServer) listenStdinFromWs(serverId string, ws *websocket.Conn) {
-	commandReq := &json_struct.Command{}
+	commandReq := &models.Command{}
 	for {
 		err := ws.ReadJSON(commandReq)
 		if err != nil {

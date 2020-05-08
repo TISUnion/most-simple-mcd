@@ -2,7 +2,7 @@ package plugin
 
 import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 )
 
 // 插件管理服务器，每个mc服务端都会有一个实例
@@ -22,7 +22,7 @@ type PluginManager interface {
 	UnbanPlugin(string)
 
 	// 处理投递消息
-	HandleMessage(*json_struct.ReciveMessage)
+	HandleMessage(*models.ReciveMessage)
 
 	// 通知添加插件(已拥有，则不添加)，可用于动态添加插件
 	AddPlugin(Plugin)

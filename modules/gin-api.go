@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -122,13 +122,13 @@ func addUpToContainer(c *gin.Context) {
 
 // 用户登录
 func userLogin(c *gin.Context) {
-	var reqInfo json_struct.AdminUser
+	var reqInfo models.AdminUser
 	if err := c.BindJSON(&reqInfo); err != nil {
 		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}
-	var adminObj json_struct.AdminUser
+	var adminObj models.AdminUser
 	adminJson := GetFromDatabase(constant.DEFAULT_ACCOUNT_DB_KEY)
 	if adminJson == "" {
 		adminObj = *setDefaultAccount()
@@ -145,7 +145,7 @@ func userLogin(c *gin.Context) {
 			token = utils.Md5(fmt.Sprintf("%v%s", time.Now().UnixNano(), reqInfo.Password))
 			SetWiteTTLFromDatabase(constant.DEFAULT_TOKEN_DB_KEY, token, constant.DEFAULT_TOKEN_DB_KEY_EXPIRE)
 		}
-		c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", json_struct.UserToken{Token: token}))
+		c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", models.UserToken{Token: token}))
 		return
 	}
 	c.JSON(http.StatusOK, getResponse(constant.PASSWORD_ERROR, constant.PASSWORD_ERROR_MESSAGE, ""))
@@ -153,7 +153,7 @@ func userLogin(c *gin.Context) {
 
 // 用户信息获取
 func getInfo(c *gin.Context) {
-	var adminObj json_struct.AdminUser
+	var adminObj models.AdminUser
 	adminJson := GetFromDatabase(constant.DEFAULT_ACCOUNT_DB_KEY)
 	_ = json.Unmarshal([]byte(adminJson), &adminObj)
 	adminObj.Password = ""
@@ -233,6 +233,12 @@ func serversStdListen(c *gin.Context) {
 	ListenStdinFromWs(serverId, ws)
 }
 
+// 获取服务端列表
+func serversInfoList(c *gin.Context) {
+	ctr := GetMinecraftServerContainerInstance()
+	confs := ctr.GetAllServerConf()
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", confs))
+}
 
 // 获取服务端运行状态
 func getServerState(c *gin.Context) {
@@ -248,7 +254,7 @@ func getServerState(c *gin.Context) {
 		return
 	}
 	servCfg := serv.GetServerConf()
-	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", &json_struct.ServerRunState{State: servCfg.State}))
+	c.JSON(http.StatusOK, getResponse(constant.HTTP_OK, "", &models.ServerRunState{State: int(servCfg.State)}))
 }
 
 // 获取服务端详情
@@ -264,7 +270,7 @@ func serverDetail(c *gin.Context) {
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}
-	info := &json_struct.ServerDetail{
+	info := &models.ServerDetail{
 		ServInfo: serv.GetServerConf(),
 		PlgnInfo: serv.GetPluginsInfo(),
 	}
@@ -273,7 +279,7 @@ func serverDetail(c *gin.Context) {
 
 // 修改服务端信息
 func updateServerInfo(c *gin.Context) {
-	var reqInfo json_struct.ServerConf
+	var reqInfo models.ServerConf
 	if err := c.BindJSON(&reqInfo); err != nil {
 		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
@@ -311,7 +317,7 @@ func updateServerInfo(c *gin.Context) {
 
 // 向服务端执行一条命令
 func runCommand(c *gin.Context) {
-	var reqInfo json_struct.SingleCommand
+	var reqInfo models.SingleCommand
 	if err := c.BindJSON(&reqInfo); err != nil {
 		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
@@ -343,13 +349,18 @@ func getLog(c *gin.Context) {
 		}
 		runPath := filepath.Dir(serv.GetServerConf().RunPath)
 		originFilePath = filepath.Join(runPath, constant.LOG_DIR)
+		// 压缩
+		_ = utils.CompressFile(originFilePath, filePath)
+
 	case constant.LOG_TYPE_GIN:
 		originFilePath = filepath.Join(GetConfVal(constant.WORKSPACE), constant.LOG_DIR, constant.GIN_LOG_NAME)
+		// 压缩
+		_ = utils.CompressFile(originFilePath, filePath)
 	case constant.LOG_TYPE_DEFAULT:
 		originFilePath = filepath.Join(GetConfVal(constant.WORKSPACE), constant.LOG_DIR, constant.DEFAULT_LOG_NAME)
+		// 压缩
+		_ = utils.CompressFile(originFilePath, filePath)
 	}
-	// 压缩
-	_ = utils.CompressFile(originFilePath, filePath)
 	c.FileAttachment(filePath, logName)
 }
 
@@ -368,7 +379,7 @@ func delTmpFlie(c *gin.Context) {
 
 // 服务端操作
 func operateServer(c *gin.Context) {
-	ops := &json_struct.OperateServer{}
+	ops := &models.OperateServer{}
 	if err := c.BindJSON(ops); err != nil {
 		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
@@ -395,7 +406,7 @@ func operateServer(c *gin.Context) {
 
 // 服务端插件操作
 func operatePlugin(c *gin.Context) {
-	opp := &json_struct.OperatePlugin{}
+	opp := &models.OperatePlugin{}
 	if err := c.BindJSON(opp); err != nil {
 		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
@@ -423,14 +434,14 @@ func operatePlugin(c *gin.Context) {
 // 修改用户信息
 func updateUserData(c *gin.Context) {
 	// 获取用户设置信息
-	var reqInfo json_struct.AdminUser
+	var reqInfo models.AdminUser
 	if err := c.BindJSON(&reqInfo); err != nil {
 		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
 		return
 	}
 	// 获取数据库信息
-	var adminObj json_struct.AdminUser
+	var adminObj models.AdminUser
 	adminJson := GetFromDatabase(constant.DEFAULT_ACCOUNT_DB_KEY)
 	if err := json.Unmarshal([]byte(adminJson), &adminObj); err != nil {
 		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
@@ -467,7 +478,7 @@ func getConfigVal(c *gin.Context) {
 // 获取配置内容
 func getConfig(c *gin.Context) {
 	// 获取用户设置信息
-	jsonObj := make([]*json_struct.ConfParam, 0)
+	jsonObj := make([]*models.ConfParam, 0)
 	conf := GetConfInstance().GetConfigObj()
 	for _, v := range conf {
 		jsonObj = append(jsonObj, v)
@@ -478,7 +489,7 @@ func getConfig(c *gin.Context) {
 // 更新配置内容
 func updateConfig(c *gin.Context) {
 	// 获取用户设置信息
-	var reqInfo []*json_struct.ConfParam
+	var reqInfo []*models.ConfParam
 	if err := c.BindJSON(&reqInfo); err != nil {
 		WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
 		c.JSON(http.StatusOK, getResponse(constant.HTTP_PARAMS_ERROR, constant.HTTP_PARAMS_ERROR_MESSAGE, ""))
@@ -494,9 +505,9 @@ func updateConfig(c *gin.Context) {
 }
 
 // 设置初始账号密码
-func setDefaultAccount() *json_struct.AdminUser {
+func setDefaultAccount() *models.AdminUser {
 	pwd := utils.Md5(constant.DEFAULT_PASSWORD)
-	adminObj := &json_struct.AdminUser{
+	adminObj := &models.AdminUser{
 		Nickname: constant.DEFAULT_ACCOUNT,
 		Account:  constant.DEFAULT_ACCOUNT,
 		Password: pwd,

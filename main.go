@@ -7,6 +7,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/modules"
 	pack_webfile "github.com/TISUnion/most-simple-mcd/pack-webfile"
 	"github.com/TISUnion/most-simple-mcd/plugins"
+	"github.com/TISUnion/most-simple-mcd/services"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
 	"runtime"
@@ -20,6 +21,7 @@ func ModuleInit() {
 	// 解压前端静态文件
 	_ = pack_webfile.UnCompress()
 	modules.GetMinecraftServerContainerInstance()
+	services.RegisterServices()
 	_ = modules.GetGinServerInstance().Start()
 }
 

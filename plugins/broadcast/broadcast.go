@@ -5,7 +5,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
@@ -64,7 +64,7 @@ func (p *BroadcastPlugin) Stop()  {}
 
 /* --------------------------------------------- */
 
-func (p *BroadcastPlugin) HandleMessage(message *json_struct.ReciveMessage) {
+func (p *BroadcastPlugin) HandleMessage(message *models.ReciveMessage) {
 	if message.Player == "" {
 		return
 	}
@@ -83,7 +83,7 @@ func (p *BroadcastPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 	}
 }
 
-func (p *BroadcastPlugin) paramsHandle(player string, pc *json_struct.PluginCommand, mcServer server.MinecraftServer) {
+func (p *BroadcastPlugin) paramsHandle(player string, pc *models.PluginCommand, mcServer server.MinecraftServer) {
 	switch pc.Params[0] {
 	case "help", "-h":
 		_ = mcServer.TellrawCommand(player, helpDescription)

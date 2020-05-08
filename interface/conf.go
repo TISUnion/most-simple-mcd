@@ -1,6 +1,6 @@
 package _interface
 
-import json_struct "github.com/TISUnion/most-simple-mcd/models"
+import "github.com/TISUnion/most-simple-mcd/models"
 
 type Conf interface {
 	CallBack
@@ -11,7 +11,7 @@ type Conf interface {
 
 	// GetConfigObj
 	// 获取所有配置对象
-	GetConfigObj() map[string]*json_struct.ConfParam
+	GetConfigObj() map[string]*models.ConfParam
 
 	// GetConfigKeys
 	// 获取所有配置的键值

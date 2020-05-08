@@ -14,7 +14,7 @@ service McServer {
     rpc list (ListReq) returns (ListResp);
     // 获取服务端信息列表
     // `middleware:"auth"`
-    rpc getServerState (GetServerStateReq) returns (GetServerStateReq);
+    rpc getServerState (GetServerStateReq) returns (GetServerStateResp);
     // 获取服务端详情
     // `middleware:"auth"`
     rpc detail (DetailReq) returns (DetailResp);

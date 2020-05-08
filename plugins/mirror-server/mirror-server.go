@@ -6,7 +6,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/interface/container"
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
@@ -102,7 +102,7 @@ func (p *MirrorServerPlugin) Stop()  {}
 
 /* --------------------------------------------- */
 
-func (p *MirrorServerPlugin) HandleMessage(message *json_struct.ReciveMessage) {
+func (p *MirrorServerPlugin) HandleMessage(message *models.ReciveMessage) {
 	if message.Player == "" {
 		return
 	}
@@ -121,7 +121,7 @@ func (p *MirrorServerPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 	}
 }
 
-func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginCommand, mcServer server.MinecraftServer) {
+func (p *MirrorServerPlugin) paramsHandle(player string, pc *models.PluginCommand, mcServer server.MinecraftServer) {
 	switch pc.Params[0] {
 	case "list", "-l":
 		data := make([][]string, 0)
@@ -144,7 +144,7 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 		if !ok {
 			return
 		}
-		mirrorSrvConf := &json_struct.ServerConf{
+		mirrorSrvConf := &models.ServerConf{
 			EntryId:  mirrorId,
 			Name:     name,
 			CmdStr:   utils.GetCommandArr(constant.MC_DEFAULT_MEMORY, runPath),
@@ -195,7 +195,7 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 }
 
 // 构建镜像
-func (p *MirrorServerPlugin) buildMirror(conf *json_struct.ServerConf, id string) (path string, ok bool) {
+func (p *MirrorServerPlugin) buildMirror(conf *models.ServerConf, id string) (path string, ok bool) {
 	serverPath, filename := filepath.Split(conf.RunPath)
 	mirrorPath := filepath.Join(modules.GetConfVal(constant.WORKSPACE), MC_MIRROR_DIR, id)
 	mirrorRunPath := filepath.Join(mirrorPath, id+constant.JAR_SUF)

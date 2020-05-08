@@ -1,7 +1,5 @@
 package models
 
-import "github.com/TISUnion/most-simple-mcd/grpc/api"
-
 // 服务器配置
 type ServerConf struct {
 	// EntryId
@@ -52,44 +50,4 @@ type ServerConf struct {
 
 	// 本机的ip
 	Ips []string `json:"ips"`
-}
-
-// 模型转数组pb对象数组
-func ServerConfObjs2ServerConfPbs(srvConfList []*ServerConf) []*api.ListResp_Record {
-	res := make([]*api.ListResp_Record, 0)
-	for _, c := range srvConfList {
-		res = append(res, &api.ListResp_Record{
-			EntryId:        c.EntryId,
-			Name:           c.Name,
-			CmdStr:         c.CmdStr,
-			Port:           c.Port,
-			RunPath:        c.RunPath,
-			IsMirror:       c.IsMirror,
-			IsStartMonitor: c.IsStartMonitor,
-			Memory:         c.Memory,
-			Version:        c.Version,
-			GameType:       c.GameType,
-			State:          c.State,
-			Ips:            c.Ips,
-		})
-	}
-	return res
-}
-
-// 模型转pb对象
-func (c *ServerConf) ServerConfObj2ServerConfPb() *api.ListResp_Record {
-	return &api.ListResp_Record{
-		EntryId:        c.EntryId,
-		Name:           c.Name,
-		CmdStr:         c.CmdStr,
-		Port:           c.Port,
-		RunPath:        c.RunPath,
-		IsMirror:       c.IsMirror,
-		IsStartMonitor: c.IsStartMonitor,
-		Memory:         c.Memory,
-		Version:        c.Version,
-		GameType:       c.GameType,
-		State:          c.State,
-		Ips:            c.Ips,
-	}
 }

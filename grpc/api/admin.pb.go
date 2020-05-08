@@ -4,8 +4,12 @@
 package api
 
 import (
+	context "context"
 	fmt "fmt"
 	proto "github.com/lightbrotherV/gin-protobuf/proto"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -942,4 +946,388 @@ var fileDescriptor_73a7fc70dcc2027c = []byte{
 	0x3c, 0x82, 0x86, 0x3f, 0x73, 0x2a, 0x3e, 0x29, 0x41, 0x72, 0x9e, 0x76, 0xf6, 0xd6, 0x54, 0xb5,
 	0x7a, 0x5b, 0xfb, 0x52, 0xa5, 0x8a, 0x5f, 0xd6, 0xd3, 0x3f, 0xda, 0x57, 0xbf, 0x03, 0x00, 0x00,
 	0xff, 0xff, 0x0d, 0x5a, 0x67, 0x1b, 0x77, 0x07, 0x00, 0x00,
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConnInterface
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion6
+
+// AdminClient is the client API for Admin service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type AdminClient interface {
+	// 获取配置
+	GetConfig(ctx context.Context, in *GetConfigReq, opts ...grpc.CallOption) (*GetConfigResp, error)
+	// 修改配置
+	UpdateConfig(ctx context.Context, in *UpdateConfigReq, opts ...grpc.CallOption) (*UpdateConfigResp, error)
+	// 服务端插件操作
+	OperatePlugin(ctx context.Context, in *OperatePluginReq, opts ...grpc.CallOption) (*OperatePluginResp, error)
+	// 服务端插件操作
+	GetConfigVal(ctx context.Context, in *GetConfigValReq, opts ...grpc.CallOption) (*GetConfigValResp, error)
+	// 向服务端执行一条命令
+	RunCommand(ctx context.Context, in *RunCommandReq, opts ...grpc.CallOption) (*RunCommandResp, error)
+	// 获取服务端日志
+	GetLog(ctx context.Context, in *GetLogReq, opts ...grpc.CallOption) (*GetLogResp, error)
+	// 删除临时文件
+	DelTmpFlie(ctx context.Context, in *DelTmpFlieReq, opts ...grpc.CallOption) (*DelTmpFlieResp, error)
+	// 获取上传服务端文件，并注入到容器中
+	AddUpToContainer(ctx context.Context, in *AddUpToContainerReq, opts ...grpc.CallOption) (*AddUpToContainerResp, error)
+	CloseMcd(ctx context.Context, in *CloseMcdReq, opts ...grpc.CallOption) (*CloseMcdResp, error)
+}
+
+type adminClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewAdminClient(cc grpc.ClientConnInterface) AdminClient {
+	return &adminClient{cc}
+}
+
+func (c *adminClient) GetConfig(ctx context.Context, in *GetConfigReq, opts ...grpc.CallOption) (*GetConfigResp, error) {
+	out := new(GetConfigResp)
+	err := c.cc.Invoke(ctx, "/most.simple.mcd.Admin/getConfig", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) UpdateConfig(ctx context.Context, in *UpdateConfigReq, opts ...grpc.CallOption) (*UpdateConfigResp, error) {
+	out := new(UpdateConfigResp)
+	err := c.cc.Invoke(ctx, "/most.simple.mcd.Admin/updateConfig", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) OperatePlugin(ctx context.Context, in *OperatePluginReq, opts ...grpc.CallOption) (*OperatePluginResp, error) {
+	out := new(OperatePluginResp)
+	err := c.cc.Invoke(ctx, "/most.simple.mcd.Admin/operatePlugin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) GetConfigVal(ctx context.Context, in *GetConfigValReq, opts ...grpc.CallOption) (*GetConfigValResp, error) {
+	out := new(GetConfigValResp)
+	err := c.cc.Invoke(ctx, "/most.simple.mcd.Admin/getConfigVal", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) RunCommand(ctx context.Context, in *RunCommandReq, opts ...grpc.CallOption) (*RunCommandResp, error) {
+	out := new(RunCommandResp)
+	err := c.cc.Invoke(ctx, "/most.simple.mcd.Admin/runCommand", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) GetLog(ctx context.Context, in *GetLogReq, opts ...grpc.CallOption) (*GetLogResp, error) {
+	out := new(GetLogResp)
+	err := c.cc.Invoke(ctx, "/most.simple.mcd.Admin/getLog", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) DelTmpFlie(ctx context.Context, in *DelTmpFlieReq, opts ...grpc.CallOption) (*DelTmpFlieResp, error) {
+	out := new(DelTmpFlieResp)
+	err := c.cc.Invoke(ctx, "/most.simple.mcd.Admin/delTmpFlie", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) AddUpToContainer(ctx context.Context, in *AddUpToContainerReq, opts ...grpc.CallOption) (*AddUpToContainerResp, error) {
+	out := new(AddUpToContainerResp)
+	err := c.cc.Invoke(ctx, "/most.simple.mcd.Admin/addUpToContainer", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) CloseMcd(ctx context.Context, in *CloseMcdReq, opts ...grpc.CallOption) (*CloseMcdResp, error) {
+	out := new(CloseMcdResp)
+	err := c.cc.Invoke(ctx, "/most.simple.mcd.Admin/closeMcd", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// AdminServer is the server API for Admin service.
+type AdminServer interface {
+	// 获取配置
+	GetConfig(context.Context, *GetConfigReq) (*GetConfigResp, error)
+	// 修改配置
+	UpdateConfig(context.Context, *UpdateConfigReq) (*UpdateConfigResp, error)
+	// 服务端插件操作
+	OperatePlugin(context.Context, *OperatePluginReq) (*OperatePluginResp, error)
+	// 服务端插件操作
+	GetConfigVal(context.Context, *GetConfigValReq) (*GetConfigValResp, error)
+	// 向服务端执行一条命令
+	RunCommand(context.Context, *RunCommandReq) (*RunCommandResp, error)
+	// 获取服务端日志
+	GetLog(context.Context, *GetLogReq) (*GetLogResp, error)
+	// 删除临时文件
+	DelTmpFlie(context.Context, *DelTmpFlieReq) (*DelTmpFlieResp, error)
+	// 获取上传服务端文件，并注入到容器中
+	AddUpToContainer(context.Context, *AddUpToContainerReq) (*AddUpToContainerResp, error)
+	CloseMcd(context.Context, *CloseMcdReq) (*CloseMcdResp, error)
+}
+
+// UnimplementedAdminServer can be embedded to have forward compatible implementations.
+type UnimplementedAdminServer struct {
+}
+
+func (*UnimplementedAdminServer) GetConfig(ctx context.Context, req *GetConfigReq) (*GetConfigResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
+}
+func (*UnimplementedAdminServer) UpdateConfig(ctx context.Context, req *UpdateConfigReq) (*UpdateConfigResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateConfig not implemented")
+}
+func (*UnimplementedAdminServer) OperatePlugin(ctx context.Context, req *OperatePluginReq) (*OperatePluginResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OperatePlugin not implemented")
+}
+func (*UnimplementedAdminServer) GetConfigVal(ctx context.Context, req *GetConfigValReq) (*GetConfigValResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetConfigVal not implemented")
+}
+func (*UnimplementedAdminServer) RunCommand(ctx context.Context, req *RunCommandReq) (*RunCommandResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RunCommand not implemented")
+}
+func (*UnimplementedAdminServer) GetLog(ctx context.Context, req *GetLogReq) (*GetLogResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLog not implemented")
+}
+func (*UnimplementedAdminServer) DelTmpFlie(ctx context.Context, req *DelTmpFlieReq) (*DelTmpFlieResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DelTmpFlie not implemented")
+}
+func (*UnimplementedAdminServer) AddUpToContainer(ctx context.Context, req *AddUpToContainerReq) (*AddUpToContainerResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUpToContainer not implemented")
+}
+func (*UnimplementedAdminServer) CloseMcd(ctx context.Context, req *CloseMcdReq) (*CloseMcdResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CloseMcd not implemented")
+}
+
+func RegisterAdminServer(s *grpc.Server, srv AdminServer) {
+	s.RegisterService(&_Admin_serviceDesc, srv)
+}
+
+func _Admin_GetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConfigReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).GetConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/most.simple.mcd.Admin/GetConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).GetConfig(ctx, req.(*GetConfigReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_UpdateConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateConfigReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).UpdateConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/most.simple.mcd.Admin/UpdateConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).UpdateConfig(ctx, req.(*UpdateConfigReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_OperatePlugin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OperatePluginReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).OperatePlugin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/most.simple.mcd.Admin/OperatePlugin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).OperatePlugin(ctx, req.(*OperatePluginReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_GetConfigVal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConfigValReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).GetConfigVal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/most.simple.mcd.Admin/GetConfigVal",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).GetConfigVal(ctx, req.(*GetConfigValReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_RunCommand_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RunCommandReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).RunCommand(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/most.simple.mcd.Admin/RunCommand",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).RunCommand(ctx, req.(*RunCommandReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_GetLog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLogReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).GetLog(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/most.simple.mcd.Admin/GetLog",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).GetLog(ctx, req.(*GetLogReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_DelTmpFlie_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DelTmpFlieReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).DelTmpFlie(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/most.simple.mcd.Admin/DelTmpFlie",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).DelTmpFlie(ctx, req.(*DelTmpFlieReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_AddUpToContainer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUpToContainerReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).AddUpToContainer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/most.simple.mcd.Admin/AddUpToContainer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).AddUpToContainer(ctx, req.(*AddUpToContainerReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_CloseMcd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CloseMcdReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).CloseMcd(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/most.simple.mcd.Admin/CloseMcd",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).CloseMcd(ctx, req.(*CloseMcdReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Admin_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "most.simple.mcd.Admin",
+	HandlerType: (*AdminServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "getConfig",
+			Handler:    _Admin_GetConfig_Handler,
+		},
+		{
+			MethodName: "updateConfig",
+			Handler:    _Admin_UpdateConfig_Handler,
+		},
+		{
+			MethodName: "operatePlugin",
+			Handler:    _Admin_OperatePlugin_Handler,
+		},
+		{
+			MethodName: "getConfigVal",
+			Handler:    _Admin_GetConfigVal_Handler,
+		},
+		{
+			MethodName: "runCommand",
+			Handler:    _Admin_RunCommand_Handler,
+		},
+		{
+			MethodName: "getLog",
+			Handler:    _Admin_GetLog_Handler,
+		},
+		{
+			MethodName: "delTmpFlie",
+			Handler:    _Admin_DelTmpFlie_Handler,
+		},
+		{
+			MethodName: "addUpToContainer",
+			Handler:    _Admin_AddUpToContainer_Handler,
+		},
+		{
+			MethodName: "closeMcd",
+			Handler:    _Admin_CloseMcd_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "admin.proto",
 }

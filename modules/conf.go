@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
 	"io/ioutil"
@@ -17,7 +17,7 @@ import (
 
 var (
 	_appConf         *Conf
-	DefaultConfParam map[string]*json_struct.ConfParam
+	DefaultConfParam map[string]*models.ConfParam
 )
 
 // Conf
@@ -25,7 +25,7 @@ var (
 type Conf struct {
 	// Confs
 	// 配置
-	confs map[string]*json_struct.ConfParam
+	confs map[string]*models.ConfParam
 
 	// ConfKeys
 	// 所有配置键值
@@ -36,13 +36,13 @@ type Conf struct {
 	lock *sync.Mutex
 }
 
-func (c *Conf) GetConfigObj() map[string]*json_struct.ConfParam {
+func (c *Conf) GetConfigObj() map[string]*models.ConfParam {
 	return c.confs
 }
 
 func ConfInit() {
 	// 注册默认配置
-	DefaultConfParam = make(map[string]*json_struct.ConfParam)
+	DefaultConfParam = make(map[string]*models.ConfParam)
 	RegisterConfig(constant.IS_RELOAD_CONF, "false", constant.IS_RELOAD_CONF_DESCREPTION, constant.CONF_DEFAULT_LEVEL, true)
 	RegisterConfig(constant.RELOAD_CONF_INTERVAL, "5000", constant.RELOAD_CONF_INTERVAL_DESCREPTION, constant.CONF_DEFAULT_LEVEL, true)
 	RegisterConfig(constant.IS_MANAGE_HTTP, "true", constant.IS_MANAGE_HTTP_DESCREPTION, constant.CONF_DEFAULT_LEVEL, false)
@@ -219,7 +219,7 @@ func (c *Conf) SetConfParam(Name, ConfVal, description string, level int) {
 func (c *Conf) RegisterConfParam(confKey, ConfVal, description string, level int, IsAlterable bool) {
 	if _, ok := c.confs[confKey]; !ok {
 		c.ConfKeys = append(c.ConfKeys, confKey)
-		c.confs[confKey] = &json_struct.ConfParam{
+		c.confs[confKey] = &models.ConfParam{
 			ConfVal:        ConfVal,
 			Name:           confKey,
 			Level:          level,
@@ -269,7 +269,7 @@ func GetConfInstance() _interface.Conf {
 	_appConf = &Conf{
 		lock:     &sync.Mutex{},
 		ConfKeys: make([]string, 0),
-		confs:    make(map[string]*json_struct.ConfParam),
+		confs:    make(map[string]*models.ConfParam),
 	}
 	// 注册回调
 	RegisterCallBack(_appConf)
@@ -277,7 +277,7 @@ func GetConfInstance() _interface.Conf {
 }
 
 // 设置ini配置对象
-func setIniCfg(data map[string]*json_struct.ConfParam) *ini.File {
+func setIniCfg(data map[string]*models.ConfParam) *ini.File {
 	cfg := ini.Empty()
 	sec, _ := cfg.NewSection(ini.DefaultSection)
 	for k, v := range data {

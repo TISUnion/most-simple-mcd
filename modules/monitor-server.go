@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/process"
@@ -17,7 +17,7 @@ var (
 )
 
 type MonitorServer struct {
-	messageChan chan *json_struct.MonitorMessage
+	messageChan chan *models.MonitorMessage
 	serverId    string
 	serverPid   int
 	processObj  *process.Process
@@ -25,7 +25,7 @@ type MonitorServer struct {
 	lock        *sync.Mutex
 }
 
-func (m *MonitorServer) GetMessageChan() chan *json_struct.MonitorMessage {
+func (m *MonitorServer) GetMessageChan() chan *models.MonitorMessage {
 	return m.messageChan
 }
 
@@ -69,7 +69,7 @@ func (m *MonitorServer) GetMonitorMessage() {
 	memoryInfo, _ := m.processObj.MemoryInfo()
 
 	virtualMem, _ := mem.VirtualMemory()
-	msg := &json_struct.MonitorMessage{
+	msg := &models.MonitorMessage{
 		CpuUsedPercent:           cpuPercent,
 		MemoryUsedPercent:        memoryPercent,
 		VirtualMemoryUsedPercent: utils.Uint64Tofloat64(memoryInfo.VMS) / utils.Uint64Tofloat64(virtualMem.Total) * 100,
@@ -90,7 +90,7 @@ func (m *MonitorServer) _stop() error {
 	jobC := GetJobContainerInstance()
 	jobC.StopJob(m.jobName)
 	// 重置管道，防止有数据遗留在管道中，下次被读出
-	m.messageChan = make(chan *json_struct.MonitorMessage, 10)
+	m.messageChan = make(chan *models.MonitorMessage, 10)
 	return nil
 }
 
@@ -109,7 +109,7 @@ func (m *MonitorServer) Restart() error {
 
 func NewMonitorServer(id string, pid int) server.MonitorServer {
 	ms := &MonitorServer{
-		messageChan: make(chan *json_struct.MonitorMessage, 10),
+		messageChan: make(chan *models.MonitorMessage, 10),
 		serverId:    id,
 		serverPid:   pid,
 		jobName:     fmt.Sprintf("monitor:%d", id),

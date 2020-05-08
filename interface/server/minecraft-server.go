@@ -1,6 +1,6 @@
 package server
 
-import json_struct "github.com/TISUnion/most-simple-mcd/models"
+import "github.com/TISUnion/most-simple-mcd/models"
 
 type MinecraftServer interface {
 	BasicServer
@@ -33,10 +33,10 @@ type MinecraftServer interface {
 	Rename(string)
 
 	// 获取服务配置
-	GetServerConf() *json_struct.ServerConf
+	GetServerConf() *models.ServerConf
 
 	// 修改服务配置
-	SetServerConf(*json_struct.ServerConf)
+	SetServerConf(*models.ServerConf)
 
 	// 获取资源监控服务
 	GetServerMonitor() MonitorServer
@@ -45,7 +45,7 @@ type MinecraftServer interface {
 	GetServerEntryId() string
 
 	// 注册订阅该服务端消息管道，PS：必须保证管道必须一直是被消费中！
-	RegisterSubscribeMessageChan(chan *json_struct.ReciveMessage)
+	RegisterSubscribeMessageChan(chan *models.ReciveMessage)
 
 	// 启动资源监控服务(只有关闭后才会启动)
 	StartMonitorServer()
@@ -57,7 +57,7 @@ type MinecraftServer interface {
 	UnbanPlugin(string)
 
 	// 获取插件配置
-	GetPluginsInfo()[]*json_struct.PluginInfo
+	GetPluginsInfo()[]*models.PluginInfo
 
 	// 关闭资源监控服务
 	StopMonitorServer()

@@ -8,7 +8,7 @@ import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
 	"io"
@@ -27,7 +27,7 @@ var (
 // MinecraftServer
 // mc服务器子进程对象
 type MinecraftServer struct {
-	*json_struct.ServerConf
+	*models.ServerConf
 
 	// CmdObj
 	//子进程实例
@@ -51,7 +51,7 @@ type MinecraftServer struct {
 
 	// messageChan
 	// 玩家发言存储chan
-	messageChan chan *json_struct.ReciveMessage
+	messageChan chan *models.ReciveMessage
 
 	// MonitorServer
 	// 资源监听器
@@ -68,7 +68,7 @@ type MinecraftServer struct {
 	logger _interface.Log
 
 	// 其他模块订阅服务的消息推送管道
-	subscribeMessageChans []chan *json_struct.ReciveMessage
+	subscribeMessageChans []chan *models.ReciveMessage
 
 	// 服务端关闭回调
 	mcCloseCallback []func(string)
@@ -89,11 +89,11 @@ func (m *MinecraftServer) UnbanPlugin(pluginId string) {
 }
 
 // 获取插件信息
-func (m *MinecraftServer) GetPluginsInfo() []*json_struct.PluginInfo {
-	res := make([]*json_struct.PluginInfo, 0)
+func (m *MinecraftServer) GetPluginsInfo() []*models.PluginInfo {
+	res := make([]*models.PluginInfo, 0)
 	ablePlugins := m.pluginManager.GetAblePlugins()
 	for _, p := range ablePlugins {
-		res = append(res, &json_struct.PluginInfo{
+		res = append(res, &models.PluginInfo{
 			Name:            p.GetName(),
 			Id:              p.GetId(),
 			IsBan:           false,
@@ -104,7 +104,7 @@ func (m *MinecraftServer) GetPluginsInfo() []*json_struct.PluginInfo {
 	}
 	disablePlugins := m.pluginManager.GetDisablePlugins()
 	for _, p := range disablePlugins {
-		res = append(res, &json_struct.PluginInfo{
+		res = append(res, &models.PluginInfo{
 			Name:            p.GetName(),
 			Id:              p.GetId(),
 			IsBan:           true,
@@ -116,7 +116,7 @@ func (m *MinecraftServer) GetPluginsInfo() []*json_struct.PluginInfo {
 	return res
 }
 
-func (m *MinecraftServer) RegisterSubscribeMessageChan(c chan *json_struct.ReciveMessage) {
+func (m *MinecraftServer) RegisterSubscribeMessageChan(c chan *models.ReciveMessage) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -146,11 +146,11 @@ func (m *MinecraftServer) GetServerMonitor() server.MonitorServer {
 	return m.monitorServer
 }
 
-func (m *MinecraftServer) GetServerConf() *json_struct.ServerConf {
+func (m *MinecraftServer) GetServerConf() *models.ServerConf {
 	return m.ServerConf
 }
 
-func (m *MinecraftServer) SetServerConf(c *json_struct.ServerConf) {
+func (m *MinecraftServer) SetServerConf(c *models.ServerConf) {
 	m.ServerConf = c
 }
 
@@ -601,11 +601,11 @@ func (m *MinecraftServer) initLocalIps() {
 
 // NewMinecraftServer
 // 新建一个mc服务端进程
-func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServer {
+func NewMinecraftServer(serverConf *models.ServerConf) server.MinecraftServer {
 	minecraftServer := &MinecraftServer{
 		ServerConf:  serverConf,
 		lock:        &sync.Mutex{},
-		messageChan: make(chan *json_struct.ReciveMessage, 10),
+		messageChan: make(chan *models.ReciveMessage, 10),
 		logger:      AddLog(serverConf.EntryId),
 	}
 	RegisterCallBack(minecraftServer)

@@ -4,7 +4,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/models"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
@@ -78,7 +78,7 @@ func (p *BasicPlugin) Stop()  {}
 
 /* --------------------------------------------- */
 
-func (p *BasicPlugin) HandleMessage(message *json_struct.ReciveMessage) {
+func (p *BasicPlugin) HandleMessage(message *models.ReciveMessage) {
 	if message.Player == "" {
 		return
 	}
@@ -93,7 +93,7 @@ func (p *BasicPlugin) HandleMessage(message *json_struct.ReciveMessage) {
 	}
 }
 
-func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand) {
+func (p *BasicPlugin) paramsHandle(player string, pc *models.PluginCommand) {
 	switch pc.Params[0] {
 	case "info", "-if":
 		header := []string{"id", "名称", "端口", "内存(单位：M)", "版本", "模式"}
@@ -179,7 +179,7 @@ func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand)
 	}
 }
 
-func (p *BasicPlugin) getPluginByCmd(cmd string) *json_struct.PluginInfo {
+func (p *BasicPlugin) getPluginByCmd(cmd string) *models.PluginInfo {
 	aPlcfg := p.mcServer.GetPluginsInfo()
 	for _, plcfg := range aPlcfg {
 		if cmd == plcfg.CommandName {
