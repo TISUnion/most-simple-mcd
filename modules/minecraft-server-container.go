@@ -258,7 +258,7 @@ func (m *MinecraftServerContainer) GetAllServerObj() map[string]server.Minecraft
 }
 
 // 处理mc服务端文件
-func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, memory int) *models.ServerConf {
+func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, memory int64) *models.ServerConf {
 	path, _ := utils.GetCurrentPath()
 	entryId := uuid.NewV4().String()
 	_, filename := filepath.Split(filePath)

@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	stateMap map[int]string
+	stateMap map[int64]string
 )
 
 type BasicPlugin struct {
@@ -62,7 +62,7 @@ func (p *BasicPlugin) Init(mcServer server.MinecraftServer) {
 func (p *BasicPlugin) ChangeConfCallBack() {}
 func (p *BasicPlugin) DestructCallBack()   {}
 func (p *BasicPlugin) InitCallBack() {
-	stateMap = make(map[int]string)
+	stateMap = make(map[int64]string)
 	// 0.未启动 1.启动  -1.正在启动 -2.正在关闭
 	stateMap[constant.MC_STATE_STOP] = "未启动"
 	stateMap[constant.MC_STATE_START] = "启动"
@@ -98,7 +98,7 @@ func (p *BasicPlugin) paramsHandle(player string, pc *models.PluginCommand) {
 	case "info", "-if":
 		header := []string{"id", "名称", "端口", "内存(单位：M)", "版本", "模式"}
 		cfg := p.mcServer.GetServerConf()
-		data := [][]string{{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.Itoa(cfg.Port), strconv.Itoa(cfg.Memory), cfg.Version, cfg.GameType}}
+		data := [][]string{{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.FormatInt(cfg.Port, 10), strconv.FormatInt(cfg.Memory, 10), cfg.Version, cfg.GameType}}
 		p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
 	case "infos", "-ifs":
 		header := []string{"id", "名称", "端口", "内存(单位：M)", "版本", "模式", "运行状态"}
@@ -108,7 +108,7 @@ func (p *BasicPlugin) paramsHandle(player string, pc *models.PluginCommand) {
 		for _, cfg := range aCfg {
 			// 镜像不展示
 			if !cfg.IsMirror {
-				data = append(data, []string{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.Itoa(cfg.Port), strconv.Itoa(cfg.Memory), cfg.Version, cfg.GameType, stateMap[cfg.State]})
+				data = append(data, []string{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.FormatInt(cfg.Port, 10), strconv.FormatInt(cfg.Memory, 10), cfg.Version, cfg.GameType, stateMap[cfg.State]})
 			}
 		}
 		p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))

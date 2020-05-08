@@ -27,7 +27,7 @@ type MinecraftServer interface {
 
 	// 修改内存使用阈值（单位M）
 	// 为0表示不修改
-	SetMemory(int)
+	SetMemory(int64)
 
 	// 修改服务器名称
 	Rename(string)

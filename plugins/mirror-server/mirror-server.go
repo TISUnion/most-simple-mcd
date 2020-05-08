@@ -28,7 +28,7 @@ const (
 )
 
 var (
-	stateMap map[int]string
+	stateMap map[int64]string
 	listHead []string
 )
 
@@ -74,9 +74,9 @@ func (p *MirrorServerPlugin) Init(mcServer server.MinecraftServer) {
 /* ------------------回调接口-------------------- */
 func (p *MirrorServerPlugin) ChangeConfCallBack() {}
 func (p *MirrorServerPlugin) DestructCallBack()   {}
-func (p *MirrorServerPlugin) InitCallBack()       {
+func (p *MirrorServerPlugin) InitCallBack() {
 	p.mcSaveState = make(map[string]bool)
-	stateMap = make(map[int]string)
+	stateMap = make(map[int64]string)
 	p.savedChan = make(chan struct{})
 	p.lock = &sync.Mutex{}
 	// 0.未启动 1.启动  -1.正在启动 -2.正在关闭
@@ -127,7 +127,7 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *models.PluginComman
 		data := make([][]string, 0)
 		for _, mcMs := range p.mirrors {
 			mcConf := mcMs.GetServerConf()
-			data = append(data, []string{utils.Ellipsis(mcConf.EntryId, maxLen), mcConf.Name, strconv.Itoa(mcConf.Memory), mcConf.Version, stateMap[mcConf.State]})
+			data = append(data, []string{utils.Ellipsis(mcConf.EntryId, maxLen), mcConf.Name, strconv.FormatInt(mcConf.Memory, 10), mcConf.Version, stateMap[mcConf.State]})
 		}
 		_ = mcServer.TellrawCommand(player, utils.FormateTable(listHead, data))
 	case "save", "-s":

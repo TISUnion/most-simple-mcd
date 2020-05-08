@@ -17,7 +17,7 @@ import (
 
 // to suppressed 'imported but not used warning'
 
-const HTTP_METGOD = "GRPC"
+const ADMIN_HTTP_METGOD = "GRPC"
 
 var PathAdminGetConfig = "/most.simple.mcd.Admin/getConfig"
 var PathAdminUpdateConfig = "/most.simple.mcd.Admin/updateConfig"
@@ -61,146 +61,182 @@ type AdminGinServer interface {
 var apiAdminSvc AdminGinServer
 
 func getConfig(c *gin.Context) {
-	p := new(GetConfigResp)
+	p := new(GetConfigReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
 	resp, err := apiAdminSvc.GetConfig(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getAdminResponse(c, resp))
 }
 
 func updateConfig(c *gin.Context) {
-	p := new(UpdateConfigResp)
+	p := new(UpdateConfigReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
 	resp, err := apiAdminSvc.UpdateConfig(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getAdminResponse(c, resp))
 }
 
 func operatePlugin(c *gin.Context) {
-	p := new(OperatePluginResp)
+	p := new(OperatePluginReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
 	resp, err := apiAdminSvc.OperatePlugin(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getAdminResponse(c, resp))
 }
 
 func getConfigVal(c *gin.Context) {
-	p := new(GetConfigValResp)
+	p := new(GetConfigValReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
 	resp, err := apiAdminSvc.GetConfigVal(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getAdminResponse(c, resp))
 }
 
 func runCommand(c *gin.Context) {
-	p := new(RunCommandResp)
+	p := new(RunCommandReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
 	resp, err := apiAdminSvc.RunCommand(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getAdminResponse(c, resp))
 }
 
 func getLog(c *gin.Context) {
-	p := new(GetLogResp)
+	p := new(GetLogReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
 	resp, err := apiAdminSvc.GetLog(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getAdminResponse(c, resp))
 }
 
 func delTmpFlie(c *gin.Context) {
-	p := new(DelTmpFlieResp)
+	p := new(DelTmpFlieReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
 	resp, err := apiAdminSvc.DelTmpFlie(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getAdminResponse(c, resp))
 }
 
 func addUpToContainer(c *gin.Context) {
-	p := new(AddUpToContainerResp)
+	p := new(AddUpToContainerReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
 	resp, err := apiAdminSvc.AddUpToContainer(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getAdminResponse(c, resp))
 }
 
 func closeMcd(c *gin.Context) {
-	p := new(CloseMcdResp)
+	p := new(CloseMcdReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
 	resp, err := apiAdminSvc.CloseMcd(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getAdminResponse(c, resp))
 }
 
 func RegisterAdminAdminGinServer(e *gin.Engine, server AdminGinServer) {
 	apiAdminSvc = server
-	e.Handle(HTTP_METGOD, PathAdminGetConfig, handleAdminAuthMiddleware, getConfig)
-	e.Handle(HTTP_METGOD, PathAdminUpdateConfig, handleAdminAuthMiddleware, updateConfig)
-	e.Handle(HTTP_METGOD, PathAdminOperatePlugin, handleAdminAuthMiddleware, operatePlugin)
-	e.Handle(HTTP_METGOD, PathAdminGetConfigVal, handleAdminAuthMiddleware, getConfigVal)
-	e.Handle(HTTP_METGOD, PathAdminRunCommand, handleAdminAuthMiddleware, runCommand)
-	e.Handle(HTTP_METGOD, PathAdminGetLog, handleAdminAuthMiddleware, getLog)
-	e.Handle(HTTP_METGOD, PathAdminDelTmpFlie, handleAdminAuthMiddleware, delTmpFlie)
-	e.Handle(HTTP_METGOD, PathAdminAddUpToContainer, handleAdminAuthMiddleware, addUpToContainer)
-	e.Handle(HTTP_METGOD, PathAdminCloseMcd, handleAdminAuthMiddleware, closeMcd)
+	e.Handle(ADMIN_HTTP_METGOD, PathAdminGetConfig, handleAdminAuthMiddleware, getConfig)
+	e.Handle(ADMIN_HTTP_METGOD, PathAdminUpdateConfig, handleAdminAuthMiddleware, updateConfig)
+	e.Handle(ADMIN_HTTP_METGOD, PathAdminOperatePlugin, handleAdminAuthMiddleware, operatePlugin)
+	e.Handle(ADMIN_HTTP_METGOD, PathAdminGetConfigVal, handleAdminAuthMiddleware, getConfigVal)
+	e.Handle(ADMIN_HTTP_METGOD, PathAdminRunCommand, handleAdminAuthMiddleware, runCommand)
+	e.Handle(ADMIN_HTTP_METGOD, PathAdminGetLog, handleAdminAuthMiddleware, getLog)
+	e.Handle(ADMIN_HTTP_METGOD, PathAdminDelTmpFlie, handleAdminAuthMiddleware, delTmpFlie)
+	e.Handle(ADMIN_HTTP_METGOD, PathAdminAddUpToContainer, handleAdminAuthMiddleware, addUpToContainer)
+	e.Handle(ADMIN_HTTP_METGOD, PathAdminCloseMcd, handleAdminAuthMiddleware, closeMcd)
 }
 
 // 返回数据格式化
-func getResponse(c *gin.Context, data interface{}) gin.H {
+func getAdminResponse(c *gin.Context, data interface{}) gin.H {
 	responseData := make(map[string]interface{})
 	code, ok := c.Get("code")
 	if !ok {

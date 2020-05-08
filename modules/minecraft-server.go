@@ -154,7 +154,7 @@ func (m *MinecraftServer) SetServerConf(c *models.ServerConf) {
 	m.ServerConf = c
 }
 
-func (m *MinecraftServer) SetMemory(memory int) {
+func (m *MinecraftServer) SetMemory(memory int64) {
 	if memory > 0 {
 		m.Memory = memory
 	}
@@ -462,7 +462,7 @@ func (m *MinecraftServer) SayCommand(msg string) error {
 
 // validatePort
 // 校验mc的端口
-func (m *MinecraftServer) validatePort() (int, error) {
+func (m *MinecraftServer) validatePort() (int64, error) {
 	runDir := filepath.Dir(m.RunPath)
 	// 新建mc配置文件
 	mcConfPath := filepath.Join(runDir, constant.MC_CONF_NAME)
@@ -470,10 +470,10 @@ func (m *MinecraftServer) validatePort() (int, error) {
 		f.Close()
 	}
 	cfg, _ := ini.Load(mcConfPath)
-	var realPort int
+	var realPort int64
 	if m.Port != 0 {
 		realPort = m.Port
-		realPortStr := strconv.Itoa(realPort)
+		realPortStr := strconv.FormatInt(realPort, 10)
 		sec, _ := cfg.GetSection(ini.DefaultSection)
 		if sec.HasKey(constant.MC_PORT_TEXT) {
 			sec.Key(constant.MC_PORT_TEXT).SetValue(realPortStr)
@@ -500,12 +500,12 @@ func (m *MinecraftServer) validatePort() (int, error) {
 
 // changePort
 // 更换mc服务端端口
-func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int) (int, error) {
+func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int64) (int64, error) {
 	// 如果可以自动更换端口就自动更换端口
 	if isChange, _ := strconv.ParseBool(GetConfVal(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT)); isChange {
 		unusedPort, _ := utils.GetFreePort(port)
 		sec, _ := cfg.GetSection(ini.DefaultSection)
-		unusedPortStr := strconv.Itoa(unusedPort)
+		unusedPortStr := strconv.FormatInt(unusedPort, 10)
 		// 重新配置文件
 		if sec.HasKey(constant.MC_PORT_TEXT) {
 			sec.Key(constant.MC_PORT_TEXT).SetValue(unusedPortStr)

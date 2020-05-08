@@ -109,9 +109,9 @@ func addUpToContainer(c *gin.Context) {
 		return
 	}
 	ctr := GetMinecraftServerContainerInstance()
-	port, _ := strconv.Atoi(c.DefaultPostForm(constant.UPLOAD_PORT_TEXT, strconv.Itoa(constant.MC_DEFAULT_PORT)))
+	port, _ := strconv.ParseInt(c.DefaultPostForm(constant.UPLOAD_PORT_TEXT, strconv.Itoa(constant.MC_DEFAULT_PORT)), 10, 64)
 	name := c.DefaultPostForm(constant.UPLOAD_NAME_TEXT, header.Filename)
-	memory, _ := strconv.Atoi(c.DefaultPostForm(constant.UPLOAD_MEMORY_TEXT, strconv.Itoa(constant.MC_DEFAULT_MEMORY)))
+	memory, _ := strconv.ParseInt(c.DefaultPostForm(constant.UPLOAD_MEMORY_TEXT, strconv.Itoa(constant.MC_DEFAULT_MEMORY)), 10, 64)
 	if memory == 0 {
 		memory = constant.MC_DEFAULT_MEMORY
 	}

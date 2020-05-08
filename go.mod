@@ -14,6 +14,7 @@ require (
 	github.com/gookit/gcli/v2 v2.2.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/klauspost/compress v1.10.5
+	github.com/lightbrotherV/gin-protobuf v1.0.3
 	github.com/mholt/archiver/v3 v3.3.0
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/robfig/cron/v3 v3.0.1
@@ -22,5 +23,6 @@ require (
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1 // indirect
 	golang.org/x/text v0.3.2
+	google.golang.org/grpc v1.29.1
 	gopkg.in/ini.v1 v1.55.0
 )

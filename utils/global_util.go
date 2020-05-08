@@ -124,7 +124,7 @@ func ParseCharacter(data []byte) ([]byte, error) {
 // GetFreePort
 // 获取系统空闲端口
 // 如果port为0，则表示随机获取一个空闲端口，不为0则为指定端口
-func GetFreePort(port int) (int, error) {
+func GetFreePort(port int64) (int64, error) {
 	addrIp4, err := net.ResolveTCPAddr("tcp4", fmt.Sprintf("localhost:%d", port))
 	if err != nil {
 		return 0, err
@@ -144,7 +144,7 @@ func GetFreePort(port int) (int, error) {
 		return 0, err
 	}
 	defer l6.Close()
-	return l4.Addr().(*net.TCPAddr).Port, nil
+	return int64(l4.Addr().(*net.TCPAddr).Port), nil
 }
 
 // Int转int32
@@ -229,7 +229,7 @@ func IsUTF8(data []byte) bool {
 }
 
 // UTF8转GBK
-func UTF82GBK(data []byte) ([]byte, error)  {
+func UTF82GBK(data []byte) ([]byte, error) {
 	if result, err := simplifiedchinese.GBK.NewEncoder().Bytes(data); err != nil {
 		return data, err
 	} else {
@@ -238,7 +238,7 @@ func UTF82GBK(data []byte) ([]byte, error)  {
 }
 
 // GBK转UTF8
-func GBK2UTF8(data []byte) ([]byte, error)  {
+func GBK2UTF8(data []byte) ([]byte, error) {
 	if result, err := simplifiedchinese.GBK.NewDecoder().Bytes(data); err != nil {
 		return data, err
 	} else {
@@ -247,7 +247,7 @@ func GBK2UTF8(data []byte) ([]byte, error)  {
 }
 
 // 获取cmd命令数组
-func GetCommandArr(memory int, runPath string) []string {
+func GetCommandArr(memory int64, runPath string) []string {
 	return []string{
 		"java",
 		"-jar",

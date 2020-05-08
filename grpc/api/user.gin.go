@@ -17,7 +17,7 @@ import (
 
 // to suppressed 'imported but not used warning'
 
-const HTTP_METGOD = "GRPC"
+const USER_HTTP_METGOD = "GRPC"
 
 var PathUserLogin = "/most.simple.mcd.User/login"
 var PathUserLogout = "/most.simple.mcd.User/logout"
@@ -42,71 +42,87 @@ type UserGinServer interface {
 var apiUserSvc UserGinServer
 
 func login(c *gin.Context) {
-	p := new(LoginResp)
+	p := new(LoginReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getUserResponse(c, nil))
+		return
 	}
 	resp, err := apiUserSvc.Login(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getUserResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getUserResponse(c, resp))
 }
 
 func logout(c *gin.Context) {
-	p := new(LogoutResp)
+	p := new(LogoutReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getUserResponse(c, nil))
+		return
 	}
 	resp, err := apiUserSvc.Logout(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getUserResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getUserResponse(c, resp))
 }
 
 func info(c *gin.Context) {
-	p := new(InfoResp)
+	p := new(InfoReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getUserResponse(c, nil))
+		return
 	}
 	resp, err := apiUserSvc.Info(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getUserResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getUserResponse(c, resp))
 }
 
 func update(c *gin.Context) {
-	p := new(UpdateResp)
+	p := new(UpdateReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getUserResponse(c, nil))
+		return
 	}
 	resp, err := apiUserSvc.Update(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getUserResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getUserResponse(c, resp))
 }
 
 func RegisterUserUserGinServer(e *gin.Engine, server UserGinServer) {
 	apiUserSvc = server
-	e.Handle(HTTP_METGOD, PathUserLogin, login)
-	e.Handle(HTTP_METGOD, PathUserLogout, logout)
-	e.Handle(HTTP_METGOD, PathUserInfo, handleUserAuthMiddleware, info)
-	e.Handle(HTTP_METGOD, PathUserUpdate, handleUserAuthMiddleware, update)
+	e.Handle(USER_HTTP_METGOD, PathUserLogin, login)
+	e.Handle(USER_HTTP_METGOD, PathUserLogout, logout)
+	e.Handle(USER_HTTP_METGOD, PathUserInfo, handleUserAuthMiddleware, info)
+	e.Handle(USER_HTTP_METGOD, PathUserUpdate, handleUserAuthMiddleware, update)
 }
 
 // 返回数据格式化
-func getResponse(c *gin.Context, data interface{}) gin.H {
+func getUserResponse(c *gin.Context, data interface{}) gin.H {
 	responseData := make(map[string]interface{})
 	code, ok := c.Get("code")
 	if !ok {

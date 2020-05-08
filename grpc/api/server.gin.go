@@ -17,10 +17,8 @@ import (
 
 // to suppressed 'imported but not used warning'
 
-const HTTP_METGOD = "GRPC"
+const SERVER_HTTP_METGOD = "GRPC"
 
-var PathMcServerListenResource = "/most.simple.mcd.McServer/listenResource"
-var PathMcServerServerInteraction = "/most.simple.mcd.McServer/serverInteraction"
 var PathMcServerList = "/most.simple.mcd.McServer/list"
 var PathMcServerGetServerState = "/most.simple.mcd.McServer/getServerState"
 var PathMcServerDetail = "/most.simple.mcd.McServer/detail"
@@ -29,12 +27,6 @@ var PathMcServerUpdateServerInfo = "/most.simple.mcd.McServer/updateServerInfo"
 
 // McServerGinServer is the server API for McServer service.
 type McServerGinServer interface {
-	// 监听服务端消耗资源
-	ListenResource(ctx context.Context, req *ListenResourceReq) (resp *ListenResourceResp, err error)
-
-	// 服务器交互
-	ServerInteraction(ctx context.Context, req *ServerInteractionReq) (resp *ServerInteractionResp, err error)
-
 	// 获取服务端信息列表
 	List(ctx context.Context, req *ListReq) (resp *ListResp, err error)
 
@@ -53,117 +45,107 @@ type McServerGinServer interface {
 
 var apiMcServerSvc McServerGinServer
 
-func listenResource(c *gin.Context) {
-	p := new(ListenResourceResp)
-	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-	}
-	resp, err := apiMcServerSvc.ListenResource(c, p)
-	if err != nil {
-		c.Set("code", -500)
-		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
-	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
-}
-
-func serverInteraction(c *gin.Context) {
-	p := new(ServerInteractionResp)
-	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-	}
-	resp, err := apiMcServerSvc.ServerInteraction(c, p)
-	if err != nil {
-		c.Set("code", -500)
-		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
-	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
-}
-
 func list(c *gin.Context) {
-	p := new(ListResp)
+	p := new(ListReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getServerResponse(c, nil))
+		return
 	}
 	resp, err := apiMcServerSvc.List(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getServerResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getServerResponse(c, resp))
 }
 
 func getServerState(c *gin.Context) {
-	p := new(GetServerStateResp)
+	p := new(GetServerStateReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getServerResponse(c, nil))
+		return
 	}
 	resp, err := apiMcServerSvc.GetServerState(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getServerResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getServerResponse(c, resp))
 }
 
 func detail(c *gin.Context) {
-	p := new(DetailResp)
+	p := new(DetailReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getServerResponse(c, nil))
+		return
 	}
 	resp, err := apiMcServerSvc.Detail(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getServerResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getServerResponse(c, resp))
 }
 
 func operateServer(c *gin.Context) {
-	p := new(OperateServerResp)
+	p := new(OperateServerReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getServerResponse(c, nil))
+		return
 	}
 	resp, err := apiMcServerSvc.OperateServer(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getServerResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getServerResponse(c, resp))
 }
 
 func updateServerInfo(c *gin.Context) {
-	p := new(UpdateServerInfoResp)
+	p := new(UpdateServerInfoReq)
 	if err := c.BindJSON(p); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getServerResponse(c, nil))
+		return
 	}
 	resp, err := apiMcServerSvc.UpdateServerInfo(c, p)
 	if err != nil {
 		c.Set("code", -500)
 		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getResponse(c, nil))
+		c.JSON(http.StatusOK, getServerResponse(c, nil))
+		return
 	}
-	c.JSON(http.StatusOK, getResponse(c, resp))
+	c.JSON(http.StatusOK, getServerResponse(c, resp))
 }
 
 func RegisterServerMcServerGinServer(e *gin.Engine, server McServerGinServer) {
 	apiMcServerSvc = server
-	e.Handle(HTTP_METGOD, PathMcServerListenResource, listenResource)
-	e.Handle(HTTP_METGOD, PathMcServerServerInteraction, serverInteraction)
-	e.Handle(HTTP_METGOD, PathMcServerList, handleServerAuthMiddleware, list)
-	e.Handle(HTTP_METGOD, PathMcServerGetServerState, handleServerAuthMiddleware, getServerState)
-	e.Handle(HTTP_METGOD, PathMcServerDetail, handleServerAuthMiddleware, detail)
-	e.Handle(HTTP_METGOD, PathMcServerOperateServer, handleServerAuthMiddleware, operateServer)
-	e.Handle(HTTP_METGOD, PathMcServerUpdateServerInfo, handleServerAuthMiddleware, updateServerInfo)
+	e.Handle(SERVER_HTTP_METGOD, PathMcServerList, handleServerAuthMiddleware, list)
+	e.Handle(SERVER_HTTP_METGOD, PathMcServerGetServerState, handleServerAuthMiddleware, getServerState)
+	e.Handle(SERVER_HTTP_METGOD, PathMcServerDetail, handleServerAuthMiddleware, detail)
+	e.Handle(SERVER_HTTP_METGOD, PathMcServerOperateServer, handleServerAuthMiddleware, operateServer)
+	e.Handle(SERVER_HTTP_METGOD, PathMcServerUpdateServerInfo, handleServerAuthMiddleware, updateServerInfo)
 }
 
 // 返回数据格式化
-func getResponse(c *gin.Context, data interface{}) gin.H {
+func getServerResponse(c *gin.Context, data interface{}) gin.H {
 	responseData := make(map[string]interface{})
 	code, ok := c.Get("code")
 	if !ok {
