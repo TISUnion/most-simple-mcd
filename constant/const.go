@@ -121,6 +121,7 @@ const (
 	LOG_TYPE_DEFAULT = "3"
 
 	JAR_SUF = ".jar"
+	TOKEN_HEADER_NAME = "X-Token"
 )
 
 // 各模块常量

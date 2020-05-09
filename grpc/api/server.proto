@@ -5,6 +5,12 @@ package most.simple.mcd;
 option go_package = "api";
 
 service McServer {
+    // 监听服务端消耗资源
+    // `method:"GET" hasInput:"false" hasOutput:"false"`
+    rpc listenResource (ListenResourceReq) returns (ListenResourceResp);
+    // 服务器交互
+    // `method:"GET" hasInput:"false" hasOutput:"false"`
+    rpc serverInteraction (ServerInteractionReq) returns (ServerInteractionResp);
     // 获取服务端信息列表
     // `middleware:"auth"`
     rpc list (ListReq) returns (ListResp);

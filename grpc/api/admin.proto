@@ -17,11 +17,14 @@ service Admin {
     // 向服务端执行一条命令
     rpc runCommand (RunCommandReq) returns (RunCommandResp);
     // 获取服务端日志
+    // `method:"POST" hasInput:"false" hasOutput:"false"`
     rpc getLog (GetLogReq) returns (GetLogResp);
     // 删除临时文件
     rpc delTmpFlie (DelTmpFlieReq) returns (DelTmpFlieResp);
     // 获取上传服务端文件，并注入到容器中
+    // `method:"POST" hasInput:"false"
     rpc addUpToContainer (AddUpToContainerReq) returns (AddUpToContainerResp);
+    // `hasInput:"false"
     rpc closeMcd (CloseMcdReq) returns (CloseMcdResp);
 }
 

@@ -19,6 +19,8 @@ import (
 
 const SERVER_HTTP_METGOD = "GRPC"
 
+var PathMcServerListenResource = "/most.simple.mcd.McServer/listenResource"
+var PathMcServerServerInteraction = "/most.simple.mcd.McServer/serverInteraction"
 var PathMcServerList = "/most.simple.mcd.McServer/list"
 var PathMcServerGetServerState = "/most.simple.mcd.McServer/getServerState"
 var PathMcServerDetail = "/most.simple.mcd.McServer/detail"
@@ -27,6 +29,12 @@ var PathMcServerUpdateServerInfo = "/most.simple.mcd.McServer/updateServerInfo"
 
 // McServerGinServer is the server API for McServer service.
 type McServerGinServer interface {
+	// 监听服务端消耗资源
+	ListenResource(ctx context.Context, req *ListenResourceReq) (resp *ListenResourceResp, err error)
+
+	// 服务器交互
+	ServerInteraction(ctx context.Context, req *ServerInteractionReq) (resp *ServerInteractionResp, err error)
+
 	// 获取服务端信息列表
 	List(ctx context.Context, req *ListReq) (resp *ListResp, err error)
 
@@ -44,6 +52,16 @@ type McServerGinServer interface {
 }
 
 var apiMcServerSvc McServerGinServer
+
+func listenResource(c *gin.Context) {
+	p := new(ListenResourceReq)
+	apiMcServerSvc.ListenResource(c, p)
+}
+
+func serverInteraction(c *gin.Context) {
+	p := new(ServerInteractionReq)
+	apiMcServerSvc.ServerInteraction(c, p)
+}
 
 func list(c *gin.Context) {
 	p := new(ListReq)
@@ -137,6 +155,8 @@ func updateServerInfo(c *gin.Context) {
 
 func RegisterServerMcServerGinServer(e *gin.Engine, server McServerGinServer) {
 	apiMcServerSvc = server
+	e.Handle("GET", PathMcServerListenResource, listenResource)
+	e.Handle("GET", PathMcServerServerInteraction, serverInteraction)
 	e.Handle(SERVER_HTTP_METGOD, PathMcServerList, handleServerAuthMiddleware, list)
 	e.Handle(SERVER_HTTP_METGOD, PathMcServerGetServerState, handleServerAuthMiddleware, getServerState)
 	e.Handle(SERVER_HTTP_METGOD, PathMcServerDetail, handleServerAuthMiddleware, detail)

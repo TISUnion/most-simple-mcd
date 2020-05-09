@@ -53,8 +53,10 @@ type AdminGinServer interface {
 	DelTmpFlie(ctx context.Context, req *DelTmpFlieReq) (resp *DelTmpFlieResp, err error)
 
 	// 获取上传服务端文件，并注入到容器中
+	// `method:"POST" hasInput:"false"
 	AddUpToContainer(ctx context.Context, req *AddUpToContainerReq) (resp *AddUpToContainerResp, err error)
 
+	// `hasInput:"false"
 	CloseMcd(ctx context.Context, req *CloseMcdReq) (resp *CloseMcdResp, err error)
 }
 
@@ -152,20 +154,7 @@ func runCommand(c *gin.Context) {
 
 func getLog(c *gin.Context) {
 	p := new(GetLogReq)
-	if err := c.BindJSON(p); err != nil {
-		c.Set("code", -500)
-		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getAdminResponse(c, nil))
-		return
-	}
-	resp, err := apiAdminSvc.GetLog(c, p)
-	if err != nil {
-		c.Set("code", -500)
-		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getAdminResponse(c, nil))
-		return
-	}
-	c.JSON(http.StatusOK, getAdminResponse(c, resp))
+	apiAdminSvc.GetLog(c, p)
 }
 
 func delTmpFlie(c *gin.Context) {
@@ -229,7 +218,7 @@ func RegisterAdminAdminGinServer(e *gin.Engine, server AdminGinServer) {
 	e.Handle(ADMIN_HTTP_METGOD, PathAdminOperatePlugin, handleAdminAuthMiddleware, operatePlugin)
 	e.Handle(ADMIN_HTTP_METGOD, PathAdminGetConfigVal, handleAdminAuthMiddleware, getConfigVal)
 	e.Handle(ADMIN_HTTP_METGOD, PathAdminRunCommand, handleAdminAuthMiddleware, runCommand)
-	e.Handle(ADMIN_HTTP_METGOD, PathAdminGetLog, handleAdminAuthMiddleware, getLog)
+	e.Handle("POST", PathAdminGetLog, handleAdminAuthMiddleware, getLog)
 	e.Handle(ADMIN_HTTP_METGOD, PathAdminDelTmpFlie, handleAdminAuthMiddleware, delTmpFlie)
 	e.Handle(ADMIN_HTTP_METGOD, PathAdminAddUpToContainer, handleAdminAuthMiddleware, addUpToContainer)
 	e.Handle(ADMIN_HTTP_METGOD, PathAdminCloseMcd, handleAdminAuthMiddleware, closeMcd)

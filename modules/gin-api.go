@@ -22,9 +22,9 @@ const (
 
 func RegisterRouter() {
 	router := GetGinServerInstanceRouter()
-	// 用户登陆
+	// 用户登陆[move]
 	router.POST("/user/login", userLogin)
-	// 用户注销
+	// 用户注销[move]
 	router.POST("/user/logout", userLogout)
 	// 静态后台管理前端文件
 	router.Use(static.Serve("/", static.LocalFile(filepath.Join(GetConfVal(constant.WORKSPACE), constant.Web_FILE_DIR_NAME), true)))
@@ -46,46 +46,46 @@ func RegisterRouter() {
 				c.Abort()
 			}
 		})
-		// 获取用户信息
+		// 获取用户信息 [move]
 		v1.GET("/user/info", getInfo)
-		// 更新用户信息
+		// 更新用户信息 [move]
 		v1.POST("/user/account", updateUserData)
-		// 获取配置
+		// 获取配置 [move]
 		v1.GET("/config/list", getConfig)
-		// 修改配置
+		// 修改配置 [move]
 		v1.POST("/config", updateConfig)
-		// 获取服务端列表
+		// 获取服务端列表 [move]
 		v1.GET("/server/list", serversInfoList)
-		// 获取服务端运行状态
+		// 获取服务端运行状态 [move]
 		v1.GET("/server/ping", getServerState)
-		// 获取服务端详情
+		// 获取服务端详情 [move]
 		v1.GET("/server/detail", serverDetail)
-		// 操作服务端
+		// 操作服务端 [move]
 		v1.POST("/server", operateServer)
-		// 操作插件
+		// 操作插件 [move]
 		v1.POST("/plugin", operatePlugin)
-		// 获取一个配置
+		// 获取一个配置 [move]
 		v1.GET("/config/val", getConfigVal)
 
-		// 修改服务端参数
+		// 修改服务端参数 [move]
 		v1.POST("/server/info", updateServerInfo)
-		// 在指定服务端中运行一条命令
+		// 在指定服务端中运行一条命令 [move]
 		v1.POST("/server/run/command", runCommand)
 		// 获取日志
 		v1.GET("/log/download", getLog)
-		// 删除临时文件
+		// 删除临时文件 [move]
 		v1.POST("/tmp/files", delTmpFlie)
-		// 获取上传服务端文件，并注入到容器中
+		// 获取上传服务端文件，并注入到容器中 [move]
 		v1.POST("/upload/server", addUpToContainer)
 
-		// 关闭mcd
+		// 关闭mcd [move]
 		v1.POST("/close", func(c *gin.Context) {
 			SendExitSign()
 		})
 	}
-	// websocket实时监听服务端耗费资源
+	// websocket实时监听服务端耗费资源 [move]
 	router.GET("/server/resources/listen", serversResourcesListen)
-	// websocket实时获取服务器输出
+	// websocket实时获取服务器输出 [move]
 	router.GET("/server/std/listen", serversStdListen)
 }
 

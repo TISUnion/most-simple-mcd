@@ -14,7 +14,7 @@ require (
 	github.com/gookit/gcli/v2 v2.2.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/klauspost/compress v1.10.5
-	github.com/lightbrotherV/gin-protobuf v1.0.3
+	github.com/lightbrotherV/gin-protobuf v1.0.4
 	github.com/mholt/archiver/v3 v3.3.0
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/robfig/cron/v3 v3.0.1

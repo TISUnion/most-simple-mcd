@@ -25,7 +25,7 @@ func PanicError(msg string, err error) {
 }
 
 // 创建confParam实例
-func NewConfParam(confKey, ConfVal, description string, level int, IsAlterable bool) *models.ConfParam {
+func NewConfParam(confKey, ConfVal, description string, level int64, IsAlterable bool) *models.ConfParam {
 	return &models.ConfParam{
 		ConfVal:        ConfVal,
 		DefaultConfVal: ConfVal,

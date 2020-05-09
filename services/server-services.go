@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/grpc/api"
 	"github.com/TISUnion/most-simple-mcd/models"
@@ -17,15 +16,15 @@ type ServerService struct {
 }
 
 func (s *ServerService) ListenResource(ctx context.Context, req *api.ListenResourceReq) (resp *api.ListenResourceResp, err error) {
-	if ginCtx, ok :=  ctx.(*gin.Context); ok {
-		s._listenResource(ginCtx, req.Id)
+	if ginCtx, ok := ctx.(*gin.Context); ok {
+		s._listenResource(ginCtx)
 	}
 	return
 }
 
 func (s *ServerService) ServerInteraction(ctx context.Context, req *api.ServerInteractionReq) (resp *api.ServerInteractionResp, err error) {
-	if ginCtx, ok :=  ctx.(*gin.Context); ok {
-		s._serverInteraction(ginCtx, req.Id)
+	if ginCtx, ok := ctx.(*gin.Context); ok {
+		s._serverInteraction(ginCtx)
 	}
 	return
 }
@@ -131,6 +130,71 @@ func (s *ServerService) UpdateServerInfo(ctx context.Context, req *api.UpdateSer
 	return
 }
 
+func (s *ServerService) _listenResource(ginCtx *gin.Context) {
+	serverId := ginCtx.Query(constant.QUERY_ID)
+	if serverId == "" {
+
+	}
+	upGrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+	ws, err := upGrader.Upgrade(ginCtx.Writer, ginCtx.Request, nil)
+	if err != nil {
+		return
+	}
+	// 校验token
+	for {
+		_, tokenByte, err := ws.ReadMessage()
+		if err != nil {
+			ws.Close()
+			return
+		}
+		dbtoken := modules.GetFromDatabase(constant.DEFAULT_TOKEN_DB_KEY)
+		if string(tokenByte) == dbtoken {
+			break
+		} else {
+			ws.Close()
+			return
+		}
+	}
+	modules.AppendResourceWsToPool(ginCtx, serverId, ws)
+}
+
+func (s *ServerService) _serverInteraction(c *gin.Context) {
+	serverId := c.Query(constant.QUERY_ID)
+	if serverId == "" {
+
+	}
+	upGrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		return
+	}
+	// 校验token
+	for {
+		_, tokenByte, err := ws.ReadMessage()
+		if err != nil {
+			ws.Close()
+			return
+		}
+		dbtoken := modules.GetFromDatabase(constant.DEFAULT_TOKEN_DB_KEY)
+		if string(tokenByte) == dbtoken {
+			break
+		} else {
+			ws.Close()
+			return
+		}
+	}
+	modules.AppendStdWsToPool(serverId, ws)
+	modules.ListenStdinFromWs(serverId, ws)
+}
+
 func (s *ServerService) _list() ([]*models.ServerConf, error) {
 	ctr := modules.GetMinecraftServerContainerInstance()
 	return ctr.GetAllServerConf(), nil
@@ -142,8 +206,8 @@ func (s *ServerService) _getServerState(serverId string) (state int64, err error
 		return
 	}
 	ctr := modules.GetMinecraftServerContainerInstance()
-	serv, err := ctr.GetServerById(serverId)
-	if err != nil {
+	serv, e := ctr.GetServerById(serverId)
+	if e != nil {
 		err = errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
 		return
 	}
@@ -213,71 +277,4 @@ func (s *ServerService) _updateServerInfo(reqModel *models.ServerConf) (err erro
 	serv.SetServerConf(servConf)
 	ctr.SaveToDb()
 	return nil
-}
-
-func (s *ServerService) _listenResource(c *gin.Context, serverId string) {
-	if serverId == "" {
-		return
-	}
-	upGrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
-	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		return
-	}
-	// 校验token
-	for {
-		_, tokenByte, err := ws.ReadMessage()
-		if err != nil {
-			ws.Close()
-			return
-		}
-		dbtoken := modules.GetFromDatabase(constant.DEFAULT_TOKEN_DB_KEY)
-		if string(tokenByte) == dbtoken {
-			break
-		} else {
-			ws.Close()
-			return
-		}
-	}
-	modules.AppendResourceWsToPool(c, serverId, ws)
-}
-
-func (s *ServerService) _serverInteraction(c *gin.Context, serverId string) {
-	if serverId == "" {
-		return
-	}
-	upGrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
-	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		return
-	}
-	// 校验token
-	for {
-		_, tokenByte, err := ws.ReadMessage()
-		if err != nil {
-			ws.Close()
-			return
-		}
-		dbtoken := modules.GetFromDatabase(constant.DEFAULT_TOKEN_DB_KEY)
-		if string(tokenByte) == dbtoken {
-			break
-		} else {
-			ws.Close()
-			return
-		}
-	}
-	modules.AppendStdWsToPool(serverId, ws)
-	modules.ListenStdinFromWs(serverId, ws)
-}
-
-func errorFormat(err error) string {
-	return fmt.Sprintf("GRPC error: %v", err)
 }

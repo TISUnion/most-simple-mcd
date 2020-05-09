@@ -186,7 +186,7 @@ func (g *GinServer) listenStdinFromWs(serverId string, ws *websocket.Conn) {
 	}
 }
 
-func RunOneCommand(serverId, command string, commandType int) bool {
+func RunOneCommand(serverId, command string, commandType int64) bool {
 	mcContainer := GetMinecraftServerContainerInstance()
 	mcServ, err := mcContainer.GetServerById(serverId)
 	if err != nil {

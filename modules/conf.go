@@ -202,7 +202,7 @@ func (c *Conf) Init(terminalConfs map[string]string) {
 }
 
 // 设置配置
-func (c *Conf) SetConfParam(Name, ConfVal, description string, level int) {
+func (c *Conf) SetConfParam(Name, ConfVal, description string, level int64) {
 	if confParam, ok := c.confs[Name]; ok {
 		// 如果配置优先级不低于与存在配置，就修改
 		if confParam.Level <= level {
@@ -216,7 +216,7 @@ func (c *Conf) SetConfParam(Name, ConfVal, description string, level int) {
 }
 
 // 注册配置
-func (c *Conf) RegisterConfParam(confKey, ConfVal, description string, level int, IsAlterable bool) {
+func (c *Conf) RegisterConfParam(confKey, ConfVal, description string, level int64, IsAlterable bool) {
 	if _, ok := c.confs[confKey]; !ok {
 		c.ConfKeys = append(c.ConfKeys, confKey)
 		c.confs[confKey] = &models.ConfParam{
@@ -292,7 +292,7 @@ func GetConfVal(confKey string) string {
 	return GetConfInstance().GetConfVal(confKey)
 }
 // 注册配置
-func RegisterConfig(confKey, ConfVal, description string, level int, IsAlterable bool) {
+func RegisterConfig(confKey, ConfVal, description string, level int64, IsAlterable bool) {
 	conObj := GetConfInstance()
 	DefaultConfParam[confKey] = utils.NewConfParam(confKey, ConfVal, description, level, IsAlterable)
 	conObj.RegisterConfParam(confKey, ConfVal, description, level, IsAlterable)

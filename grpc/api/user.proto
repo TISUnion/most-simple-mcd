@@ -36,8 +36,6 @@ message LogoutResp {
 }
 
 message InfoReq {
-    // 登录态token
-    string token = 1;
 }
 
 message InfoResp {
