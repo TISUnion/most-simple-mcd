@@ -976,9 +976,10 @@ type AdminClient interface {
 	// 删除临时文件
 	DelTmpFlie(ctx context.Context, in *DelTmpFlieReq, opts ...grpc.CallOption) (*DelTmpFlieResp, error)
 	// 获取上传服务端文件，并注入到容器中
-	// `method:"POST" hasInput:"false"
+	// `method:"POST" hasInput:"false"`
 	AddUpToContainer(ctx context.Context, in *AddUpToContainerReq, opts ...grpc.CallOption) (*AddUpToContainerResp, error)
-	// `hasInput:"false"
+	// 关闭mcd
+	// `hasInput:"false"`
 	CloseMcd(ctx context.Context, in *CloseMcdReq, opts ...grpc.CallOption) (*CloseMcdResp, error)
 }
 
@@ -1089,9 +1090,10 @@ type AdminServer interface {
 	// 删除临时文件
 	DelTmpFlie(context.Context, *DelTmpFlieReq) (*DelTmpFlieResp, error)
 	// 获取上传服务端文件，并注入到容器中
-	// `method:"POST" hasInput:"false"
+	// `method:"POST" hasInput:"false"`
 	AddUpToContainer(context.Context, *AddUpToContainerReq) (*AddUpToContainerResp, error)
-	// `hasInput:"false"
+	// 关闭mcd
+	// `hasInput:"false"`
 	CloseMcd(context.Context, *CloseMcdReq) (*CloseMcdResp, error)
 }
 

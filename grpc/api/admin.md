@@ -6,7 +6,7 @@
 - [/most.simple.mcd.Admin/getLog](#mostsimplemcdadmingetlog)  获取服务端日志
 - [/most.simple.mcd.Admin/delTmpFlie](#mostsimplemcdadmindeltmpflie)  删除临时文件
 - [/most.simple.mcd.Admin/addUpToContainer](#mostsimplemcdadminadduptocontainer)  获取上传服务端文件，并注入到容器中
-- [/most.simple.mcd.Admin/closeMcd](#mostsimplemcdadminclosemcd)  `hasInput:"false"
+- [/most.simple.mcd.Admin/closeMcd](#mostsimplemcdadminclosemcd)  关闭mcd
 
 ##/most.simple.mcd.Admin/getConfig
 ### 获取配置
@@ -256,7 +256,7 @@
 
 
 ##/most.simple.mcd.Admin/closeMcd
-### `hasInput:"false"
+### 关闭mcd
 
 #### 方法：GRPC
 

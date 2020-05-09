@@ -53,10 +53,9 @@ type AdminGinServer interface {
 	DelTmpFlie(ctx context.Context, req *DelTmpFlieReq) (resp *DelTmpFlieResp, err error)
 
 	// 获取上传服务端文件，并注入到容器中
-	// `method:"POST" hasInput:"false"
 	AddUpToContainer(ctx context.Context, req *AddUpToContainerReq) (resp *AddUpToContainerResp, err error)
 
-	// `hasInput:"false"
+	// 关闭mcd
 	CloseMcd(ctx context.Context, req *CloseMcdReq) (resp *CloseMcdResp, err error)
 }
 
@@ -177,12 +176,6 @@ func delTmpFlie(c *gin.Context) {
 
 func addUpToContainer(c *gin.Context) {
 	p := new(AddUpToContainerReq)
-	if err := c.BindJSON(p); err != nil {
-		c.Set("code", -500)
-		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getAdminResponse(c, nil))
-		return
-	}
 	resp, err := apiAdminSvc.AddUpToContainer(c, p)
 	if err != nil {
 		c.Set("code", -500)
@@ -195,12 +188,6 @@ func addUpToContainer(c *gin.Context) {
 
 func closeMcd(c *gin.Context) {
 	p := new(CloseMcdReq)
-	if err := c.BindJSON(p); err != nil {
-		c.Set("code", -500)
-		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getAdminResponse(c, nil))
-		return
-	}
 	resp, err := apiAdminSvc.CloseMcd(c, p)
 	if err != nil {
 		c.Set("code", -500)
@@ -220,7 +207,7 @@ func RegisterAdminAdminGinServer(e *gin.Engine, server AdminGinServer) {
 	e.Handle(ADMIN_HTTP_METGOD, PathAdminRunCommand, handleAdminAuthMiddleware, runCommand)
 	e.Handle("POST", PathAdminGetLog, handleAdminAuthMiddleware, getLog)
 	e.Handle(ADMIN_HTTP_METGOD, PathAdminDelTmpFlie, handleAdminAuthMiddleware, delTmpFlie)
-	e.Handle(ADMIN_HTTP_METGOD, PathAdminAddUpToContainer, handleAdminAuthMiddleware, addUpToContainer)
+	e.Handle("POST", PathAdminAddUpToContainer, handleAdminAuthMiddleware, addUpToContainer)
 	e.Handle(ADMIN_HTTP_METGOD, PathAdminCloseMcd, handleAdminAuthMiddleware, closeMcd)
 }
 

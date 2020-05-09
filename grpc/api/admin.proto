@@ -22,9 +22,10 @@ service Admin {
     // 删除临时文件
     rpc delTmpFlie (DelTmpFlieReq) returns (DelTmpFlieResp);
     // 获取上传服务端文件，并注入到容器中
-    // `method:"POST" hasInput:"false"
+    // `method:"POST" hasInput:"false"`
     rpc addUpToContainer (AddUpToContainerReq) returns (AddUpToContainerResp);
-    // `hasInput:"false"
+    // 关闭mcd
+    // `hasInput:"false"`
     rpc closeMcd (CloseMcdReq) returns (CloseMcdResp);
 }
 
