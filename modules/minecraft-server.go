@@ -488,12 +488,19 @@ func (m *MinecraftServer) validatePort() (int, error) {
 		realPort = constant.MC_DEFAULT_PORT
 	}
 	// 开启的服务端的端口已被占用,修修改
-	if p, _ := utils.GetFreePort(realPort); p == 0 {
+	if p, e := utils.GetFreePort(realPort); p == 0 {
+		if e != nil {
+			m.WriteLog(e.Error(), constant.LOG_ERROR)
+		}
 		p, err := m.changePort(cfg, mcConfPath, 0)
 		if err != nil {
 			return 0, err
 		}
 		realPort = p
+	}
+
+	if realPort == 0 {
+		return realPort, PORT_REPEAT_ERROR
 	}
 	return realPort, nil
 }
@@ -503,7 +510,10 @@ func (m *MinecraftServer) validatePort() (int, error) {
 func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int) (int, error) {
 	// 如果可以自动更换端口就自动更换端口
 	if isChange, _ := strconv.ParseBool(GetConfVal(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT)); isChange {
-		unusedPort, _ := utils.GetFreePort(port)
+		unusedPort, err := utils.GetFreePort(port)
+		if err != nil {
+			m.WriteLog(err.Error(), constant.LOG_ERROR)
+		}
 		sec, _ := cfg.GetSection(ini.DefaultSection)
 		unusedPortStr := strconv.Itoa(unusedPort)
 		// 重新配置文件
