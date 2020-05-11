@@ -443,9 +443,10 @@ type UserClient interface {
 	// 用户登录
 	Login(ctx context.Context, in *LoginReq, opts ...grpc.CallOption) (*LoginResp, error)
 	// 用户注销
+	// `hasInput:"false"`
 	Logout(ctx context.Context, in *LogoutReq, opts ...grpc.CallOption) (*LogoutResp, error)
 	// 获取用户信息
-	// `middleware:"auth"`
+	// `middleware:"auth" hasInput:"false"`
 	Info(ctx context.Context, in *InfoReq, opts ...grpc.CallOption) (*InfoResp, error)
 	// 更新用户信息
 	// `middleware:"auth"`
@@ -501,9 +502,10 @@ type UserServer interface {
 	// 用户登录
 	Login(context.Context, *LoginReq) (*LoginResp, error)
 	// 用户注销
+	// `hasInput:"false"`
 	Logout(context.Context, *LogoutReq) (*LogoutResp, error)
 	// 获取用户信息
-	// `middleware:"auth"`
+	// `middleware:"auth" hasInput:"false"`
 	Info(context.Context, *InfoReq) (*InfoResp, error)
 	// 更新用户信息
 	// `middleware:"auth"`

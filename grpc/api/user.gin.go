@@ -61,12 +61,6 @@ func login(c *gin.Context) {
 
 func logout(c *gin.Context) {
 	p := new(LogoutReq)
-	if err := c.BindJSON(p); err != nil {
-		c.Set("code", -500)
-		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getUserResponse(c, nil))
-		return
-	}
 	resp, err := apiUserSvc.Logout(c, p)
 	if err != nil {
 		c.Set("code", -500)
@@ -79,12 +73,6 @@ func logout(c *gin.Context) {
 
 func info(c *gin.Context) {
 	p := new(InfoReq)
-	if err := c.BindJSON(p); err != nil {
-		c.Set("code", -500)
-		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getUserResponse(c, nil))
-		return
-	}
 	resp, err := apiUserSvc.Info(c, p)
 	if err != nil {
 		c.Set("code", -500)

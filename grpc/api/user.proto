@@ -8,9 +8,10 @@ service User {
     // 用户登录
     rpc login (LoginReq) returns (LoginResp);
     // 用户注销
+    // `hasInput:"false"`
     rpc logout (LogoutReq) returns (LogoutResp);
     // 获取用户信息
-    // `middleware:"auth"`
+    // `middleware:"auth" hasInput:"false"`
     rpc info (InfoReq) returns (InfoResp);
     // 更新用户信息
     // `middleware:"auth"`

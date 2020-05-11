@@ -25,8 +25,10 @@ func RegisterServices() {
 	ginEngine := modules.GetGinServerInstanceRouter()
 	api.RegisterServerAuthMiddleware(AuthMiddle)
 	api.RegisterAdminAuthMiddleware(AuthMiddle)
+	api.RegisterUserAuthMiddleware(AuthMiddle)
 	api.RegisterServerMcServerGinServer(ginEngine, &ServerService{})
 	api.RegisterAdminAdminGinServer(ginEngine, &AdminService{})
+	api.RegisterUserUserGinServer(ginEngine, &UserService{})
 }
 
 // 返回数据格式化
