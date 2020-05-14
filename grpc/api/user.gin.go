@@ -103,10 +103,10 @@ func update(c *gin.Context) {
 
 func RegisterUserUserGinServer(e *gin.Engine, server UserGinServer) {
 	apiUserSvc = server
-	e.Handle(USER_HTTP_METGOD, PathUserLogin, login)
-	e.Handle(USER_HTTP_METGOD, PathUserLogout, logout)
-	e.Handle(USER_HTTP_METGOD, PathUserInfo, handleUserAuthMiddleware, info)
-	e.Handle(USER_HTTP_METGOD, PathUserUpdate, handleUserAuthMiddleware, update)
+	e.Handle("POST", PathUserLogin, login)
+	e.Handle("POST", PathUserLogout, logout)
+	e.Handle("POST", PathUserInfo, handleUserAuthMiddleware, info)
+	e.Handle("POST", PathUserUpdate, handleUserAuthMiddleware, update)
 }
 
 // 返回数据格式化

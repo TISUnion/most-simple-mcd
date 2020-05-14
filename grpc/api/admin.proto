@@ -4,9 +4,10 @@ package most.simple.mcd;
 
 option go_package = "api";
 
-// `middleware:"auth"`
+// `middleware:"auth" method:"POST"`
 service Admin {
     // 获取配置
+    // `hasInput:"false"`
     rpc getConfig (GetConfigReq) returns (GetConfigResp);
     // 修改配置
     rpc updateConfig (UpdateConfigReq) returns (UpdateConfigResp);
@@ -17,12 +18,12 @@ service Admin {
     // 向服务端执行一条命令
     rpc runCommand (RunCommandReq) returns (RunCommandResp);
     // 获取服务端日志
-    // `method:"POST" hasInput:"false" hasOutput:"false"`
+    // `hasInput:"false" hasOutput:"false"`
     rpc getLog (GetLogReq) returns (GetLogResp);
     // 删除临时文件
     rpc delTmpFlie (DelTmpFlieReq) returns (DelTmpFlieResp);
     // 获取上传服务端文件，并注入到容器中
-    // `method:"POST" hasInput:"false"`
+    // `hasInput:"false"`
     rpc addUpToContainer (AddUpToContainerReq) returns (AddUpToContainerResp);
     // 关闭mcd
     // `hasInput:"false"`

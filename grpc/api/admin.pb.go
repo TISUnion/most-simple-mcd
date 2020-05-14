@@ -961,6 +961,7 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type AdminClient interface {
 	// 获取配置
+	// `hasInput:"false"`
 	GetConfig(ctx context.Context, in *GetConfigReq, opts ...grpc.CallOption) (*GetConfigResp, error)
 	// 修改配置
 	UpdateConfig(ctx context.Context, in *UpdateConfigReq, opts ...grpc.CallOption) (*UpdateConfigResp, error)
@@ -971,12 +972,12 @@ type AdminClient interface {
 	// 向服务端执行一条命令
 	RunCommand(ctx context.Context, in *RunCommandReq, opts ...grpc.CallOption) (*RunCommandResp, error)
 	// 获取服务端日志
-	// `method:"POST" hasInput:"false" hasOutput:"false"`
+	// `hasInput:"false" hasOutput:"false"`
 	GetLog(ctx context.Context, in *GetLogReq, opts ...grpc.CallOption) (*GetLogResp, error)
 	// 删除临时文件
 	DelTmpFlie(ctx context.Context, in *DelTmpFlieReq, opts ...grpc.CallOption) (*DelTmpFlieResp, error)
 	// 获取上传服务端文件，并注入到容器中
-	// `method:"POST" hasInput:"false"`
+	// `hasInput:"false"`
 	AddUpToContainer(ctx context.Context, in *AddUpToContainerReq, opts ...grpc.CallOption) (*AddUpToContainerResp, error)
 	// 关闭mcd
 	// `hasInput:"false"`
@@ -1075,6 +1076,7 @@ func (c *adminClient) CloseMcd(ctx context.Context, in *CloseMcdReq, opts ...grp
 // AdminServer is the server API for Admin service.
 type AdminServer interface {
 	// 获取配置
+	// `hasInput:"false"`
 	GetConfig(context.Context, *GetConfigReq) (*GetConfigResp, error)
 	// 修改配置
 	UpdateConfig(context.Context, *UpdateConfigReq) (*UpdateConfigResp, error)
@@ -1085,12 +1087,12 @@ type AdminServer interface {
 	// 向服务端执行一条命令
 	RunCommand(context.Context, *RunCommandReq) (*RunCommandResp, error)
 	// 获取服务端日志
-	// `method:"POST" hasInput:"false" hasOutput:"false"`
+	// `hasInput:"false" hasOutput:"false"`
 	GetLog(context.Context, *GetLogReq) (*GetLogResp, error)
 	// 删除临时文件
 	DelTmpFlie(context.Context, *DelTmpFlieReq) (*DelTmpFlieResp, error)
 	// 获取上传服务端文件，并注入到容器中
-	// `method:"POST" hasInput:"false"`
+	// `hasInput:"false"`
 	AddUpToContainer(context.Context, *AddUpToContainerReq) (*AddUpToContainerResp, error)
 	// 关闭mcd
 	// `hasInput:"false"`

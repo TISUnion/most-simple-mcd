@@ -1072,7 +1072,7 @@ type McServerClient interface {
 	// `method:"GET" hasInput:"false" hasOutput:"false"`
 	ServerInteraction(ctx context.Context, in *ServerInteractionReq, opts ...grpc.CallOption) (*ServerInteractionResp, error)
 	// 获取服务端信息列表
-	// `middleware:"auth"`
+	// `middleware:"auth" hasInput:"false"`
 	List(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error)
 	// 获取服务端信息列表
 	// `middleware:"auth"`
@@ -1168,7 +1168,7 @@ type McServerServer interface {
 	// `method:"GET" hasInput:"false" hasOutput:"false"`
 	ServerInteraction(context.Context, *ServerInteractionReq) (*ServerInteractionResp, error)
 	// 获取服务端信息列表
-	// `middleware:"auth"`
+	// `middleware:"auth" hasInput:"false"`
 	List(context.Context, *ListReq) (*ListResp, error)
 	// 获取服务端信息列表
 	// `middleware:"auth"`

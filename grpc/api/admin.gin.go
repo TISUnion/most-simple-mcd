@@ -63,12 +63,6 @@ var apiAdminSvc AdminGinServer
 
 func getConfig(c *gin.Context) {
 	p := new(GetConfigReq)
-	if err := c.BindJSON(p); err != nil {
-		c.Set("code", -500)
-		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getAdminResponse(c, nil))
-		return
-	}
 	resp, err := apiAdminSvc.GetConfig(c, p)
 	if err != nil {
 		c.Set("code", -500)
@@ -200,15 +194,15 @@ func closeMcd(c *gin.Context) {
 
 func RegisterAdminAdminGinServer(e *gin.Engine, server AdminGinServer) {
 	apiAdminSvc = server
-	e.Handle(ADMIN_HTTP_METGOD, PathAdminGetConfig, handleAdminAuthMiddleware, getConfig)
-	e.Handle(ADMIN_HTTP_METGOD, PathAdminUpdateConfig, handleAdminAuthMiddleware, updateConfig)
-	e.Handle(ADMIN_HTTP_METGOD, PathAdminOperatePlugin, handleAdminAuthMiddleware, operatePlugin)
-	e.Handle(ADMIN_HTTP_METGOD, PathAdminGetConfigVal, handleAdminAuthMiddleware, getConfigVal)
-	e.Handle(ADMIN_HTTP_METGOD, PathAdminRunCommand, handleAdminAuthMiddleware, runCommand)
+	e.Handle("POST", PathAdminGetConfig, handleAdminAuthMiddleware, getConfig)
+	e.Handle("POST", PathAdminUpdateConfig, handleAdminAuthMiddleware, updateConfig)
+	e.Handle("POST", PathAdminOperatePlugin, handleAdminAuthMiddleware, operatePlugin)
+	e.Handle("POST", PathAdminGetConfigVal, handleAdminAuthMiddleware, getConfigVal)
+	e.Handle("POST", PathAdminRunCommand, handleAdminAuthMiddleware, runCommand)
 	e.Handle("POST", PathAdminGetLog, handleAdminAuthMiddleware, getLog)
-	e.Handle(ADMIN_HTTP_METGOD, PathAdminDelTmpFlie, handleAdminAuthMiddleware, delTmpFlie)
+	e.Handle("POST", PathAdminDelTmpFlie, handleAdminAuthMiddleware, delTmpFlie)
 	e.Handle("POST", PathAdminAddUpToContainer, handleAdminAuthMiddleware, addUpToContainer)
-	e.Handle(ADMIN_HTTP_METGOD, PathAdminCloseMcd, handleAdminAuthMiddleware, closeMcd)
+	e.Handle("POST", PathAdminCloseMcd, handleAdminAuthMiddleware, closeMcd)
 }
 
 // 返回数据格式化

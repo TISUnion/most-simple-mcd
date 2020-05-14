@@ -65,12 +65,6 @@ func serverInteraction(c *gin.Context) {
 
 func list(c *gin.Context) {
 	p := new(ListReq)
-	if err := c.BindJSON(p); err != nil {
-		c.Set("code", -500)
-		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getServerResponse(c, nil))
-		return
-	}
 	resp, err := apiMcServerSvc.List(c, p)
 	if err != nil {
 		c.Set("code", -500)
@@ -157,11 +151,11 @@ func RegisterServerMcServerGinServer(e *gin.Engine, server McServerGinServer) {
 	apiMcServerSvc = server
 	e.Handle("GET", PathMcServerListenResource, listenResource)
 	e.Handle("GET", PathMcServerServerInteraction, serverInteraction)
-	e.Handle(SERVER_HTTP_METGOD, PathMcServerList, handleServerAuthMiddleware, list)
-	e.Handle(SERVER_HTTP_METGOD, PathMcServerGetServerState, handleServerAuthMiddleware, getServerState)
-	e.Handle(SERVER_HTTP_METGOD, PathMcServerDetail, handleServerAuthMiddleware, detail)
-	e.Handle(SERVER_HTTP_METGOD, PathMcServerOperateServer, handleServerAuthMiddleware, operateServer)
-	e.Handle(SERVER_HTTP_METGOD, PathMcServerUpdateServerInfo, handleServerAuthMiddleware, updateServerInfo)
+	e.Handle("POST", PathMcServerList, handleServerAuthMiddleware, list)
+	e.Handle("POST", PathMcServerGetServerState, handleServerAuthMiddleware, getServerState)
+	e.Handle("POST", PathMcServerDetail, handleServerAuthMiddleware, detail)
+	e.Handle("POST", PathMcServerOperateServer, handleServerAuthMiddleware, operateServer)
+	e.Handle("POST", PathMcServerUpdateServerInfo, handleServerAuthMiddleware, updateServerInfo)
 }
 
 // 返回数据格式化
