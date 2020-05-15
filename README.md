@@ -6,6 +6,9 @@ most-simple-mcd是一个minecraft开服辅助工具，只需鼠标“点点点�
 MCDaemon-go是most-simple-mcd的前身，在MCDaemon-go中踩的坑和不合理规划，都将在most-simple-mcd中被填平！
 目前MCDaemon-go已经停止维护。
 
+## 使用时遇到了问题
+首先查看[FAQ](https://github.com/TISUnion/most-simple-mcd/wiki/FAQ)，没有在FAQ中找到解决方案，则查看运行文件目录下，logs目录下的default文件夹里对应的日志，将错误信息提交至issue或者交流群中。
+
 ## 编译方法
 - 下载本项目
 ```git
