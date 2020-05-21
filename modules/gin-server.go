@@ -7,9 +7,11 @@ import (
 	"github.com/TISUnion/most-simple-mcd/interface/server"
 	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/gin-contrib/gzip"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"sync"
 	"time"
@@ -42,13 +44,18 @@ func (g *GinServer) DestructCallBack() {
 }
 
 func (g *GinServer) InitCallBack() {
-	RegisterRouter()
 	g.resourceWsPool = make(map[string][]*websocket.Conn)
 	g.stdoutWsPool = make(map[string][]*websocket.Conn)
 	g.stdoutChans = make(map[string]chan *models.ReciveMessage)
 
 	//  启用gzip压缩
 	g.router.Use(gzip.Gzip(gzip.DefaultCompression))
+
+	// 静态后台管理前端文件
+	g.router.Use(static.Serve("/", static.LocalFile(filepath.Join(GetConfVal(constant.WORKSPACE), constant.Web_FILE_DIR_NAME), true)))
+
+	// 静态日志文件
+	g.router.Use(static.Serve("/static/file/logs", static.LocalFile(filepath.Join(GetConfVal(constant.WORKSPACE), constant.LOG_DIR), true)))
 }
 
 func (g *GinServer) Start() error {

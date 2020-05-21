@@ -15,13 +15,18 @@ import (
 
 // 初始化
 func ModuleInit() {
+	// 处理退出逻辑
 	go modules.ExitHandle()
 	ini.PrettyFormat = false
+	// 注册插件到容器中
 	plugins.RegisterPlugin()
 	// 解压前端静态文件
 	_ = pack_webfile.UnCompress()
+	// 创建服务端容器对象
 	modules.GetMinecraftServerContainerInstance()
+	// 注册gin路由
 	services.RegisterServices()
+	// 开启web服务器
 	_ = modules.GetGinServerInstance().Start()
 }
 
