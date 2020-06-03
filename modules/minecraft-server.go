@@ -29,6 +29,8 @@ var (
 type MinecraftServer struct {
 	*models.ServerConf
 
+	*ServerAdapter
+
 	// CmdObj
 	//子进程实例
 	CmdObj *exec.Cmd
@@ -374,7 +376,7 @@ func (m *MinecraftServer) handleMessage() {
 }
 
 func (m *MinecraftServer) getVersion(data []byte) {
-	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Starting minecraft server version ([0-9]*\\.?[0-9]*\\.?[0-9]*\\.?)")
+	reg, _ := regexp.Compile(m.GetVersionRegularExpression())
 	ves := reg.FindSubmatch(data)
 	if len(ves) > 1 {
 		m.Version = string(ves[1])
@@ -382,7 +384,7 @@ func (m *MinecraftServer) getVersion(data []byte) {
 }
 
 func (m *MinecraftServer) getGameType(data []byte) {
-	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Default game type: (?P<type>[a-zA-Z]+)")
+	reg, _ := regexp.Compile(m.GetGameTypeRegularExpression())
 	match := reg.FindSubmatch(data)
 	if len(match) > 1 {
 		m.GameType = string(match[1])
@@ -391,7 +393,7 @@ func (m *MinecraftServer) getGameType(data []byte) {
 
 // 判断服务端是否已经启动
 func (m *MinecraftServer) sureServerStart(data []byte) {
-	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Done \\(.*\\)! For help, type \"help\"")
+	reg, _ := regexp.Compile(m.GetGameStartRegularExpression())
 	match := reg.Find(data)
 	if len(match) > 0 {
 		m.State = constant.MC_STATE_START
@@ -406,7 +408,7 @@ func (m *MinecraftServer) sureServerStop() {
 
 // 判断服务端是否已保存
 func (m *MinecraftServer) sureServerSave(data []byte) {
-	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Saved the world")
+	reg, _ := regexp.Compile(m.GetGameSaveRegularExpression())
 	match := reg.Find(data)
 	// 如果已关闭则发送关闭信息
 	if len(match) > 0 {
@@ -603,10 +605,11 @@ func (m *MinecraftServer) initLocalIps() {
 // 新建一个mc服务端进程
 func NewMinecraftServer(serverConf *models.ServerConf) server.MinecraftServer {
 	minecraftServer := &MinecraftServer{
-		ServerConf:  serverConf,
-		lock:        &sync.Mutex{},
-		messageChan: make(chan *models.ReciveMessage, 10),
-		logger:      AddLog(serverConf.EntryId),
+		ServerConf:    serverConf,
+		lock:          &sync.Mutex{},
+		messageChan:   make(chan *models.ReciveMessage, 10),
+		logger:        AddLog(serverConf.EntryId),
+		ServerAdapter: &ServerAdapter{side: serverConf.Side},
 	}
 	RegisterCallBack(minecraftServer)
 	return minecraftServer

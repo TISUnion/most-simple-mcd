@@ -50,4 +50,7 @@ type ServerConf struct {
 
 	// 本机的ip
 	Ips []string `json:"ips"`
+
+	// 服务端类型: 原版，水龙头等，默认为原版
+	Side string `json:"side"`
 }

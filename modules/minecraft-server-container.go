@@ -258,7 +258,7 @@ func (m *MinecraftServerContainer) GetAllServerObj() map[string]server.Minecraft
 }
 
 // 处理mc服务端文件
-func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, memory int64) *models.ServerConf {
+func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, memory int64, side string) *models.ServerConf {
 	path, _ := utils.GetCurrentPath()
 	entryId := uuid.NewV4().String()
 	_, filename := filepath.Split(filePath)
@@ -280,6 +280,10 @@ func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, mem
 		filename = name
 	}
 
+	if side == "" {
+		side = constant.VANILLA
+	}
+
 	// 生成config
 	return &models.ServerConf{
 		Name:    filename,
@@ -287,6 +291,7 @@ func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, mem
 		EntryId: entryId,
 		Port:    port,
 		Memory:  memory,
+		Side:    side,
 	}
 }
 
@@ -298,7 +303,7 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 	jarspath, _ := filepath.Glob(fmt.Sprintf("%s/*.jar", path))
 	// 读取当前目录下的所有jar文件
 	for _, v := range jarspath {
-		m.AddServer(m.HandleMcFile(v, "", 0, 0), false)
+		m.AddServer(m.HandleMcFile(v, "", 0, 0, ""), false)
 	}
 	m._saveToDb()
 }
