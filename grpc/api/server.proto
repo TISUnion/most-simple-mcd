@@ -27,6 +27,15 @@ service McServer {
     // 修改服务端参数
     // `middleware:"auth"`
     rpc updateServerInfo (UpdateServerInfoReq) returns (UpdateServerInfoResp);
+    // 获取支持的服务端
+    // `method:"GET" hasInput:"false" middleware:"auth"`
+    rpc getServerSide (GetServerSideReq) returns (GetServerSideResp);
+}
+message GetServerSideReq {}
+
+message GetServerSideResp {
+    // 支持的服务端数组
+    repeated string server_sides = 1;
 }
 
 message ListenResourceReq {
@@ -74,6 +83,8 @@ message ListResp {
         int64 state = 11;
         // 本机的ip
         repeated string ips = 12 [json_name = "ips"];
+        // 服务端类型
+        string side = 13;
     }
     // 服务端配置
     repeated Record list = 1;
@@ -136,6 +147,8 @@ message DetailResp {
     repeated string ips = 12 [json_name = "ips"];
     // 插件信息
     repeated PluginRecord pluginfo = 13 [json_name = "plugin_info"];
+    // 服务端类型
+    string side = 14;
 }
 
 message OperateServerReq {
@@ -174,6 +187,8 @@ message UpdateServerInfoReq {
     int64 state = 11 [json_name = "state"];
     // 本机的ip
     repeated string ips = 12 [json_name = "ips"];
+    // 服务端类型
+    string side = 13;
 }
 
 message UpdateServerInfoResp {

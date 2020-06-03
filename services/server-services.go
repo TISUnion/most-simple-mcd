@@ -15,6 +15,13 @@ import (
 type ServerService struct {
 }
 
+func (s *ServerService) GetServerSide(ctx context.Context, req *api.GetServerSideReq) (resp *api.GetServerSideResp, err error) {
+	resp = &api.GetServerSideResp{
+		ServerSides: modules.GetAllServerSide(),
+	}
+	return
+}
+
 func (s *ServerService) ListenResource(ctx context.Context, req *api.ListenResourceReq) (resp *api.ListenResourceResp, err error) {
 	if ginCtx, ok := ctx.(*gin.Context); ok {
 		s._listenResource(ginCtx)
@@ -50,6 +57,7 @@ func (s *ServerService) List(ctx context.Context, req *api.ListReq) (resp *api.L
 			GameType:       c.GameType,
 			State:          c.State,
 			Ips:            c.Ips,
+			Side:           c.Side,
 		})
 	}
 	return &api.ListResp{
@@ -101,6 +109,7 @@ func (s *ServerService) Detail(ctx context.Context, req *api.DetailReq) (resp *a
 		State:          sc.State,
 		Ips:            sc.Ips,
 		Pluginfo:       pluginResp,
+		Side:           sc.Side,
 	}, nil
 }
 
@@ -273,6 +282,9 @@ func (s *ServerService) _updateServerInfo(reqModel *models.ServerConf) (err erro
 	}
 	if reqModel.GameType != "" {
 		servConf.GameType = reqModel.GameType
+	}
+	if reqModel.Side != "" {
+		servConf.Side = reqModel.Side
 	}
 	serv.SetServerConf(servConf)
 	ctr.SaveToDb()

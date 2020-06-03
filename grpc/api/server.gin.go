@@ -26,6 +26,7 @@ var PathMcServerGetServerState = "/most.simple.mcd.McServer/getServerState"
 var PathMcServerDetail = "/most.simple.mcd.McServer/detail"
 var PathMcServerOperateServer = "/most.simple.mcd.McServer/operateServer"
 var PathMcServerUpdateServerInfo = "/most.simple.mcd.McServer/updateServerInfo"
+var PathMcServerGetServerSide = "/most.simple.mcd.McServer/getServerSide"
 
 // McServerGinServer is the server API for McServer service.
 type McServerGinServer interface {
@@ -49,6 +50,9 @@ type McServerGinServer interface {
 
 	// 修改服务端参数
 	UpdateServerInfo(ctx context.Context, req *UpdateServerInfoReq) (resp *UpdateServerInfoResp, err error)
+
+	// 获取支持的服务端
+	GetServerSide(ctx context.Context, req *GetServerSideReq) (resp *GetServerSideResp, err error)
 }
 
 var apiMcServerSvc McServerGinServer
@@ -147,6 +151,18 @@ func updateServerInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, getServerResponse(c, resp))
 }
 
+func getServerSide(c *gin.Context) {
+	p := new(GetServerSideReq)
+	resp, err := apiMcServerSvc.GetServerSide(c, p)
+	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getServerResponse(c, nil))
+		return
+	}
+	c.JSON(http.StatusOK, getServerResponse(c, resp))
+}
+
 func RegisterServerMcServerGinServer(e *gin.Engine, server McServerGinServer) {
 	apiMcServerSvc = server
 	e.Handle("GET", PathMcServerListenResource, listenResource)
@@ -156,6 +172,7 @@ func RegisterServerMcServerGinServer(e *gin.Engine, server McServerGinServer) {
 	e.Handle("POST", PathMcServerDetail, handleServerAuthMiddleware, detail)
 	e.Handle("POST", PathMcServerOperateServer, handleServerAuthMiddleware, operateServer)
 	e.Handle("POST", PathMcServerUpdateServerInfo, handleServerAuthMiddleware, updateServerInfo)
+	e.Handle("GET", PathMcServerGetServerSide, handleServerAuthMiddleware, getServerSide)
 }
 
 // 返回数据格式化

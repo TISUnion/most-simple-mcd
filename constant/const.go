@@ -138,6 +138,7 @@ const (
 	UPLOAD_PORT_TEXT                = "port"
 	UPLOAD_MEMORY_TEXT              = "memory"
 	UPLOAD_NAME_TEXT                = "name"
+	UPLOAD_SIDE_TEXT                = "side"
 
 	OS_WINDOWS = "windows"
 	OS_LINUX   = "linux"

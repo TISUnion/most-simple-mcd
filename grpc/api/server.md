@@ -5,6 +5,7 @@
 - [/most.simple.mcd.McServer/detail](#mostsimplemcdmcserverdetail)  获取服务端详情
 - [/most.simple.mcd.McServer/operateServer](#mostsimplemcdmcserveroperateserver)  操作服务端
 - [/most.simple.mcd.McServer/updateServerInfo](#mostsimplemcdmcserverupdateserverinfo)  修改服务端参数
+- [/most.simple.mcd.McServer/getServerSide](#mostsimplemcdmcservergetserverside)  获取支持的服务端
 
 ##/most.simple.mcd.McServer/listenResource
 ### 监听服务端消耗资源
@@ -106,6 +107,8 @@
                 "ips": [
                     ""
                 ]
+                // 服务端类型
+                "side": ""
             }
         ]
     }
@@ -207,6 +210,8 @@
                 "help_description": ""
             }
         ]
+        // 服务端类型
+        "side": ""
     }
 
 }
@@ -261,6 +266,7 @@
 |game_type|否|string||
 |state|否|integer| 启动状态：0.未启动 1.启动  -1.正在启动 -2.正在关闭|
 |ips|否|string| 本机的ip|
+|side|否|string| 服务端类型|
 
 
 #### 响应
@@ -271,6 +277,33 @@
     "message": "ok",
     "data": 
     {
+    }
+
+}
+```
+
+
+##/most.simple.mcd.McServer/getServerSide
+### 获取支持的服务端
+
+#### 方法：GRPC
+
+#### 请求参数
+
+
+
+#### 响应
+
+```javascript
+{
+    "code": 0,
+    "message": "ok",
+    "data": 
+    {
+        // 支持的服务端数组
+        "serverSides": [
+            ""
+        ]
     }
 
 }
