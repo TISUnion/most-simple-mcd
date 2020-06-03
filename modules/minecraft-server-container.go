@@ -44,6 +44,37 @@ type MinecraftServerContainer struct {
 	mcCallbacks map[string][]func(string)
 }
 
+// 删除服务端
+func (m *MinecraftServerContainer) DeleteServer(id string) error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	_, err := m._getServerById(id)
+	if err != nil {
+		return err
+	}
+	logPath := filepath.Join(GetConfVal(constant.WORKSPACE), constant.LOG_DIR, id)
+	serverPath := filepath.Join(GetConfVal(constant.WORKSPACE), constant.MC_SERVER_DIR, id)
+	err = os.RemoveAll(logPath)
+	if err != nil {
+		return err
+	}
+	err = os.RemoveAll(serverPath)
+	if err != nil {
+		return err
+	}
+
+	// 从数据库删除中删除
+	oldC := m.getServerConfFromDb()
+	var newC []*models.ServerConf
+	for _, cfg := range oldC {
+		if cfg.EntryId != id {
+			newC = append(newC, cfg)
+		}
+	}
+	m._saveToDb(newC)
+	return nil
+}
+
 // 统一注册关闭回调
 func (m *MinecraftServerContainer) RegisterAllServerCloseCallback(f func(string)) {
 	m.mcCallbacks[constant.MC_CLOSE_CALLBACK] = append(m.mcCallbacks[constant.MC_CLOSE_CALLBACK], f)
@@ -248,7 +279,8 @@ func (m *MinecraftServerContainer) AddServer(config *models.ServerConf, isSave b
 		mcServer.RegisterSaveCallback(fCb)
 	}
 	if isSave {
-		m._saveToDb()
+		config := m._getAllServerConf()
+		m._saveToDb(config)
 	}
 }
 
@@ -305,7 +337,8 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 	for _, v := range jarspath {
 		m.AddServer(m.HandleMcFile(v, "", 0, 0, ""), false)
 	}
-	m._saveToDb()
+	config := m._getAllServerConf()
+	m._saveToDb(config)
 }
 
 // 读取数据库中mc配置
@@ -335,12 +368,12 @@ func (m *MinecraftServerContainer) getServerConfFromDb() []*models.ServerConf {
 func (m *MinecraftServerContainer) SaveToDb() {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	m._saveToDb()
+	config := m._getAllServerConf()
+	m._saveToDb(config)
 }
 
 // 持久化服务器配置
-func (m *MinecraftServerContainer) _saveToDb() {
-	config := m._getAllServerConf()
+func (m *MinecraftServerContainer) _saveToDb(config []*models.ServerConf) {
 	data, _ := json.Marshal(config)
 	SetFromDatabase(constant.MC_SERVER_DB_KEY, string(data))
 }

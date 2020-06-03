@@ -35,6 +35,9 @@ type MinecraftContainer interface {
 	// 添加服务端
 	AddServer(*models.ServerConf, bool)
 
+	// 删除服务端
+	DeleteServer(string) error
+
 	// 生成服务端参数对象
 	HandleMcFile(string, string, int64, int64, string) *models.ServerConf
 
