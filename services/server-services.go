@@ -58,6 +58,7 @@ func (s *ServerService) List(ctx context.Context, req *api.ListReq) (resp *api.L
 			State:          c.State,
 			Ips:            c.Ips,
 			Side:           c.Side,
+			Comment:        c.Comment,
 		})
 	}
 	return &api.ListResp{
@@ -110,6 +111,7 @@ func (s *ServerService) Detail(ctx context.Context, req *api.DetailReq) (resp *a
 		Ips:            sc.Ips,
 		Pluginfo:       pluginResp,
 		Side:           sc.Side,
+		Comment:        sc.Comment,
 	}, nil
 }
 

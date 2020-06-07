@@ -50,6 +50,7 @@ func (sa *ServerAdapter) GetMessageRegularExpression() string {
 		return ""
 	}
 }
+
 // 支持的所有服务端
 func GetAllServerSide() []string {
 	return []string{constant.VANILLA}

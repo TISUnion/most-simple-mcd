@@ -53,4 +53,7 @@ type ServerConf struct {
 
 	// 服务端类型: 原版，水龙头等，默认为原版
 	Side string `json:"side"`
+
+	// 备注
+	Comment string `json:"comment"`
 }

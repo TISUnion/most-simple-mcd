@@ -85,6 +85,8 @@ message ListResp {
         repeated string ips = 12 [json_name = "ips"];
         // 服务端类型
         string side = 13;
+        // 备注
+        string comment = 14;
     }
     // 服务端配置
     repeated Record list = 1;
@@ -149,6 +151,8 @@ message DetailResp {
     repeated PluginRecord pluginfo = 13 [json_name = "plugin_info"];
     // 服务端类型
     string side = 14;
+    // 备注
+    string comment = 15;
 }
 
 message OperateServerReq {
@@ -189,6 +193,8 @@ message UpdateServerInfoReq {
     repeated string ips = 12 [json_name = "ips"];
     // 服务端类型
     string side = 13;
+    // 备注
+    string comment = 14;
 }
 
 message UpdateServerInfoResp {

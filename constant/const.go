@@ -122,7 +122,7 @@ const (
 	LOG_TYPE_GIN     = "2"
 	LOG_TYPE_DEFAULT = "3"
 
-	JAR_SUF = ".jar"
+	JAR_SUF           = ".jar"
 	TOKEN_HEADER_NAME = "X-Token"
 )
 
@@ -141,6 +141,7 @@ const (
 	UPLOAD_MEMORY_TEXT              = "memory"
 	UPLOAD_NAME_TEXT                = "name"
 	UPLOAD_SIDE_TEXT                = "side"
+	UPLOAD_COMMENT_TEXT             = "comment"
 
 	OS_WINDOWS = "windows"
 	OS_LINUX   = "linux"
