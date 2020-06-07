@@ -72,6 +72,7 @@ func (p *HerePlugin) Stop()  {}
 
 func (p *HerePlugin) HandleMessage(message *models.ReciveMessage) {
 	// 匹配是否是坐标json
+	p.PosDataHandle(message.OriginData)
 
 	if message.Player == "" {
 		return

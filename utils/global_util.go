@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/models"
@@ -124,27 +125,31 @@ func ParseCharacter(data []byte) ([]byte, error) {
 // GetFreePort
 // 获取系统空闲端口
 // 如果port为0，则表示随机获取一个空闲端口，不为0则为指定端口
-func GetFreePort(port int64) (int64, error) {
-	addrIp4, err := net.ResolveTCPAddr("tcp4", fmt.Sprintf("localhost:%d", port))
-	if err != nil {
-		return 0, err
+func GetFreePort(port int) (int, error) {
+	if runtime.GOOS == constant.OS_DARWIN {
+		checkStatement := fmt.Sprintf("lsof -i:%d ", port)
+		output, err := exec.Command("sh", "-c", checkStatement).CombinedOutput()
+		if err != nil {
+			if !strings.Contains(err.Error(), "exit status") {
+				return 0, err
+			}
+		}
+		if len(output) > 0 {
+			return 0, errors.New("端口号冲突")
+		}
+		return port, nil
+	} else {
+		addrIp, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("localhost:%d", port))
+		if err != nil {
+			return 0, err
+		}
+		l, err := net.ListenTCP("tcp", addrIp)
+		if err != nil {
+			return 0, err
+		}
+		defer l.Close()
+		return l.Addr().(*net.TCPAddr).Port, nil
 	}
-	addrIp6, err := net.ResolveTCPAddr("tcp6", fmt.Sprintf("localhost:%d", port))
-	if err != nil {
-		return 0, err
-	}
-	// mac 中同一端口可以支持2种ip方式被不同socket监听
-	l4, err := net.ListenTCP("tcp4", addrIp4)
-	if err != nil {
-		return 0, err
-	}
-	defer l4.Close()
-	l6, err := net.ListenTCP("tcp6", addrIp6)
-	if err != nil {
-		return 0, err
-	}
-	defer l6.Close()
-	return int64(l4.Addr().(*net.TCPAddr).Port), nil
 }
 
 // Int转int32

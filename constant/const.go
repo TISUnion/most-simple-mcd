@@ -67,18 +67,20 @@ const (
 
 // mc服务端常量
 const (
-	EULA_FILE_NAME    = "eula.txt"
-	EULA              = "eula"
-	TRUE_STR          = "true"
-	MC_CONF_NAME      = "server.properties"
-	MC_PORT_TEXT      = "server-port"
-	MC_SERVER_DIR     = "minecraft-servers"
-	MC_SERVER_BACK    = "minecraft-servers-back"
-	MC_SERVER_DB_KEY  = "minecraft:server:configs"
-	MC_ALL_PLAYER     = "@a"
-	MC_DEFAULT_PORT   = 25565
-	MC_DEFAULT_MEMORY = 1024
-	UUID_LENGTH       = 36
+	EULA_FILE_NAME       = "eula.txt"
+	EULA                 = "eula"
+	TRUE_STR             = "true"
+	MC_CONF_NAME         = "server.properties"
+	MC_PORT_TEXT         = "server-port"
+	MC_SERVER_DIR        = "minecraft-servers"
+	MC_SERVER_BACK       = "minecraft-servers-back"
+	MC_SERVER_DB_KEY     = "minecraft:server:configs"
+	MC_LAST_UTF8_VERSION = "1.12"
+	MC_ALL_PLAYER        = "@a"
+	MC_DEFAULT_PORT      = 25565
+	MC_DEFAULT_MEMORY    = 1024
+	UUID_LENGTH          = 36
+	MAX_RESIVE_BUFF_SIZE = 1024
 
 	MC_STATE_STOPING  = -2
 	MC_STATE_STARTIND = -1
@@ -151,5 +153,4 @@ const (
 	COMPARE_GT = 1
 	COMPARE_EQ = 0
 	COMPARE_LT = -1
-
 )

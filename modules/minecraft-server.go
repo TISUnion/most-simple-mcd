@@ -16,7 +16,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -289,34 +291,26 @@ func (m *MinecraftServer) Restart() error {
 
 // 获取一条消息
 func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
-	const MAX_SIZE = 1024
-	buff := make([]byte, MAX_SIZE)
-	n, err := m.stdout.Read(buff)
-	buff = buff[:n]
-	if err != nil {
-		errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
-		m.sureServerStop()
-		return []byte{}, errors.New(errMsg)
-	}
-	// 如果一次的数据为1024，就多次获取
-	if n == MAX_SIZE {
-		for {
-			subBuff := make([]byte, MAX_SIZE)
-			subN, subErr := m.stdout.Read(buff)
-			if subErr != nil {
-				errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
-				m.sureServerStop()
-				return []byte{}, errors.New(errMsg)
-			}
-			subBuff = subBuff[:subN]
-			buff = append(buff, subBuff...)
-			if subN != MAX_SIZE {
-				break
-			}
+	result := make([]byte, 0)
+	for {
+		buff := make([]byte, constant.MAX_RESIVE_BUFF_SIZE)
+		n, err := m.stdout.Read(buff)
+		if err != nil {
+			errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
+			m.sureServerStop()
+			return []byte{}, errors.New(errMsg)
+		}
+		if n <= 0 {
+			continue
+		}
+		result = append(result, buff[:n]...)
+		if buff[n-1] == '\n' {
+			break
 		}
 	}
-	buff, _ = utils.ParseCharacter(buff)
-	return buff, nil
+
+	result, _ = utils.ParseCharacter(result)
+	return result, nil
 }
 
 // 获取消息，并写入到管道中
@@ -402,7 +396,6 @@ func (m *MinecraftServer) sureServerStart(data []byte) {
 
 // 判断服务端是否已经关闭
 func (m *MinecraftServer) sureServerStop() {
-	m.State = constant.MC_STATE_START
 	m.stopTagChan <- struct{}{}
 }
 
@@ -427,7 +420,14 @@ func (m *MinecraftServer) Command(c string) error {
 func (m *MinecraftServer) _command(c string) error {
 	// 不加换行无法执行命令
 	c += "\n"
-	_, err := m.stdin.Write([]byte(c))
+	cmd := []byte(c)
+	sys := runtime.GOOS
+	// 在windows下小于1.12是gbk编码
+	if sys == constant.OS_WINDOWS && utils.CompareMcVersion(m.Version, constant.MC_LAST_UTF8_VERSION) == constant.COMPARE_LT {
+		c = strings.ReplaceAll(c, "\n", "\r\n")
+		cmd, _ = utils.UTF82GBK([]byte(c))
+	}
+	_, err := m.stdin.Write(cmd)
 	return err
 }
 
@@ -490,12 +490,19 @@ func (m *MinecraftServer) validatePort() (int64, error) {
 		realPort = constant.MC_DEFAULT_PORT
 	}
 	// 开启的服务端的端口已被占用,修修改
-	if p, _ := utils.GetFreePort(realPort); p == 0 {
+	if p, e := utils.GetFreePort(realPort); p == 0 {
+		if e != nil {
+			m.WriteLog(e.Error(), constant.LOG_ERROR)
+		}
 		p, err := m.changePort(cfg, mcConfPath, 0)
 		if err != nil {
 			return 0, err
 		}
 		realPort = p
+	}
+
+	if realPort == 0 {
+		return realPort, PORT_REPEAT_ERROR
 	}
 	return realPort, nil
 }
@@ -505,7 +512,10 @@ func (m *MinecraftServer) validatePort() (int64, error) {
 func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int64) (int64, error) {
 	// 如果可以自动更换端口就自动更换端口
 	if isChange, _ := strconv.ParseBool(GetConfVal(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT)); isChange {
-		unusedPort, _ := utils.GetFreePort(port)
+		unusedPort, err := utils.GetFreePort(port)
+		if err != nil {
+			m.WriteLog(err.Error(), constant.LOG_ERROR)
+		}
 		sec, _ := cfg.GetSection(ini.DefaultSection)
 		unusedPortStr := strconv.FormatInt(unusedPort, 10)
 		// 重新配置文件
