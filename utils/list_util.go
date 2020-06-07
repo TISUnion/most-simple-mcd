@@ -1,5 +1,7 @@
 package utils
 
+import "encoding/json"
+
 // 链表
 type List struct {
 	_list  []*Item
@@ -77,4 +79,24 @@ func (l *List) DelByCallback(cb func(int, interface{}) bool) {
 
 func (l *List) GetLen() int {
 	return l.length
+}
+
+func (l *List) ToArray() []interface{} {
+	result := make([]interface{}, 0)
+	list := l._list
+	for _, v := range list {
+		result = append(result, v)
+	}
+
+	return result
+}
+
+func (l *List) ToJson() (string, error) {
+	objArr := l.ToArray()
+	jsonByte, e := json.Marshal(objArr)
+	if e != nil {
+		return "", e
+	}
+
+	return string(jsonByte), nil
 }
