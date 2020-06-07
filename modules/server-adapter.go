@@ -42,6 +42,14 @@ func (sa *ServerAdapter) GetGameSaveRegularExpression() string {
 	}
 }
 
+func (sa *ServerAdapter) GetMessageRegularExpression() string {
+	switch sa.side {
+	case constant.VANILLA:
+		return constant.VANILLA_MESSAGE
+	default:
+		return ""
+	}
+}
 // 支持的所有服务端
 func GetAllServerSide() []string {
 	return []string{constant.VANILLA}

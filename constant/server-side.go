@@ -6,6 +6,7 @@ const (
 	VANILLA_GAME_TYPE = "\\[Server thread/INFO\\]: Default game type: (?P<type>[a-zA-Z]+)"
 	VANILLA_GAME_START = "\\[Server thread/INFO\\]: Done \\(.*\\)! For help, type \"help\""
 	VANILLA_GAME_SAVE = "\\[Server thread/INFO\\]: Saved the world"
+	VANILLA_MESSAGE = `\[(\d+:\d+:\d+)]\s+\[Server thread/INFO\]:\s+[<|\[]{1}(.+)[>|\]]{1}\s+(.+)`
 )
 
 const (

@@ -313,6 +313,21 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 	return result, nil
 }
 
+// 解析mc玩家发言
+func (m *MinecraftServer) parseMessage(originMsg []byte) *models.ReciveMessage {
+	re := regexp.MustCompile(m.GetMessageRegularExpression())
+	match := re.FindStringSubmatch(string(originMsg))
+	if len(match) == 4 {
+		return &models.ReciveMessage{
+			Player:     match[2],
+			Time:       match[1],
+			Speak:      match[3],
+			OriginData: originMsg,
+		}
+	}
+	return &models.ReciveMessage{OriginData: originMsg}
+}
+
 // 获取消息，并写入到管道中
 func (m *MinecraftServer) reciveMessageToChan() {
 	for {
@@ -322,7 +337,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 			WriteLogToDefault(err.Error(), constant.LOG_ERROR)
 			return
 		}
-		msg := utils.ParseMessage(everyBuff)
+		msg := m.parseMessage(everyBuff)
 		msg.ServerId = m.EntryId
 		m.messageChan <- msg
 	}

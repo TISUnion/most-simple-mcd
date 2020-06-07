@@ -12,13 +12,10 @@ import (
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"net"
 	"os/exec"
-	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
 )
-
-const parseMessageRGX = `\[(\d+:\d+:\d+)]\s+\[Server thread/INFO\]:\s+[<|\[]{1}(.+)[>|\]]{1}\s+(.+)`
 
 // 致命错误，退出程序
 func PanicError(msg string, err error) {
@@ -35,21 +32,6 @@ func NewConfParam(confKey, ConfVal, description string, level int64, IsAlterable
 		Description:    description,
 		IsAlterable:    IsAlterable,
 	}
-}
-
-// 解析mc玩家发言
-func ParseMessage(originMsg []byte) *models.ReciveMessage {
-	re := regexp.MustCompile(parseMessageRGX)
-	match := re.FindStringSubmatch(string(originMsg))
-	if len(match) == 4 {
-		return &models.ReciveMessage{
-			Player:     match[2],
-			Time:       match[1],
-			Speak:      match[3],
-			OriginData: originMsg,
-		}
-	}
-	return &models.ReciveMessage{OriginData: originMsg}
 }
 
 // 解析mc玩家发言插件命令
@@ -125,7 +107,7 @@ func ParseCharacter(data []byte) ([]byte, error) {
 // GetFreePort
 // 获取系统空闲端口
 // 如果port为0，则表示随机获取一个空闲端口，不为0则为指定端口
-func GetFreePort(port int) (int, error) {
+func GetFreePort(port int64) (int64, error) {
 	if runtime.GOOS == constant.OS_DARWIN {
 		checkStatement := fmt.Sprintf("lsof -i:%d ", port)
 		output, err := exec.Command("sh", "-c", checkStatement).CombinedOutput()
@@ -148,7 +130,7 @@ func GetFreePort(port int) (int, error) {
 			return 0, err
 		}
 		defer l.Close()
-		return l.Addr().(*net.TCPAddr).Port, nil
+		return int64(l.Addr().(*net.TCPAddr).Port), nil
 	}
 }
 
