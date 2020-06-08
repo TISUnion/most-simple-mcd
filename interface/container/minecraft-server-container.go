@@ -39,7 +39,7 @@ type MinecraftContainer interface {
 	DeleteServer(string) error
 
 	// 生成服务端参数对象
-	HandleMcFile(string, string, int64, int64, string) *models.ServerConf
+	HandleMcFile(string, string, int64, int64, string, string) *models.ServerConf
 
 	// StopAll
 	// 关闭所有mc服务器

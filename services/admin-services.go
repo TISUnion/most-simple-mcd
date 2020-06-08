@@ -165,8 +165,8 @@ func (a *AdminService) _addUpToContainer(c *gin.Context) error {
 		memory = constant.MC_DEFAULT_MEMORY
 	}
 	side := c.DefaultPostForm(constant.UPLOAD_SIDE_TEXT, constant.VANILLA)
-	//comment := c.DefaultPostForm(constant.UPLOAD_COMMENT_TEXT, "")
-	mcCfg := ctr.HandleMcFile(dst, name, port, memory, side)
+	comment := c.DefaultPostForm(constant.UPLOAD_COMMENT_TEXT, "")
+	mcCfg := ctr.HandleMcFile(dst, name, port, memory, side, comment)
 	ctr.AddServer(mcCfg, true)
 	return nil
 }

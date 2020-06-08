@@ -135,6 +135,7 @@ func (s *ServerService) UpdateServerInfo(ctx context.Context, req *api.UpdateSer
 		GameType:       req.GameType,
 		State:          req.State,
 		Ips:            req.Ips,
+		Comment:        req.Comment,
 	}
 	resp = &api.UpdateServerInfoResp{}
 	err = s._updateServerInfo(reqModel)
@@ -287,6 +288,9 @@ func (s *ServerService) _updateServerInfo(reqModel *models.ServerConf) (err erro
 	}
 	if reqModel.Side != "" {
 		servConf.Side = reqModel.Side
+	}
+	if reqModel.Comment != "" {
+		servConf.Comment = reqModel.Comment
 	}
 	serv.SetServerConf(servConf)
 	ctr.SaveToDb()
