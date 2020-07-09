@@ -1,4 +1,4 @@
-package modules
+package lib
 
 import (
 	"bytes"
@@ -39,7 +39,7 @@ func CreatePluginTmplFile(dirname, enName, zhName, description, command, helpDes
 		return err
 	}
 	tmplBytes := buf.Bytes()
-	pluginPath := filepath.Join(GetConfVal(constant.WORKSPACE), constant.PLUGIN_DIR, dirname, dirname+".go")
+	pluginPath := filepath.Join(constant.PLUGIN_DIR, dirname, dirname+".go")
 	fileObj, err := utils.CreateFile(pluginPath)
 	if err != nil {
 		return err
