@@ -2,6 +2,16 @@
 #define _UTILS_H_
 #include <Python.h>
 
+typedef struct Server{
+	char *name;
+    char *id;
+    int memory;
+    int port;
+    char *version;
+    char *side;
+    char *comment;
+} Server;
+
 // 新建一个class
 PyObject *CreateClass(char *className, PyObject *classDict);
 

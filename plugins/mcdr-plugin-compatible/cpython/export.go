@@ -1,82 +1,114 @@
 package cpython
 
+/*
+#include "Utils.h"
+*/
 import "C"
+import (
+	"github.com/TISUnion/most-simple-mcd/modules"
+	"unsafe"
+)
+
+type Server C.Server
+
+var ctr = modules.GetMinecraftServerContainerInstance()
 
 //export serverInfo
-func serverInfo(id C.CString) {
+func serverInfo(cid C.CString) Server {
+	srvId := C.GoString(cid)
+	s, err := ctr.GetServerById(srvId)
+	if err != nil {
+		return nil
+	}
+	info := s.GetServerConf()
+	id := C.CString(info.EntryId)
+	name := C.CString(info.Name)
+	memory := int(info.Memory)
+	port := int(info.Port)
+	version := C.CString(info.Version)
+	side := C.CString(info.Side)
+	comment := C.CString(info.Comment)
+	defer C.free(unsafe.Pointer(id))
+	defer C.free(unsafe.Pointer(version))
+	defer C.free(unsafe.Pointer(side))
+	defer C.free(unsafe.Pointer(comment))
+	defer C.free(unsafe.Pointer(name))
+	csrv := Server{name: name, id: id, memory: memory, port: port, version: version, side: side, comment: comment}
+	return csrv
 }
 
 //export start
-func start(id C.CString) {
+func start(cid C.CString) {
+	id := C.GoString(cid)
 }
 
 //export stop
-func stop(id C.CString) {
+func stop(cid C.CString) {
 }
 
 //export restart
-func restart(id C.CString) {
+func restart(cid C.CString) {
 }
 
 //export stopExit
-func stopExit(id C.CString) {
+func stopExit(cid C.CString) {
 }
 
 //export exit
-func exit(id C.CString) {
+func exit(cid C.CString) {
 }
 
 //export isServerRunning
-func isServerRunning(id C.CString) int {
+func isServerRunning(cid C.CString) int {
 	return 0
 }
 
 //export isServerStartup
-func isServerStartup(id C.CString) int {
+func isServerStartup(cid C.CString) int {
 	return 0
 }
 
 //export isRconRunning
-func isRconRunning(id C.CString) int {
+func isRconRunning(cid C.CString) int {
 	return 0
 }
 
 //export execute
-func execute(id, text C.CString)  {
+func execute(cid, ctext C.CString) {
 }
 
 //export say
-func say(id, text C.CString)  {
+func say(cid, ctext C.CString) {
 }
 
 //export tell
-func tell(id, player, text C.CString)  {
+func tell(cid, cplayer, ctext C.CString) {
 }
 
 //export reply
-func reply(id, player, text C.CString)  {
+func reply(cid, cplayer, ctext C.CString) {
 }
 
 //export loadPlugin
-func loadPlugin(plugin_name C.CString)  {
+func loadPlugin(cpluginName C.CString) {
 }
 
 //export enablePlugin
-func enablePlugin(id C.CString)  {
+func enablePlugin(cid C.CString) {
 }
 
 //export disablePlugin
-func disablePlugin(id C.CString)  {
+func disablePlugin(cid C.CString) {
 }
 
 //export refreshAllPlugins
-func refreshAllPlugins(id C.CString)  {
+func refreshAllPlugins(cid C.CString) {
 }
 
 //export refreshChangedPlugins
-func refreshChangedPlugins(id C.CString)  {
+func refreshChangedPlugins(cid C.CString) {
 }
 
 //export getPluginList
-func getPluginList(id C.CString)  {
+func getPluginList(cid C.CString) {
 }

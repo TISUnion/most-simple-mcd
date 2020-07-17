@@ -11,20 +11,23 @@ package cpython
 #define VERSION "version"
 #define SIDE "side"
 #define COMMENT "comment"
+#define MCDR "MCDR"
+#define T (PyObject *)Py_BuildValue("i", 1)
+#define F (PyObject *)Py_BuildValue("i", 0)
 
-extern void serverInfo(char *id);
-extern void start(char *id);
-extern void stop(char *id);
-extern void restart(char *id);
-extern void stopExit(char *id);
-extern void exit(char *id);
-extern int isServerRunning(char *id);
-extern int isServerStartup(char *id);
-extern int isRconRunning(char *id);
-extern void execute(char *id, char *text);
-extern void say(char *id, char *text);
-extern void tell(char *id, char *player, char *text);
-extern void reply(char *id, char *player, char *text);
+Server serverInfo(char *id);
+void start(char *id);
+void stop(char *id);
+void restart(char *id);
+void stopExit(char *id);
+void exit(char *id);
+int isServerRunning(char *id);
+int isServerStartup(char *id);
+int isRconRunning(char *id);
+void execute(char *id, char *text);
+void say(char *id, char *text);
+void tell(char *id, char *player, char *text);
+void reply(char *id, char *player, char *text);
 
 PyObject *start(PyObject *self, PyObject *args)
 {
@@ -118,7 +121,24 @@ PyObject *reply(PyObject *self, PyObject *args)
 
 PyObject *GetServer(char *id)
 {
-	CreateClass(id, NULL);
+	PyObject *server = CreateClass(id, NULL);
+	//设置属性
+	Server s = serverInfo(id);
+	PyObject_SetAttrString(server, NAME, s.name);
+	PyObject_SetAttrString(server, ID, s.id);
+	PyObject_SetAttrString(server, PORT, s.port);
+	PyObject_SetAttrString(server, MEMORY, s.memory);
+	PyObject_SetAttrString(server, VERSION, s.version);
+	PyObject_SetAttrString(server, SIDE, s.side);
+	PyObject_SetAttrString(server, COMMENT, s.comment);
+	PyObject_SetAttrString(server, MCDR, T);
+	// 设置方法
+	PyMethodDef start_def = {ml_name, (PyCFunction)start, METH_NOARGS, ""};
+  	PyObject *Py_start = PyCFunction_New(&start_def, server);
+	// TODO
+	PyMethodDef stop_def = {ml_name, (PyCFunction)stop, METH_NOARGS, ""};
+  	PyObject *Py_stop = PyCFunction_New(&stop_def, server);
+	return server;
 }
 */
 import "C"

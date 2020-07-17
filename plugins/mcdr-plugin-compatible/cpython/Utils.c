@@ -8,6 +8,7 @@ PyObject *CreateClass(char *className, PyObject *classDict)
     classDict = PyDict_New();
   }
   PyObject *pClassBases = PyTuple_New(0);
+  Py_XDECREF(classDict);
   return PyObject_CallFunctionObjArgs((PyObject *)&PyType_Type, className, pClassBases, classDict, NULL);
 }
 
