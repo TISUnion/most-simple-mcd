@@ -98,6 +98,7 @@ func (*McdrPlugin) NewInstance() plugin.Plugin {
 var McdrPluginCompatiblePluginObj plugin.Plugin
 
 func GetMcdrPluginCompatiblePluginInstance() plugin.Plugin {
+	start_test()
 	if McdrPluginCompatiblePluginObj != nil {
 		return McdrPluginCompatiblePluginObj
 	}

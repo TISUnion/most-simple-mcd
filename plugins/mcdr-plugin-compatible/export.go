@@ -1,4 +1,4 @@
-package cpython
+package mcdr_plugin_compatible
 
 /*
 #cgo pkg-config:python3
@@ -139,6 +139,9 @@ static PyObject *GetServer(char *id)
 	PyObject *server = CreateClass(id, NULL);
 	//设置属性
 	Server s = mcServerInfo(id);
+	if (!strcmp(s.id, "")) {
+		return NULL;
+	}
 	PyObject_SetAttrString(server, NAME, PyUnicode_FromString(s.name));
 	PyObject_SetAttrString(server, ID, PyUnicode_FromString(s.id));
 	PyObject_SetAttrString(server, PORT, (PyObject *)Py_BuildValue("i",s.port));
@@ -181,6 +184,7 @@ static PyObject *GetServer(char *id)
 */
 import "C"
 import (
+	"fmt"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"unsafe"
 )
@@ -195,8 +199,13 @@ func mcServerInfo(cid *C.char) Server {
 	srvId := C.GoString(cid)
 	defer C.free(unsafe.Pointer(cid))
 	s, err := ctr.GetServerById(srvId)
+	// 获取失败
 	if err != nil {
-		return Server{}
+		id := C.CString("")
+		name := C.CString("")
+		defer C.free(unsafe.Pointer(id))
+		defer C.free(unsafe.Pointer(name))
+		return Server{name: name, id: id}
 	}
 	info := s.GetServerConf()
 	id := C.CString(info.EntryId)
@@ -211,13 +220,13 @@ func mcServerInfo(cid *C.char) Server {
 	defer C.free(unsafe.Pointer(side))
 	defer C.free(unsafe.Pointer(comment))
 	defer C.free(unsafe.Pointer(name))
-	csrv := Server{name: name, id: id, memory: C.int(memory), port: C.int(port), version: version, side: side, comment: comment}
-	return csrv
+	return Server{name: name, id: id, memory: C.int(memory), port: C.int(port), version: version, side: side, comment: comment}
 }
 
 //export mcStart
 func mcStart(cid *C.char) {
-	//id := C.GoString(cid)
+	srvId := C.GoString(cid)
+	fmt.Println(srvId)
 }
 
 //export mcStop
@@ -291,6 +300,14 @@ func mcRefreshChangedPlugins(cid *C.char) {
 func mcGetPluginList(cid *C.char) {
 }
 
+func start_test() {
+	C.PyVmStart()
+	p := C.GetServer(C.CString("test-123"))
+	if p == nil {
+		fmt.Println(123)
+	}
+	C.PyVmEnd()
+}
 
 /**
 * PyObject *server有以下属性：

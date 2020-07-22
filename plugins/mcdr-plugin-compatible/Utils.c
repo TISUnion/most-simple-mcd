@@ -2,13 +2,12 @@
 
 PyObject *CreateClass(char *className, PyObject *classDict)
 {
-  if (classDict == NULL)
-  {
-    classDict = PyDict_New();
-  }
-  PyObject *pClassBases = PyTuple_New(0);
-  Py_XDECREF(classDict);
-  return PyObject_CallFunctionObjArgs((PyObject *)&PyType_Type, className, pClassBases, classDict, NULL);
+    if (classDict == NULL)
+    {
+      classDict = PyDict_New();
+    }
+    PyObject *pClassBases = PyTuple_New(0);
+    return PyObject_CallFunctionObjArgs((PyObject *)&PyType_Type, PyUnicode_FromString(className), pClassBases, classDict, NULL);
 }
 
 int PyVmStart()
