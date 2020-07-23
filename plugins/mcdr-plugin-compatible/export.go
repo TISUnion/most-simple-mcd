@@ -185,6 +185,7 @@ static PyObject *GetServer(char *id)
 import "C"
 import (
 	"fmt"
+	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"unsafe"
 )
@@ -202,10 +203,8 @@ func mcServerInfo(cid *C.char) Server {
 	// 获取失败
 	if err != nil {
 		id := C.CString("")
-		name := C.CString("")
 		defer C.free(unsafe.Pointer(id))
-		defer C.free(unsafe.Pointer(name))
-		return Server{name: name, id: id}
+		return Server{id: id}
 	}
 	info := s.GetServerConf()
 	id := C.CString(info.EntryId)
@@ -226,33 +225,64 @@ func mcServerInfo(cid *C.char) Server {
 //export mcStart
 func mcStart(cid *C.char) {
 	srvId := C.GoString(cid)
-	fmt.Println(srvId)
+	srv, err := ctr.GetServerById(srvId)
+	if err == nil {
+		_ = srv.Start()
+	}
 }
 
 //export mcStop
 func mcStop(cid *C.char) {
+	srvId := C.GoString(cid)
+	srv, err := ctr.GetServerById(srvId)
+	if err == nil {
+		_ = srv.Stop()
+	}
 }
 
 //export mcRestart
 func mcRestart(cid *C.char) {
+	srvId := C.GoString(cid)
+	srv, err := ctr.GetServerById(srvId)
+	if err == nil {
+		_ = srv.Restart()
+	}
 }
 
 //export mcStopExit
 func mcStopExit(cid *C.char) {
+	modules.SendExitSign()
 }
 
 //export mcExit
 func mcExit(cid *C.char) {
+	modules.SendExitSign()
 }
 
 //export mcIsServerRunning
 func mcIsServerRunning(cid *C.char) C.int {
-	return 0
+	srvId := C.GoString(cid)
+	srv, err := ctr.GetServerById(srvId)
+	if err == nil {
+		if srv.GetServerConf().State == constant.MC_STATE_START || srv.GetServerConf().State == constant.MC_STATE_STARTIND {
+			return constant.MC_STATE_START
+		}
+		return constant.MC_STATE_STOP
+	}
+	return constant.MC_STATE_STOP
 }
 
 //export mcIsServerStartup
 func mcIsServerStartup(cid *C.char) C.int {
-	return 0
+	srvId := C.GoString(cid)
+	srv, err := ctr.GetServerById(srvId)
+	if err == nil {
+		if srv.GetServerConf().State == constant.MC_STATE_START {
+			return constant.MC_STATE_START
+		}
+		return constant.MC_STATE_STOP
+	}
+	return constant.MC_STATE_STOP
 }
 
 //export mcIsRconRunning
@@ -262,22 +292,53 @@ func mcIsRconRunning(cid *C.char) C.int {
 
 //export mcExecute
 func mcExecute(cid, ctext *C.char) {
+	srvId := C.GoString(cid)
+	text := C.GoString(ctext)
+	srv, err := ctr.GetServerById(srvId)
+	if err == nil {
+		_ = srv.Command(text)
+	}
 }
 
 //export mcSay
 func mcSay(cid, ctext *C.char) {
+	srvId := C.GoString(cid)
+	text := C.GoString(ctext)
+	srv, err := ctr.GetServerById(srvId)
+	if err == nil {
+		_ = srv.SayCommand(text)
+	}
 }
 
 //export mcTell
 func mcTell(cid, cplayer, ctext *C.char) {
+	srvId := C.GoString(cid)
+	text := C.GoString(ctext)
+	player := C.GoString(cplayer)
+	srv, err := ctr.GetServerById(srvId)
+	if err == nil {
+		_ = srv.TellCommand(player, text)
+	}
 }
 
 //export mcReply
 func mcReply(cid, cplayer, ctext *C.char) {
+	srvId := C.GoString(cid)
+	text := C.GoString(ctext)
+	player := C.GoString(cplayer)
+	srv, err := ctr.GetServerById(srvId)
+	if err == nil {
+		if player == "" {
+			modules.WriteLogToDefault(text)
+		} else {
+			_ = srv.TellCommand(player, text)
+		}
+	}
 }
 
 //export mcLoadPlugin
 func mcLoadPlugin(cpluginName *C.char) {
+
 }
 
 //export mcEnablePlugin
@@ -300,7 +361,7 @@ func mcRefreshChangedPlugins(cid *C.char) {
 func mcGetPluginList(cid *C.char) {
 }
 
-func start_test() {
+func StartTest() {
 	C.PyVmStart()
 	p := C.GetServer(C.CString("test-123"))
 	if p == nil {
