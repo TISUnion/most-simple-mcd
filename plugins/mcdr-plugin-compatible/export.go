@@ -184,7 +184,6 @@ static PyObject *GetServer(char *id)
 */
 import "C"
 import (
-	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"unsafe"
@@ -361,14 +360,26 @@ func mcRefreshChangedPlugins(cid *C.char) {
 func mcGetPluginList(cid *C.char) {
 }
 
-func StartTest() {
-	C.PyVmStart()
-	p := C.GetServer(C.CString("test-123"))
-	if p == nil {
-		fmt.Println(123)
+func PyVmStart() bool{
+	res := C.PyVmStart()
+	if res == 0 {
+		return false
 	}
+	return true
+}
+
+func PyVmEnd() {
 	C.PyVmEnd()
 }
+
+//func StartTest() {
+//	C.PyVmStart()
+//	p := C.GetServer(C.CString("test-123"))
+//	if p == nil {
+//		fmt.Println(123)
+//	}
+//	C.PyVmEnd()
+//}
 
 /**
 * PyObject *server有以下属性：

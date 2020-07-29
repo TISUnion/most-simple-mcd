@@ -6,6 +6,7 @@ type ServerAdapter struct {
 	side string
 }
 
+// 获取版本
 func (sa *ServerAdapter) GetVersionRegularExpression() string {
 	switch sa.side {
 	case constant.VANILLA:
@@ -15,6 +16,7 @@ func (sa *ServerAdapter) GetVersionRegularExpression() string {
 	}
 }
 
+// 获取游戏模式
 func (sa *ServerAdapter) GetGameTypeRegularExpression() string {
 	switch sa.side {
 	case constant.VANILLA:
@@ -24,6 +26,7 @@ func (sa *ServerAdapter) GetGameTypeRegularExpression() string {
 	}
 }
 
+// 游戏开始
 func (sa *ServerAdapter) GetGameStartRegularExpression() string {
 	switch sa.side {
 	case constant.VANILLA:
@@ -33,6 +36,7 @@ func (sa *ServerAdapter) GetGameStartRegularExpression() string {
 	}
 }
 
+// 游戏保存（结束）
 func (sa *ServerAdapter) GetGameSaveRegularExpression() string {
 	switch sa.side {
 	case constant.VANILLA:
@@ -42,6 +46,7 @@ func (sa *ServerAdapter) GetGameSaveRegularExpression() string {
 	}
 }
 
+// 获取玩家发言
 func (sa *ServerAdapter) GetMessageRegularExpression() string {
 	switch sa.side {
 	case constant.VANILLA:
@@ -51,7 +56,7 @@ func (sa *ServerAdapter) GetMessageRegularExpression() string {
 	}
 }
 
-// 支持的所有服务端
+// 支持的所有服务端类型
 func GetAllServerSide() []string {
 	return []string{constant.VANILLA}
 }

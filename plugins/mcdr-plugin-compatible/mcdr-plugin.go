@@ -15,10 +15,12 @@ const (
 
 type McdrPlugin struct {
 	id                string
-	pluginName        string
 	pluginDescription string
 	pluginCommand     string
 	helpDescription   string
+	pluginPath        string
+	packageName       string
+	pluginName        string
 }
 
 func (p *McdrPlugin) GetDescription() string {
@@ -52,7 +54,9 @@ func (p *McdrPlugin) Init(mcServer server.MinecraftServer) {
 /* ------------------回调接口-------------------- */
 func (p *McdrPlugin) ChangeConfCallBack() {}
 func (p *McdrPlugin) DestructCallBack()   {}
-func (p *McdrPlugin) InitCallBack()       {}
+func (p *McdrPlugin) InitCallBack()       {
+
+}
 
 /* --------------------------------------------- */
 
@@ -98,7 +102,6 @@ func (*McdrPlugin) NewInstance() plugin.Plugin {
 var McdrPluginCompatiblePluginObj plugin.Plugin
 
 func GetMcdrPluginCompatiblePluginInstance() plugin.Plugin {
-	StartTest()
 	if McdrPluginCompatiblePluginObj != nil {
 		return McdrPluginCompatiblePluginObj
 	}

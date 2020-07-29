@@ -44,7 +44,7 @@ func main() {
 		utils.OpenBrowser(webManageUrl)
 	}
 	fmt.Println("启动成功！")
-	fmt.Println("本项目开源免费，项目仓库：https://github.com/TISUnion/most-simple-mcd")
+	fmt.Println("本项目开源并且免费，项目仓库：https://github.com/TISUnion/most-simple-mcd")
 	fmt.Println("管理后台url: " + webManageUrl)
 	fmt.Println("初始账号: " + constant.DEFAULT_ACCOUNT)
 	fmt.Println("初始密码: " + constant.DEFAULT_PASSWORD)
