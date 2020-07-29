@@ -250,10 +250,7 @@ func (m *MinecraftServer) Start() error {
 		m.State = constant.MC_STATE_STOP
 		return err
 	}
-	// 运行开启回调
-	for _, f := range m.mcOpenCallback {
-		f(m.EntryId)
-	}
+
 	return nil
 }
 
@@ -406,6 +403,11 @@ func (m *MinecraftServer) sureServerStart(data []byte) {
 	match := reg.Find(data)
 	if len(match) > 0 {
 		m.State = constant.MC_STATE_START
+
+		// 运行开启回调
+		for _, f := range m.mcOpenCallback {
+			f(m.EntryId)
+		}
 	}
 }
 
