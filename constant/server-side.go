@@ -2,10 +2,10 @@ package constant
 
 const (
 	VANILLA             = "vanilla"
-	VANILLA_VERSION     = "\\[Server thread/INFO\\]: Starting minecraft server version ([0-9]*\\.?[0-9]*\\.?[0-9]*\\.?)"
-	VANILLA_GAME_TYPE   = "\\[Server thread/INFO\\]: Default game type: (?P<type>[a-zA-Z]+)"
-	VANILLA_GAME_START  = "\\[Server thread/INFO\\]: Done \\([0-9.]*s\\)! For help, type \"help\"( or \"\\?\")?"
-	VANILLA_GAME_SAVE   = "\\[Server thread/INFO\\]: Saved the world"
+	VANILLA_VERSION     = "Starting minecraft server version ([0-9]*\\.?[0-9]*\\.?[0-9]*\\.?)"
+	VANILLA_GAME_TYPE   = "Default game type: (?P<type>[a-zA-Z]+)"
+	VANILLA_GAME_START  = "Done \\([0-9.]*s\\)! For help, type \"help\"( or \"\\?\")?"
+	VANILLA_GAME_SAVE   = "Saved the world"
 	VANILLA_MESSAGE     = `\[(\d+:\d+:\d+)]\s+\[Server thread/INFO\]:\s+[<|\[]{1}(.+)[>|\]]{1}\s+(.+)`
 	VANILLA_PLAYER_JOIN = `(\w{1,16}) joined the game`
 	VANILLA_PLAYER_LEFT = `(\w{1,16}) left the game`
