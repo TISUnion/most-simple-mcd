@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	isGlobal = true
+	isMcdrPluginGlobal = true
 )
 
 type McdrPlugin struct {
@@ -36,7 +36,7 @@ func (p *McdrPlugin) GetCommandName() string {
 }
 
 func (p *McdrPlugin) IsGlobal() bool {
-	return isGlobal
+	return isMcdrPluginGlobal
 }
 
 func (p *McdrPlugin) GetId() string {
@@ -54,7 +54,7 @@ func (p *McdrPlugin) Init(mcServer server.MinecraftServer) {
 /* ------------------回调接口-------------------- */
 func (p *McdrPlugin) ChangeConfCallBack() {}
 func (p *McdrPlugin) DestructCallBack()   {}
-func (p *McdrPlugin) InitCallBack()       {
+func (p *McdrPlugin) InitCallBack() {
 
 }
 

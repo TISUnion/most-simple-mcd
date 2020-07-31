@@ -70,7 +70,7 @@ func (p *McdrPluginCompatiblePlugin) InitCallBack() {
 		modules.SendExitSign()
 	}
 	p.plugins = make(map[string]*McdrPlugin)
-	p.ScanPlugin()
+	p.scanPlugin()
 }
 
 /* --------------------------------------------- */
@@ -128,8 +128,8 @@ func GetMcdrPluginCompatiblePluginInstance() plugin.Plugin {
 	return McdrPluginCompatiblePluginObj
 }
 
-func (mpc *McdrPluginCompatiblePlugin) ScanPlugin() {
-	err := filepath.Walk(mpc.pluginRootPath, func(path string, info os.FileInfo, err error) error {
+func (p *McdrPluginCompatiblePlugin) scanPlugin() {
+	err := filepath.Walk(p.pluginRootPath, func(path string, info os.FileInfo, err error) error {
 		if info == nil {
 			return nil
 		}
@@ -143,7 +143,7 @@ func (mpc *McdrPluginCompatiblePlugin) ScanPlugin() {
 			packageName := strings.ReplaceAll(pluginName, "/", ".")
 			pluginName = strings.ReplaceAll(pluginName, "/", "_")
 			// 已经加载过的，则不重复加载
-			if _, ok := mpc.plugins[pluginName]; ok {
+			if _, ok := p.plugins[pluginName]; ok {
 				return nil
 			}
 			packageName = fmt.Sprint(pluginDir, ".", packageName)
@@ -157,7 +157,7 @@ func (mpc *McdrPluginCompatiblePlugin) ScanPlugin() {
 				helpDescription:   pluginInfo,
 			}
 			modules.RegisterCallBack(plp)
-			mpc.plugins[pluginName] = plp
+			p.plugins[pluginName] = plp
 		}
 		return nil
 	})
