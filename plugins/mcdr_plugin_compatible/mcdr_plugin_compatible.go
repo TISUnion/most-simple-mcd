@@ -16,19 +16,19 @@ import (
 )
 
 const (
-	pluginName                         = "兼容mcdr插件"
-	pluginDescription                  = "兼容mcdr插件"
-	pluginCommand                      = "!!mcdr"
-	isMcdrPluginCompatiblePluginGlobal = true
-	helpDescription                    = "插件使用方法"
-	pluginDir                          = "mcdr-plugins"
-	pythonExt                          = ".py"
+	pluginName        = "兼容mcdr插件"
+	pluginDescription = "兼容mcdr插件"
+	pluginCommand     = "!!mcdr"
+	isGlobal          = true
+	helpDescription   = "插件使用方法"
+	pluginDir = "mcdr-plugins"
+	pythonExt = ".py"
 )
 
 type McdrPluginCompatiblePlugin struct {
 	pluginRootPath string
 	plugins        map[string]*McdrPlugin
-	id             string
+    id       string
 }
 
 func (p *McdrPluginCompatiblePlugin) GetDescription() string {
@@ -44,27 +44,25 @@ func (p *McdrPluginCompatiblePlugin) GetCommandName() string {
 }
 
 func (p *McdrPluginCompatiblePlugin) IsGlobal() bool {
-	return isMcdrPluginCompatiblePluginGlobal
+    return isGlobal
 }
 
 func (p *McdrPluginCompatiblePlugin) GetId() string {
-	return p.id
+    return p.id
 }
 
-func (p *McdrPluginCompatiblePlugin) GetName() string {
-	return pluginName
+func (p *McdrPluginCompatiblePlugin) GetName() string     {
+    return pluginName
 }
 
 func (p *McdrPluginCompatiblePlugin) Init(mcServer server.MinecraftServer) {
-
+    
 }
 
 /* ------------------回调接口-------------------- */
 func (p *McdrPluginCompatiblePlugin) ChangeConfCallBack() {}
-func (p *McdrPluginCompatiblePlugin) DestructCallBack()   {
-	PyVmEnd()
-}
-func (p *McdrPluginCompatiblePlugin) InitCallBack() {
+func (p *McdrPluginCompatiblePlugin) DestructCallBack()   {}
+func (p *McdrPluginCompatiblePlugin) InitCallBack()       {
 	if !PyVmStart() {
 		modules.WriteLogToDefault("python虚拟机开启失败")
 		modules.SendExitSign()
@@ -72,13 +70,11 @@ func (p *McdrPluginCompatiblePlugin) InitCallBack() {
 	p.plugins = make(map[string]*McdrPlugin)
 	p.ScanPlugin()
 }
-
 /* --------------------------------------------- */
 
 /* ---------非全局插件，服务端启动，关闭回调--------- */
-func (p *McdrPluginCompatiblePlugin) Start() {}
-func (p *McdrPluginCompatiblePlugin) Stop()  {}
-
+func (p *McdrPluginCompatiblePlugin) Start()              {}
+func (p *McdrPluginCompatiblePlugin) Stop()               {}
 /* --------------------------------------------- */
 
 func (p *McdrPluginCompatiblePlugin) HandleMessage(message *models.ReciveMessage) {
@@ -89,29 +85,29 @@ func (p *McdrPluginCompatiblePlugin) HandleMessage(message *models.ReciveMessage
 	if com.Command != pluginCommand {
 		return
 	}
-
+	
 	mcServer, err := modules.GetMinecraftServerContainerInstance().GetServerById(message.ServerId)
-	if err != nil {
-		return
-	}
-
+    if err != nil {
+    	return
+    }
+    
 	if len(com.Params) == 0 {
 		_ = mcServer.TellrawCommand(message.Player, helpDescription)
 	} else {
-		p.paramsHandle(message.Player, com, mcServer)
+        p.paramsHandle(message.Player, com, mcServer)
 	}
 }
 
 func (p *McdrPluginCompatiblePlugin) paramsHandle(player string, pc *models.PluginCommand, mcServer server.MinecraftServer) {
-	switch pc.Params[0] {
-	// write code...
-	default:
-		_ = mcServer.TellrawCommand(player, helpDescription)
-	}
+    switch pc.Params[0] {
+    // write code...
+    default:
+    	_ = mcServer.TellrawCommand(player, helpDescription)
+    }
 }
 
 func (*McdrPluginCompatiblePlugin) NewInstance() plugin.Plugin {
-	return nil
+    return nil
 }
 
 var McdrPluginCompatiblePluginObj plugin.Plugin
@@ -121,14 +117,14 @@ func GetMcdrPluginCompatiblePluginInstance() plugin.Plugin {
 		return McdrPluginCompatiblePluginObj
 	}
 	McdrPluginCompatiblePluginObj = &McdrPluginCompatiblePlugin{
-		id:             uuid.NewV4().String(),
-		pluginRootPath: filepath.Join(modules.GetConfVal(constant.WORKSPACE), pluginDir),
+		id: uuid.NewV4().String(),
+		pluginRootPath:filepath.Join(modules.GetConfVal(constant.WORKSPACE), pluginDir),
 	}
 	modules.RegisterCallBack(McdrPluginCompatiblePluginObj)
 	return McdrPluginCompatiblePluginObj
 }
 
-func (mpc *McdrPluginCompatiblePlugin) ScanPlugin() {
+func (mpc *McdrPluginCompatible) ScanPlugin() {
 	err := filepath.Walk(mpc.pluginRootPath, func(path string, info os.FileInfo, err error) error {
 		if info == nil {
 			return nil
@@ -164,4 +160,11 @@ func (mpc *McdrPluginCompatiblePlugin) ScanPlugin() {
 	if err != nil {
 		modules.WriteLogToDefault("加载插件失败！")
 	}
+}
+
+func StartLoadMcdrPlugin() {
+	mpc = &McdrPluginCompatible {
+		pluginRootPath:filepath.Join(modules.GetConfVal(constant.WORKSPACE), pluginDir),
+	}
+	modules.RegisterCallBack(mpc)
 }

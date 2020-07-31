@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
+	"time"
 )
 
 var ExitChan chan os.Signal
@@ -18,6 +19,7 @@ func ExitHandle() {
 	signal.Notify(ExitChan, os.Interrupt, os.Kill, syscall.SIGQUIT, syscall.SIGTERM)
 	<-ExitChan
 	RunDestructCallBacks()
+	time.Sleep(time.Second) // wait write log
 	os.Exit(1)
 }
 

@@ -29,8 +29,6 @@ type MinecraftServerContainer struct {
 	// 所有mc服务器实例
 	minecraftServers map[string]server.MinecraftServer
 
-	groupLock *sync.WaitGroup
-
 	// 开启的mc服务器实例
 	startServers map[string]server.MinecraftServer
 
@@ -136,7 +134,7 @@ func (m *MinecraftServerContainer) _getServerById(id string) (server.MinecraftSe
 // 非完全匹配id
 func (m *MinecraftServerContainer) _getServerLikeId(id string) (string, error) {
 	aCfg := m._getAllServerConf()
-	aRes := make([]string, 1)
+	aRes := make([]string, 0)
 	for _, sCfg := range aCfg {
 		if strings.Contains(sCfg.EntryId, id) {
 			aRes = append(aRes, sCfg.EntryId)
@@ -399,11 +397,14 @@ func GetMinecraftServerContainerInstance() container.MinecraftContainer {
 
 	minecraftServerContainer = &MinecraftServerContainer{
 		minecraftServers: make(map[string]server.MinecraftServer),
-		groupLock:        &sync.WaitGroup{},
 		startServers:     make(map[string]server.MinecraftServer),
 		stopServers:      make(map[string]server.MinecraftServer),
 		lock:             &sync.Mutex{},
 	}
 	RegisterCallBack(minecraftServerContainer)
 	return minecraftServerContainer
+}
+
+func GetMinecraftServerById(id string) (server.MinecraftServer, error) {
+	return GetMinecraftServerContainerInstance().GetServerById(id)
 }

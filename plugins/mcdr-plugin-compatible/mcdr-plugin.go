@@ -99,15 +99,15 @@ func (*McdrPlugin) NewInstance() plugin.Plugin {
 	return nil
 }
 
-var McdrPluginCompatiblePluginObj plugin.Plugin
+var McdrPluginObj plugin.Plugin
 
-func GetMcdrPluginCompatiblePluginInstance() plugin.Plugin {
-	if McdrPluginCompatiblePluginObj != nil {
-		return McdrPluginCompatiblePluginObj
+func GetMcdrPluginInstance() plugin.Plugin {
+	if McdrPluginObj != nil {
+		return McdrPluginObj
 	}
-	McdrPluginCompatiblePluginObj = &McdrPlugin{
+	McdrPluginObj = &McdrPlugin{
 		id: uuid.NewV4().String(),
 	}
-	modules.RegisterCallBack(McdrPluginCompatiblePluginObj)
-	return McdrPluginCompatiblePluginObj
+	modules.RegisterCallBack(McdrPluginObj)
+	return McdrPluginObj
 }
