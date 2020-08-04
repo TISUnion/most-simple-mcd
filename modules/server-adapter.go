@@ -5,7 +5,7 @@ import "github.com/TISUnion/most-simple-mcd/constant"
 type ServerAdapter struct {
 	side string
 }
-//================================启动
+
 // 获取版本
 func (sa *ServerAdapter) GetVersionRegularExpression() string {
 	switch sa.side {
