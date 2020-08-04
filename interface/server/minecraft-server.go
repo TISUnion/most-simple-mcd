@@ -1,8 +1,14 @@
 package server
 
-import "github.com/TISUnion/most-simple-mcd/models"
+import (
+	_interface "github.com/TISUnion/most-simple-mcd/interface"
+	"github.com/TISUnion/most-simple-mcd/models"
+)
 
 type MinecraftServer interface {
+	// 服务端适配器
+	_interface.ServerAdapter
+	// 通用服务器接口
 	BasicServer
 	// 执行传入命令
 	Command(string) error //执行命令

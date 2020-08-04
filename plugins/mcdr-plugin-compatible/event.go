@@ -1,30 +1,40 @@
 package mcdr_plugin_compatible
 
-func (p *McdrPlugin) dealEvent(serverId, originData string) {
+import (
+	"github.com/TISUnion/most-simple-mcd/interface/server"
+	"regexp"
+)
+
+// TODO
+func (p *McdrPlugin) dealEvent(srv server.MinecraftServer, originData string) {
+	re := regexp.MustCompile(srv.GetPlayerJoinRegularExpression())
+	match := re.FindStringSubmatch(originData)
+	if len(match) > 0 {
+
+	}
+}
+
+func (p *McdrPlugin) onPlayerJoined(srv server.MinecraftServer) {
 
 }
 
-func (p *McdrPlugin) onPlayerJoined(serverId string) {
+func (p *McdrPlugin) onPlayerLeft(srv server.MinecraftServer) {
 
 }
 
-func (p *McdrPlugin) onPlayerLeft(serverId string) {
+func (p *McdrPlugin) onPlayerMadeAdvancement(srv server.MinecraftServer) {
 
 }
 
-func (p *McdrPlugin) onPlayerMadeAdvancement(serverId string) {
+func (p *McdrPlugin) onDeathMessage(srv server.MinecraftServer) {
 
 }
 
-func (p *McdrPlugin) onDeathMessage(serverId string) {
+func (p *McdrPlugin) onServerStartup(srv server.MinecraftServer) {
 
 }
 
-func (p *McdrPlugin) onServerStartup(serverId string) {
-
-}
-
-func (p *McdrPlugin) onServerStop(serverId string) {
+func (p *McdrPlugin) onServerStop(srv server.MinecraftServer) {
 
 }
 

@@ -31,7 +31,7 @@ var (
 type MinecraftServer struct {
 	*models.ServerConf
 
-	_interface.ServerAdapter
+	*ServerAdapter
 
 	// CmdObj
 	//子进程实例
