@@ -311,7 +311,7 @@ func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, mem
 	}
 
 	if side == "" {
-		side = constant.VANILLA
+		side = constant.VANILLA_SERVER
 	}
 
 	// 生成config
@@ -334,7 +334,7 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 	jarspath, _ := filepath.Glob(fmt.Sprintf("%s/*.jar", path))
 	// 读取当前目录下的所有jar文件
 	for _, v := range jarspath {
-		m.AddServer(m.HandleMcFile(v, "", 0, 0, constant.VANILLA, ""), false)
+		m.AddServer(m.HandleMcFile(v, "", 0, 0, constant.VANILLA_SERVER, ""), false)
 	}
 	config := m._getAllServerConf()
 	m._saveToDb(config)

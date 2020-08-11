@@ -1,19 +1,45 @@
 package constant
 
+/**
+	参考 Fallen-Breath/MCDReforged
+	https://github.com/Fallen-Breath/MCDReforged/tree/master/utils/parser
+	TODO
+*/
 const (
-	VANILLA             = "vanilla"
-	VANILLA_VERSION     = "Starting minecraft server version ([0-9]*\\.?[0-9]*\\.?[0-9]*\\.?)"
-	VANILLA_GAME_TYPE   = "Default game type: (?P<type>[a-zA-Z]+)"
-	VANILLA_GAME_START  = "Done \\([0-9.]*s\\)! For help, type \"help\"( or \"\\?\")?"
-	VANILLA_GAME_SAVE   = "Saved the world"
-	VANILLA_MESSAGE     = `\[(\d+:\d+:\d+)]\s+\[Server thread/INFO\]:\s+[<|\[]{1}(.+)[>|\]]{1}\s+(.+)`
-	VANILLA_PLAYER_JOIN = `(\w{1,16}) joined the game`
+	//=======================原版端
+	VANILLA_SERVER     = "vanilla"
+	VANILLA_VERSION    = "Starting minecraft server version ([0-9]*\\.?[0-9]*\\.?[0-9]*\\.?)"
+	VANILLA_GAME_TYPE  = "Default game type: (?P<type>[a-zA-Z]+)"
+	VANILLA_GAME_START = "Done \\([0-9.]*s\\)! For help, type \"help\"( or \"\\?\")?"
+	VANILLA_GAME_SAVE  = "Saved the world"
+	// [09:00:00] [Server thread/INFO]: <Steve> Hello
+	VANILLA_MESSAGE = `\[(\d+:\d+:\d+)]\s+\[Server thread/\w+\]: <(\w+)> (.*)`
+	// Steve[/127.0.0.1:9864] logged in with entity id 131 at (187.2703, 146.79014, 404.84718)
+	VANILLA_PLAYER_JOIN = `(\w{1,16})\[/[\d.:]+\] logged in with entity id \d+ at \([\dE\-., ]+\)`
+	// Steve left the game
 	VANILLA_PLAYER_LEFT = `(\w{1,16}) left the game`
+	// Steve has made the advancement [Stone Age]
 	VANILLA_PLAYER_ADVANCEMENT = `(\w{1,16}) has made the advancement \[(.+)\]`
+	//======================Bukkit端
+	BUKKIT_SERVER = "bukkit"
+	// [09:00:01 INFO]: <Steve> hi
+	BUKKIT_MESSAGE = `\[(\d+:\d+:\d+) \w+]: <(\w+)> (.*)`
+	// Fallen_Breath[/127.0.0.1:50099] logged in with entity id 11 at ([lobby]0.7133817548136454, 4.0, 5.481879061970788)
+	BUKKIT_JOIN = `（\w{1,16}）\[/[\d.:]+\] logged in with entity id \d+ at \((\[\w+\])?[\dE\-., ]+\)`
+	//======================Bukkit端，1.14.4+
+	BUKKIT14 = "bukkit14"
+	//======================Cat端
+	CAT_SERVER = "cat"
+	//======================forge端
+	FORGE_SERVER = "forge"
+	//======================bungeecord转发
+	BUNGEECORD_PROXY = "bungeecord"
+	//======================waterfall转发
+	WATERFALL_PROXY = "waterfall"
 )
 
 // 玩家死亡信息
-// From Minecraft wiki
+// 参考 Minecraft wiki
 // https://minecraft.gamepedia.com/Death_messages
 var DeathMessage = []string{
 	"\\w{1,16} blew up",

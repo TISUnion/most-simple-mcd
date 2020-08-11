@@ -34,18 +34,6 @@ func NewConfParam(confKey, ConfVal, description string, level int64, IsAlterable
 	}
 }
 
-// 解析mc玩家发言插件命令
-func ParsePluginCommand(msg string) *models.PluginCommand {
-	ctx := strings.Fields(msg)
-	res := &models.PluginCommand{
-		Command: strings.ToLower(ctx[0]),
-	}
-	if len(ctx) > 1 {
-		res.Params = ctx[1:]
-	}
-	return res
-}
-
 // 格式化数据为表格
 func FormateTable(header []string, data [][]string) string {
 	buf := bytes.NewBufferString("")
@@ -148,42 +136,6 @@ func Uint64Tofloat64(ui uint64) float64 {
 	return f64
 }
 
-// 比较mc版本 1表示大于，0表示等于，-1表示小于
-func CompareMcVersion(mainVersion, compareVersion string) int {
-	if mainVersion == compareVersion {
-		return constant.COMPARE_EQ
-	}
-	aMainVersionStr := strings.Split(mainVersion, ".")
-	aCompareVersionStr := strings.Split(compareVersion, ".")
-	laMainVersionStr := len(aMainVersionStr)
-	laCompareVersionStr := len(aCompareVersionStr)
-	shortLen := 0
-	if laMainVersionStr > laCompareVersionStr {
-		shortLen = laCompareVersionStr
-	} else {
-		shortLen = laMainVersionStr
-	}
-
-	// 比对每个次版本
-	for i := 0; i < shortLen; i++ {
-		mainSubVersion, _ := strconv.ParseInt(aMainVersionStr[i], 10, 64)
-		compareSubVersion, _ := strconv.ParseInt(aCompareVersionStr[i], 10, 64)
-		if mainSubVersion > compareSubVersion {
-			return constant.COMPARE_GT
-		} else if mainSubVersion < compareSubVersion {
-			return constant.COMPARE_LT
-		}
-	}
-	// 比对最小版本
-	if laMainVersionStr > laCompareVersionStr {
-		return constant.COMPARE_GT
-	} else if laMainVersionStr < laCompareVersionStr {
-		return constant.COMPARE_LT
-	}
-
-	return constant.COMPARE_EQ
-}
-
 // 是否是UTF8编码
 func IsUTF8(data []byte) bool {
 	i := 0
@@ -230,18 +182,6 @@ func GBK2UTF8(data []byte) ([]byte, error) {
 		return data, err
 	} else {
 		return result, nil
-	}
-}
-
-// 获取cmd命令数组
-func GetCommandArr(memory int64, runPath string) []string {
-	return []string{
-		"java",
-		"-jar",
-		fmt.Sprintf("-Xmx%dM", memory),
-		fmt.Sprintf("-Xms%dM", memory),
-		runPath,
-		"nogui",
 	}
 }
 
