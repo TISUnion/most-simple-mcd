@@ -21,6 +21,7 @@ type McdrPlugin struct {
 	pluginPath        string
 	packageName       string
 	pluginName        string
+	CArrIndex         int // c中插件数组索引
 }
 
 func (p *McdrPlugin) GetDescription() string {

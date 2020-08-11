@@ -11,8 +11,11 @@ package mcdr_plugin_compatible
 #define SIDE "side"
 #define COMMENT "comment"
 #define MCDR "MCDR"
+#define MAX_PLUGIN_COUNT 300
 
 Server mcServerInfo(char *id);
+PyObject *pluginModules[300];
+int pluginModulesCount = 1;
 void mcStart(char *id);
 void mcStop(char *id);
 void mcRestart(char *id);
@@ -181,6 +184,18 @@ static PyObject *GetServer(char *id)
 
 	return server;
 }
+
+int SetPlugin(char *packageName)
+{
+	PyObject *pluginModule = PyImport_Import(PyUnicode_FromString(packageName));
+	pluginModules[pluginModulesCount] = pluginModule;
+}
+// TODO
+void FreshPlugin(int pluginIndex)
+{
+	pluginModules
+}
+
 */
 import "C"
 import (
@@ -360,7 +375,7 @@ func mcRefreshChangedPlugins(cid *C.char) {
 func mcGetPluginList(cid *C.char) {
 }
 
-func PyVmStart() bool{
+func PyVmStart() bool {
 	res := C.PyVmStart()
 	if res == 0 {
 		return false

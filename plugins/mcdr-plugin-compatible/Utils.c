@@ -19,6 +19,9 @@ int PyVmStart()
   {
     return 0;
   }
+  //导入当前路径
+  PyRun_SimpleString("import sys");
+  PyRun_SimpleString("sys.path.append('./')");
   return 1;
 }
 
