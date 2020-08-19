@@ -137,7 +137,8 @@ static PyObject *py_mc_reply(PyObject *self, PyObject *args)
 	return Py_None;
 }
 
-static PyObject *GetServer(char *id)
+// 获取py的server对象
+PyObject *GetServer(char *id)
 {
 	PyObject *server = CreateClass(id, NULL);
 	//设置属性
@@ -185,16 +186,34 @@ static PyObject *GetServer(char *id)
 	return server;
 }
 
+// 设置插件包字典
 int SetPlugin(char *packageName)
 {
-	PyObject *pluginModule = PyImport_Import(PyUnicode_FromString(packageName));
-	pluginModules[pluginModulesCount] = pluginModule;
+	pluginModules[pluginModulesCount] = PyModule_GetDict(PyImport_Import(PyUnicode_FromString(packageName)));
+	return pluginModulesCount++;
 }
-// TODO
-void FreshPlugin(int pluginIndex)
+
+// 重载插件包字典
+void FreshPlugin(int pluginIndex, char *packageName)
 {
-	pluginModules
+	PyObject *pluginModule = pluginModules[pluginIndex];
+	Py_XDECREF(pluginModule);
+	pluginModules[pluginIndex] = PyImport_Import(PyUnicode_FromString(packageName));
 }
+
+// 调用插件回调
+void CallBackPlugin(char *id, int pluginIndex, char *funcName)
+{
+	//PyObject *server = GetServer(id);
+	//PyObject *pluginModule = pluginModules[pluginIndex];
+	//PyObject *pyFuncName = PyUnicode_FromString(funcName);
+	//if (!PyDict_Contains(pluginModule, pyFuncName)) { //不存在函数，就退出
+	//	return;
+	//}
+	//PyObject *pluginFunc = PyDict_GetItemString(pluginModule, pyFuncName);
+	//PyObject_CallFunction(pluginFunc, "OOO", server, )
+}
+
 
 */
 import "C"
@@ -205,7 +224,7 @@ import (
 )
 
 type Server C.Server
-type PyObject *C.PyObject
+type Info C.Info
 
 var ctr = modules.GetMinecraftServerContainerInstance()
 
@@ -385,6 +404,18 @@ func PyVmStart() bool {
 
 func PyVmEnd() {
 	C.PyVmEnd()
+}
+
+func SetPyPlugin(packageName string) int {
+	CPackageName := C.CString(packageName)
+	defer C.free(unsafe.Pointer(CPackageName))
+	return C.SetPlugin(CPackageName)
+}
+
+func FreshPyPlugin(packageName string, index int) {
+	CPackageName := C.CString(packageName)
+	defer C.free(unsafe.Pointer(CPackageName))
+	C.FreshPlugin(CPackageName, index)
 }
 
 //func StartTest() {

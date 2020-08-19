@@ -12,6 +12,25 @@ typedef struct Server{
     char *comment;
 } Server;
 
+typedef struct Info{
+	int id;
+	int hour;
+	int min;
+	int sec;
+	char *raw_content;
+	char *content;
+	char *player;
+	int source;
+	char *logging_level;
+	int is_player;
+	int is_user;
+} Info;
+
+enum
+{
+      on_load, on_unload, on_info, on_user_info, on_player_joined, on_player_joined
+} PluginCallBack;
+
 // 新建一个class
 PyObject *CreateClass(char *className, PyObject *classDict);
 
@@ -27,4 +46,6 @@ int hasAttr(PyObject *classInstance, char *attrName);
 // python对象转char*
 char *pyObj2string(PyObject *obj);
 
+// 获取python函数形参个数
+int getFuncArgsLen(PyObject *pyFunc)
 #endif

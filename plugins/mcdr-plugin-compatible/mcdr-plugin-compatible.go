@@ -165,3 +165,8 @@ func (p *McdrPluginCompatiblePlugin) scanPlugin() {
 		modules.WriteLogToDefault("加载插件失败！")
 	}
 }
+
+// TODO 分发事件
+//func ()  {
+//
+//}

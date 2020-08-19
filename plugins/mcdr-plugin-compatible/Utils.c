@@ -50,3 +50,23 @@ char *pyObj2string(PyObject *obj)
   Py_XDECREF(str);
   return bytes;
 }
+
+int getFuncArgsLen(PyObject *pyFunc)
+{
+  int isFunc = PyFunction_Check(pyFunc);
+  if (!isFunc) {
+    return 0;
+  }
+  PyObject *inspectModule = PyImport_ImportModule("inspect");
+  PyObject *inspectDict = PyModule_GetDict(inspectModule);
+  PyObject *getfullargspecFunc = PyDict_GetItemString(inspectDict, "getfullargspec");
+  PyObject *getfullargspecFuncRes = PyObject_CallFunction(getfullargspecFunc, "O", pyFunc);
+  PyObject *getfullargspecArgsList = PyObject_GetAttrString(getfullargspecFuncRes, "args");
+  int listLen = PyList_Size(getfullargspecArgsList);
+  Py_XDECREF(inspectModule);
+  Py_XDECREF(inspectDict);
+  Py_XDECREF(getfullargspecFunc);
+  Py_XDECREF(getfullargspecFuncRes);
+  Py_XDECREF(getfullargspecArgsList);
+  return listLen;
+}
