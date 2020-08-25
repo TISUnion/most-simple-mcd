@@ -2,7 +2,7 @@ package mcdr_plugin_compatible
 
 /*
 #cgo pkg-config:python3
-#include "Utils.h"
+#include "utils.h"
 #define NAME "name"
 #define ID "id"
 #define PORT "port"
