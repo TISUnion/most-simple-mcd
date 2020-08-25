@@ -72,13 +72,12 @@ func (p *HerePlugin) Stop()  {}
 
 func (p *HerePlugin) HandleMessage(message *models.ReciveMessage) {
 	// 匹配是否是坐标json
-	p.PosDataHandle(message.OriginData)
+	p.PosDataHandle([]byte(message.OriginData))
 
-	if message.Player == "" {
+	if !message.IsPlayer {
 		return
 	}
-	com := utils.ParsePluginCommand(message.Speak)
-	if com.Command != pluginCommand {
+	if message.Command != pluginCommand {
 		return
 	}
 
@@ -88,7 +87,7 @@ func (p *HerePlugin) HandleMessage(message *models.ReciveMessage) {
 		return
 	}
 
-	if len(com.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = p.mcServer.RunCommand("data", "get", "entity", message.Player)
 	} else {
 		_ = p.mcServer.TellrawCommand(message.Player, helpDescription)

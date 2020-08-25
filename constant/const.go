@@ -97,6 +97,9 @@ const (
 	MC_OPEN_CALLBACK  = "open"
 	MC_CLOSE_CALLBACK = "close"
 	MC_SAVE_CALLBACK  = "save"
+
+	MC_STDOUT     = 0
+	MC_SYSTEM_OUT = 1
 )
 
 // DB常量
@@ -154,4 +157,13 @@ const (
 	COMPARE_GT = 1
 	COMPARE_EQ = 0
 	COMPARE_LT = -1
+)
+
+// mc事件常量
+const (
+	OnLoad = iota + 1
+	OnUnload
+	OnInfo
+	OnUserInfo
+	OnPlayerJoined
 )

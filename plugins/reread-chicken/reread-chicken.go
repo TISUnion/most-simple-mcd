@@ -5,7 +5,6 @@ import (
 	"github.com/TISUnion/most-simple-mcd/interface/server"
 	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
-	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -64,22 +63,21 @@ func (p *RereadChickenPlugin) Stop()  {}
 /* --------------------------------------------- */
 
 func (p *RereadChickenPlugin) HandleMessage(message *models.ReciveMessage) {
-	if message.Player == "" {
+	if !message.IsPlayer {
 		return
 	}
-	com := utils.ParsePluginCommand(message.Speak)
-	if com.Command != pluginCommand {
+	if message.Command != pluginCommand {
 		return
 	}
 
-	if len(com.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = p.mcServer.TellrawCommand(message.Player, helpDescription)
 	} else {
-		p.paramsHandle(message.Player, com)
+		p.paramsHandle(message.Player, message)
 	}
 }
 
-func (p *RereadChickenPlugin) paramsHandle(player string, pc *models.PluginCommand) {
+func (p *RereadChickenPlugin) paramsHandle(player string, pc *models.ReciveMessage) {
 	switch pc.Params[0] {
 	case "help", "-h":
 		_ = p.mcServer.TellrawCommand(player, helpDescription)

@@ -1,7 +1,5 @@
 package models
 
-
-
 // 服务端运行状态
 type ServerRunState struct {
 	// State
@@ -11,13 +9,22 @@ type ServerRunState struct {
 
 // 服务器接收消息
 type ReciveMessage struct {
-	Player     string `json:"player"`
-	Time       string `json:"time"`
-	Speak      string `json:"speak"`
-	OriginData []byte `json:"origin_data"`
-	ServerId   string `json:"server_id"`
+	Player       string   `json:"player"`
+	Time         string   `json:"time"`         // 时间字符串 H:i:s
+	Speak        string   `json:"speak"`        // 玩家发言
+	OriginData   string   `json:"origin_data"`  // 服务端原始输出
+	ServerId     string   `json:"server_id"`    // 服务端id
+	Hour         int      `json:"hour"`         // 时间：小时
+	Minute       int      `json:"minute"`       // 时间：分钟
+	Second       int      `json:"second"`       // 时间：秒
+	Content      string   `json:"content"`      // 事件内容
+	Source       int      `json:"source"`       // 命令台为1，服务端输出为2
+	LoggingLevel string   `json:"LoggingLevel"` // 日志等级
+	IsPlayer     bool     `json:"IsPlayer"`     // 是否有玩家
+	IsUser       bool     `json:"isUser"`		// 是否有玩家，或者为命令行输入
+	Command      string   `json:"command"`		// 命令
+	Params       []string `json:"params"`		// 命令参数
 }
-
 
 // 服务器详情
 type ServerDetail struct {

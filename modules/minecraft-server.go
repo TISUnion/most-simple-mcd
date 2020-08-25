@@ -15,7 +15,6 @@ import (
 	"net"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -55,7 +54,7 @@ type MinecraftServer struct {
 
 	// messageChan
 	// 玩家发言存储chan
-	messageChan chan *models.ReciveMessage
+	messageChan chan string
 
 	// MonitorServer
 	// 资源监听器
@@ -287,7 +286,7 @@ func (m *MinecraftServer) Restart() error {
 }
 
 // 获取一条消息
-func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
+func (m *MinecraftServer) resiveOneMessage() (string, error) {
 	result := make([]byte, 0)
 	for {
 		buff := make([]byte, constant.MAX_RESIVE_BUFF_SIZE)
@@ -295,7 +294,7 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 		if err != nil {
 			errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
 			m.sureServerStop()
-			return []byte{}, errors.New(errMsg)
+			return "", errors.New(errMsg)
 		}
 		if n <= 0 {
 			continue
@@ -307,20 +306,14 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 	}
 
 	result, _ = utils.ParseCharacter(result)
-	return result, nil
+	return string(result), nil
 }
 
-// 解析mc玩家发言
-func (m *MinecraftServer) parseMessage(originMsg []byte) *models.ReciveMessage {
-	re := regexp.MustCompile(m.GetMessageRegularExpression())
-	match := re.FindStringSubmatch(string(originMsg))
-	if len(match) == 4 {
-		return &models.ReciveMessage{
-			Player:     match[2],
-			Time:       match[1],
-			Speak:      match[3],
-			OriginData: originMsg,
-		}
+// 解析信息
+func (m *MinecraftServer) parseMessage(originMsg string) *models.ReciveMessage {
+	msgObj, ok := m.GetMessageRegularExpression(originMsg)
+	if ok {
+		return msgObj
 	}
 	return &models.ReciveMessage{OriginData: originMsg}
 }
@@ -334,9 +327,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 			WriteLogToDefault(err.Error(), constant.LOG_ERROR)
 			return
 		}
-		msg := m.parseMessage(everyBuff)
-		msg.ServerId = m.EntryId
-		m.messageChan <- msg
+		m.messageChan <- everyBuff
 	}
 }
 
@@ -344,25 +335,29 @@ func (m *MinecraftServer) reciveMessageToChan() {
 func (m *MinecraftServer) handleMessage() {
 	for {
 		msg := <-m.messageChan
-		//fmt.Print(string(msg.OriginData))
-		m.WriteLog(string(msg.OriginData), constant.LOG_INFO)
+		m.WriteLog(msg, constant.LOG_INFO)
 		if m.Version == "" {
-			m.getVersion(msg.OriginData)
+			m.getVersion(msg)
 		}
 		if m.GameType == "" {
-			m.getGameType(msg.OriginData)
+			m.getGameType(msg)
 		}
-
+		msgObj :=  m.parseMessage(msg)
 		// 分发给各已订阅模块
 		go func() {
 			for _, c := range m.subscribeMessageChans {
-				c <- msg
+				c <- msgObj
 			}
+		}()
+
+		// 分发给插件
+		go func() {
+			m.pluginManager.HandleMessage(msgObj)
 		}()
 
 		// 正在启动
 		if m.State == constant.MC_STATE_STARTIND {
-			m.sureServerStart(msg.OriginData)
+			m.sureServerStart(msg)
 			continue // 如果还没启动，就不分发消息
 		}
 
@@ -372,38 +367,27 @@ func (m *MinecraftServer) handleMessage() {
 		}
 
 		// 如果是保存服务端就调用回调
-		go m.sureServerSave(msg.OriginData)
-
-		// 分发给插件
-		go func() {
-			m.pluginManager.HandleMessage(msg)
-		}()
+		go m.sureServerSave(msg)
 	}
 }
 
-func (m *MinecraftServer) getVersion(data []byte) {
-	reg, _ := regexp.Compile(m.GetVersionRegularExpression())
-	ves := reg.FindSubmatch(data)
-	if len(ves) > 1 {
-		m.Version = string(ves[1])
+func (m *MinecraftServer) getVersion(data string) {
+	if res, ok := m.GetVersionRegularExpression(data); ok {
+		m.Version = res.Content
 	}
 }
 
-func (m *MinecraftServer) getGameType(data []byte) {
-	reg, _ := regexp.Compile(m.GetGameTypeRegularExpression())
-	match := reg.FindSubmatch(data)
-	if len(match) > 1 {
-		m.GameType = string(match[1])
+func (m *MinecraftServer) getGameType(data string) {
+	if res, ok := m.GetVersionRegularExpression(data); ok {
+		m.GameType = res.Content
 	}
 }
 
 // 判断服务端是否已经启动
-func (m *MinecraftServer) sureServerStart(data []byte) {
-	reg, _ := regexp.Compile(m.GetGameStartRegularExpression())
-	match := reg.Find(data)
-	if len(match) > 0 {
+func (m *MinecraftServer) sureServerStart(data string) {
+	_, ok := m.GetGameStartRegularExpression(data)
+	if ok {
 		m.State = constant.MC_STATE_START
-
 		// 运行开启回调
 		for _, f := range m.mcOpenCallback {
 			f(m.EntryId)
@@ -417,11 +401,10 @@ func (m *MinecraftServer) sureServerStop() {
 }
 
 // 判断服务端是否已保存
-func (m *MinecraftServer) sureServerSave(data []byte) {
-	reg, _ := regexp.Compile(m.GetGameSaveRegularExpression())
-	match := reg.Find(data)
+func (m *MinecraftServer) sureServerSave(data string) {
+	_, ok := m.GetGameSaveRegularExpression(data)
 	// 如果已关闭则发送关闭信息
-	if len(match) > 0 {
+	if ok {
 		for _, f := range m.mcSaveCallback {
 			f(m.EntryId)
 		}
@@ -634,7 +617,7 @@ func NewMinecraftServer(serverConf *models.ServerConf) server.MinecraftServer {
 	minecraftServer := &MinecraftServer{
 		ServerConf:    serverConf,
 		lock:          &sync.Mutex{},
-		messageChan:   make(chan *models.ReciveMessage, 10),
+		messageChan:   make(chan string, 10),
 		logger:        AddLog(serverConf.EntryId),
 		ServerAdapter: &ServerAdapter{side: serverConf.Side},
 	}

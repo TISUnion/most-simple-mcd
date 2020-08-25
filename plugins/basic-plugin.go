@@ -79,27 +79,26 @@ func (p *BasicPlugin) Stop()  {}
 /* --------------------------------------------- */
 
 func (p *BasicPlugin) HandleMessage(message *models.ReciveMessage) {
-	if message.Player == "" {
+	if !message.IsPlayer {
 		return
 	}
-	commandObj := utils.ParsePluginCommand(message.Speak)
-	if commandObj.Command != pluginCommand {
+	if message.Command != pluginCommand {
 		return
 	}
-	if len(commandObj.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = p.mcServer.TellrawCommand(message.Player, helpDescription)
 	} else {
-		p.paramsHandle(message.Player, commandObj)
+		p.paramsHandle(message.Player, message)
 	}
 }
 
-func (p *BasicPlugin) paramsHandle(player string, pc *models.PluginCommand) {
+func (p *BasicPlugin) paramsHandle(player string, pc *models.ReciveMessage) {
 	switch pc.Params[0] {
 	case "info", "-if":
 		header := []string{"id", "名称", "端口", "内存(单位：M)", "版本", "模式"}
 		cfg := p.mcServer.GetServerConf()
 		data := [][]string{{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.FormatInt(cfg.Port, 10), strconv.FormatInt(cfg.Memory, 10), cfg.Version, cfg.GameType}}
-		p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
+		_ = p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
 	case "infos", "-ifs":
 		header := []string{"id", "名称", "端口", "内存(单位：M)", "版本", "模式", "运行状态"}
 		ctr := modules.GetMinecraftServerContainerInstance()
@@ -111,7 +110,7 @@ func (p *BasicPlugin) paramsHandle(player string, pc *models.PluginCommand) {
 				data = append(data, []string{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.FormatInt(cfg.Port, 10), strconv.FormatInt(cfg.Memory, 10), cfg.Version, cfg.GameType, stateMap[cfg.State]})
 			}
 		}
-		p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
+		_ = p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
 	case "plugins", "-ps":
 		aPlcfg := p.mcServer.GetPluginsInfo()
 		header := []string{"名称", "是否启用", "命令", "简介"}

@@ -103,25 +103,24 @@ func (p *MirrorServerPlugin) Stop()  {}
 /* --------------------------------------------- */
 
 func (p *MirrorServerPlugin) HandleMessage(message *models.ReciveMessage) {
-	if message.Player == "" {
+	if !message.IsPlayer {
 		return
 	}
-	com := utils.ParsePluginCommand(message.Speak)
-	if com.Command != pluginCommand {
+	if message.Command != pluginCommand {
 		return
 	}
 	mcServer, err := modules.GetMinecraftServerContainerInstance().GetServerById(message.ServerId)
 	if err != nil {
 		return
 	}
-	if len(com.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = mcServer.TellrawCommand(message.Player, helpDescription)
 	} else {
-		p.paramsHandle(message.Player, com, mcServer)
+		p.paramsHandle(message.Player, message, mcServer)
 	}
 }
 
-func (p *MirrorServerPlugin) paramsHandle(player string, pc *models.PluginCommand, mcServer server.MinecraftServer) {
+func (p *MirrorServerPlugin) paramsHandle(player string, pc *models.ReciveMessage, mcServer server.MinecraftServer) {
 	switch pc.Params[0] {
 	case "list", "-l":
 		data := make([][]string, 0)
@@ -169,7 +168,7 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *models.PluginComman
 			}
 			return
 		} else {
-			p.mcContainer.StartById(mirrorSvr.GetServerEntryId())
+			_ = p.mcContainer.StartById(mirrorSvr.GetServerEntryId())
 			_ = mcServer.TellrawCommand(player, "启动成功，可通过-l查看服务端是否完成启动")
 		}
 	case "stop", "-sp":
@@ -186,7 +185,7 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *models.PluginComman
 			}
 			return
 		} else {
-			p.mcContainer.StopById(mirrorSvr.GetServerEntryId())
+			_ = p.mcContainer.StopById(mirrorSvr.GetServerEntryId())
 			_ = mcServer.TellrawCommand(player, "关闭成功，可通过-l查看服务端是否完成关闭")
 		}
 	default:

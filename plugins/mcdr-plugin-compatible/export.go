@@ -219,6 +219,7 @@ void CallBackPlugin(char *id, int pluginIndex, char *funcName)
 import "C"
 import (
 	"github.com/TISUnion/most-simple-mcd/constant"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"unsafe"
 )
@@ -416,6 +417,18 @@ func FreshPyPlugin(packageName string, index int) {
 	CPackageName := C.CString(packageName)
 	defer C.free(unsafe.Pointer(CPackageName))
 	C.FreshPlugin(CPackageName, index)
+}
+
+// TODO
+func TriggerEvent(event int, command *models.ReciveMessage) {
+	id := modules.GetIncreateId()
+	switch event {
+	case C.OnLoad:
+	case C.OnUnload:
+	case C.OnInfo:
+	case C.OnUserInfo:
+	case C.OnPlayerJoined:
+	}
 }
 
 //func StartTest() {

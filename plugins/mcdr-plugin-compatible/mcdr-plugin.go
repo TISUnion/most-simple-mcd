@@ -5,7 +5,6 @@ import (
 	"github.com/TISUnion/most-simple-mcd/interface/server"
 	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
-	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -68,11 +67,10 @@ func (p *McdrPlugin) Stop()  {}
 /* --------------------------------------------- */
 
 func (p *McdrPlugin) HandleMessage(message *models.ReciveMessage) {
-	if message.Player == "" {
+	if !message.IsPlayer {
 		return
 	}
-	com := utils.ParsePluginCommand(message.Speak)
-	if com.Command != p.pluginCommand {
+	if message.Command != p.pluginCommand {
 		return
 	}
 
@@ -81,14 +79,14 @@ func (p *McdrPlugin) HandleMessage(message *models.ReciveMessage) {
 		return
 	}
 
-	if len(com.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = mcServer.TellrawCommand(message.Player, p.helpDescription)
 	} else {
-		p.paramsHandle(message.Player, com, mcServer)
+		p.paramsHandle(message.Player, message, mcServer)
 	}
 }
 
-func (p *McdrPlugin) paramsHandle(player string, pc *models.PluginCommand, mcServer server.MinecraftServer) {
+func (p *McdrPlugin) paramsHandle(player string, pc *models.ReciveMessage, mcServer server.MinecraftServer) {
 	switch pc.Params[0] {
 	// write code...
 	default:

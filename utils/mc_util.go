@@ -3,21 +3,18 @@ package utils
 import (
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
-	"github.com/TISUnion/most-simple-mcd/models"
 	"strconv"
 	"strings"
 )
 
 // 解析mc玩家发言插件命令
-func ParsePluginCommand(msg string) *models.PluginCommand {
-	ctx := strings.Fields(msg)
-	res := &models.PluginCommand{
-		Command: strings.ToLower(ctx[0]),
+func ParsePluginCommand(msg string) (command string, params []string) {
+	msgSub := strings.Fields(msg)
+	command = msgSub[0]
+	if len(msgSub) > 1 {
+		params = msgSub[1:]
 	}
-	if len(ctx) > 1 {
-		res.Params = ctx[1:]
-	}
-	return res
+	return command, params
 }
 
 // 比较mc版本 1表示大于，0表示等于，-1表示小于

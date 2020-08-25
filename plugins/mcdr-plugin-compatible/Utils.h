@@ -26,10 +26,11 @@ typedef struct Info{
 	int is_user;
 } Info;
 
+// 事件枚举
 enum
 {
-      on_load, on_unload, on_info, on_user_info, on_player_joined, on_player_joined
-} PluginCallBack;
+      OnLoad = 1, OnUnload, OnInfo, OnUserInfo, OnPlayerJoined
+};
 
 // 新建一个class
 PyObject *CreateClass(char *className, PyObject *classDict);

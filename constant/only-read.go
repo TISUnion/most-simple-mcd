@@ -69,11 +69,10 @@ func (p *{{.ENName}}Plugin) Stop()               {}
 /* --------------------------------------------- */
 
 func (p *{{.ENName}}Plugin) HandleMessage(message *models.ReciveMessage) {
-	if message.Player == "" {
+	if !message.IsPlayer {
 		return
 	}
-	com := utils.ParsePluginCommand(message.Speak)
-	if com.Command != pluginCommand {
+	if message.Command != pluginCommand {
 		return
 	}
 	{{if .IsGlobal}}
@@ -82,10 +81,10 @@ func (p *{{.ENName}}Plugin) HandleMessage(message *models.ReciveMessage) {
     	return
     }
     {{end}}
-	if len(com.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = {{if .IsGlobal}}mcServer{{else}}p.mcServer{{end}}.TellrawCommand(message.Player, helpDescription)
 	} else {
-        p.paramsHandle(message.Player, com{{if .IsGlobal}}, mcServer{{end}})
+        p.paramsHandle(message.Player, message{{if .IsGlobal}}, mcServer{{end}})
 	}
 }
 

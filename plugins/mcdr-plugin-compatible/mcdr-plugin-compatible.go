@@ -7,7 +7,6 @@ import (
 	"github.com/TISUnion/most-simple-mcd/interface/server"
 	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
-	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
 	"os"
 	"path/filepath"
@@ -82,11 +81,10 @@ func (p *McdrPluginCompatiblePlugin) Stop()  {}
 /* --------------------------------------------- */
 
 func (p *McdrPluginCompatiblePlugin) HandleMessage(message *models.ReciveMessage) {
-	if message.Player == "" {
+	if message.IsPlayer {
 		return
 	}
-	com := utils.ParsePluginCommand(message.Speak)
-	if com.Command != pluginCommand {
+	if message.Command != pluginCommand {
 		return
 	}
 
@@ -95,14 +93,14 @@ func (p *McdrPluginCompatiblePlugin) HandleMessage(message *models.ReciveMessage
 		return
 	}
 
-	if len(com.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = mcServer.TellrawCommand(message.Player, helpDescription)
 	} else {
-		p.paramsHandle(message.Player, com, mcServer)
+		p.paramsHandle(message.Player, message, mcServer)
 	}
 }
 
-func (p *McdrPluginCompatiblePlugin) paramsHandle(player string, pc *models.PluginCommand, mcServer server.MinecraftServer) {
+func (p *McdrPluginCompatiblePlugin) paramsHandle(player string, pc *models.ReciveMessage, mcServer server.MinecraftServer) {
 	switch pc.Params[0] {
 	// write code...
 	default:
@@ -165,8 +163,3 @@ func (p *McdrPluginCompatiblePlugin) scanPlugin() {
 		modules.WriteLogToDefault("加载插件失败！")
 	}
 }
-
-// TODO 分发事件
-//func ()  {
-//
-//}
