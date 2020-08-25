@@ -88,7 +88,7 @@ func (p *{{.ENName}}Plugin) HandleMessage(message *models.ReciveMessage) {
 	}
 }
 
-func (p *{{.ENName}}Plugin) paramsHandle(player string, pc *models.PluginCommand{{if .IsGlobal}}, mcServer server.MinecraftServer{{end}}) {
+func (p *{{.ENName}}Plugin) paramsHandle(player string, pc *models.ReciveMessage{{if .IsGlobal}}, mcServer server.MinecraftServer{{end}}) {
     switch pc.Params[0] {
     // write code...
     default:
