@@ -342,7 +342,7 @@ func (m *MinecraftServer) handleMessage() {
 		if m.GameType == "" {
 			m.getGameType(msg)
 		}
-		msgObj :=  m.parseMessage(msg)
+		msgObj := m.parseMessage(msg)
 		// 分发给各已订阅模块
 		go func() {
 			for _, c := range m.subscribeMessageChans {

@@ -28,6 +28,7 @@ func (sa *ServerAdapter) GetVersionRegularExpression(originMsg string) (res *mod
 		match = re.FindStringSubmatch(originMsg)
 	}
 	if len(match) > 1 {
+		res.Event = constant.VERSION
 		res.Content = match[1]
 		ok = true
 	}
@@ -51,6 +52,7 @@ func (sa *ServerAdapter) GetGameTypeRegularExpression(originMsg string) (res *mo
 
 	}
 	if len(match) > 1 {
+		res.Event = constant.GAME_TYPE
 		res.Content = match[1]
 		ok = true
 	}
@@ -73,6 +75,7 @@ func (sa *ServerAdapter) GetGameStartRegularExpression(originMsg string) (res *m
 		match = re.FindStringSubmatch(originMsg)
 	}
 	if len(match) > 0 {
+		res.Event = constant.GAME_START
 		res.Content = match[0]
 		ok = true
 	}
@@ -96,6 +99,7 @@ func (sa *ServerAdapter) GetGameSaveRegularExpression(originMsg string) (res *mo
 	}
 	if len(match) > 0 {
 		res.Content = match[0]
+		res.Event = constant.GAME_SAVE
 		ok = true
 	}
 	return
@@ -122,6 +126,7 @@ func (sa *ServerAdapter) GetMessageRegularExpression(originMsg string) (res *mod
 	}
 	if len(match) > 3 {
 		// 非发言参数
+		res.Event = constant.ON_INFO
 		res.Content = match[3]
 		res.LoggingLevel = match[2]
 		res.Time = match[1]
@@ -164,6 +169,7 @@ func (sa *ServerAdapter) GetPlayerJoinRegularExpression(originMsg string) (res *
 		match = re.FindStringSubmatch(originMsg)
 	}
 	if len(match) > 1 {
+		res.Event = constant.ON_PLAYER_JOINED
 		res.Player = match[1]
 		ok = true
 	}
@@ -186,6 +192,7 @@ func (sa *ServerAdapter) GetPlayerLeftRegularExpression(originMsg string) (res *
 		match = re.FindStringSubmatch(originMsg)
 	}
 	if len(match) > 0 {
+		res.Event = constant.ON_PLAYER_LEFT
 		res.Player = match[1]
 		ok = true
 	}
@@ -208,6 +215,7 @@ func (sa *ServerAdapter) GetPlayerAdvancementRegularExpression(originMsg string)
 		match = re.FindStringSubmatch(originMsg)
 	}
 	if len(match) > 2 {
+		res.Event = constant.ON_PLAYER_MADE_ADVANCEMENT
 		res.Player = match[1]
 		res.Content = match[2]
 		ok = true
@@ -232,6 +240,7 @@ func (sa *ServerAdapter) GetPlayerDeathRegularExpression(originMsg string) (res 
 			match = re.FindStringSubmatch(originMsg)
 			if len(match) > 1 {
 				res.Player = match[1]
+				res.Event = constant.ON_DEATH
 				ok = true
 				break
 			}

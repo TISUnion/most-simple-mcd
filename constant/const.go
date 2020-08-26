@@ -161,9 +161,19 @@ const (
 
 // mc事件常量
 const (
-	OnLoad = iota + 1
-	OnUnload
-	OnInfo
-	OnUserInfo
-	OnPlayerJoined
+	ON_LOAD = iota + 1
+	ON_UNlOAD
+	ON_INFO
+	ON_USER_INFO
+	ON_PLAYER_JOINED
+	ON_PLAYER_LEFT
+	ON_DEATH
+	ON_PLAYER_MADE_ADVANCEMENT
+	ON_SERVER_STARTUP
+	ON_SERVER_STOP
+	ON_MCDR_STOP
+	VERSION
+	GAME_TYPE
+	GAME_START
+	GAME_SAVE
 )

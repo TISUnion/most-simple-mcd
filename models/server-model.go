@@ -24,6 +24,7 @@ type ReciveMessage struct {
 	IsUser       bool     `json:"isUser"`		// 是否有玩家，或者为命令行输入
 	Command      string   `json:"command"`		// 命令
 	Params       []string `json:"params"`		// 命令参数
+	Event		 int   `json:"event"`		// 事件类型
 }
 
 // 服务器详情

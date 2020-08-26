@@ -14,8 +14,7 @@ func (p *McdrPlugin) dealEvent(srv server.MinecraftServer, originData string) {
 		advancement string
 	)
 	// 加入游戏
-	re = regexp.MustCompile(srv.GetPlayerJoinRegularExpression())
-	match = re.FindStringSubmatch(originData)
+	srv.GetPlayerJoinRegularExpression(originData)
 	if len(match) > 0 {
 		player = match[0]
 		p.onPlayerJoined(srv, player)
