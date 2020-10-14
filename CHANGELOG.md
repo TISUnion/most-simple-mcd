@@ -36,5 +36,4 @@
 1. 使用[protobuf插件](https://github.com/lightbrotherV/gin-protobuf)重写http接口
 2. 添加兼容不同版本服务端组件
 3. 添加服务端备注
-4. 兼容mcdr插件
-5. 将命令行模式拆分出来
+4. 将命令行模式拆分出来
