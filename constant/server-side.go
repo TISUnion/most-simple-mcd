@@ -6,7 +6,7 @@ package constant
 	TODO
 */
 const (
-	PLAYER_MESSAGE = `$<(\w{1,16})> (.*)`
+	PLAYER_MESSAGE = `^<(\w{1,16})> (.*)$`
 	//=======================原版端
 	VANILLA_SERVER     = "vanilla"
 	VANILLA_VERSION    = "Starting minecraft server version ([0-9]*\\.?[0-9]*\\.?[0-9]*\\.?)"

@@ -96,7 +96,7 @@ func (p *HerePlugin) HandleMessage(message *models.ReciveMessage) {
 
 // 获取玩家坐标信息
 func (p *HerePlugin) PosDataHandle(originData []byte) {
-	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: (.+) has the following entity data: \\{.+Dimension: (-?\\d), Rotation: \\[.+\\[(.+)d, (.+)d, (.+)d\\],.+\\}")
+	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: (.+) has the following entity data: .+\\{.+Dimension: ?\\\"(.+)?\\\", Rotation: \\[.+\\[(.+)d, (.+)d, (.+)d\\],.+\\}")
 	match := reg.FindStringSubmatch(string(originData))
 	if len(match) != 6 {
 		return
@@ -104,17 +104,17 @@ func (p *HerePlugin) PosDataHandle(originData []byte) {
 	player := match[1]
 	dimension := match[2]
 	posData := match[3:]
-	position_show := fmt.Sprintf("[x:%s, y:%s, z:%s]", posData[0], posData[1], posData[2])
-	dimension_display := ""
+	positionShow := fmt.Sprintf("[x:%s, y:%s, z:%s]", posData[0], posData[1], posData[2])
+	dimensionDisplay := ""
 	switch dimension {
-	case "0":
-		dimension_display = "§2主世界"
-	case "-1":
-		dimension_display = "§4地狱"
-	case "1":
-		dimension_display = "§5末地"
+	case "0", "minecraft:overworld":
+		dimensionDisplay = "§2主世界"
+	case "-1", "minecraft:the_nether":
+		dimensionDisplay = "§4地狱"
+	case "1", "minecraft:the_end":
+		dimensionDisplay = "§5末地"
 	}
-	tellMsg := fmt.Sprintf("§e%s§r @ %s §r%s", player, dimension_display, position_show)
+	tellMsg := fmt.Sprintf("§e%s§r @ %s §r%s", player, dimensionDisplay, positionShow)
 	_ = p.mcServer.TellrawCommand(constant.MC_ALL_PLAYER, tellMsg)
 	_ = p.mcServer.TellrawCommand(player, fmt.Sprintf("你将会被高亮%d秒", highlightTime))
 }
