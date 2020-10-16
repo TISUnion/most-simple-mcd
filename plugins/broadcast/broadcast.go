@@ -90,7 +90,10 @@ func (p *BroadcastPlugin) paramsHandle(player string, pc *models.ReciveMessage, 
 		ctr := modules.GetMinecraftServerContainerInstance()
 		aMcSrv := ctr.GetAllServerObj()
 		for _, mcS := range aMcSrv {
-			_ = mcS.TellrawCommand(constant.MC_ALL_PLAYER, broadcast)
+			// 给开启的服务器发送
+			if mcS.GetServerConf().State == constant.MC_STATE_START {
+				_ = mcS.TellrawCommand(constant.MC_ALL_PLAYER, broadcast)
+			}
 		}
 	}
 }

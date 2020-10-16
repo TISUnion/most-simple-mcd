@@ -23,6 +23,7 @@ import (
 
 var (
 	PORT_REPEAT_ERROR = errors.New("服务器端口已被其他程序占用，请更换端口或者开启自动更换端口")
+	SEFVER_NOT_START_ERROR = errors.New("服务器未开启")
 )
 
 // MinecraftServer
@@ -313,9 +314,10 @@ func (m *MinecraftServer) resiveOneMessage() (string, error) {
 func (m *MinecraftServer) parseMessage(originMsg string) *models.ReciveMessage {
 	msgObj, ok := m.GetMessageRegularExpression(originMsg)
 	if ok {
+		msgObj.ServerId = m.EntryId
 		return msgObj
 	}
-	return &models.ReciveMessage{OriginData: originMsg}
+	return &models.ReciveMessage{OriginData: originMsg, ServerId: m.EntryId}
 }
 
 // 获取消息，并写入到管道中
@@ -418,6 +420,9 @@ func (m *MinecraftServer) Command(c string) error {
 }
 
 func (m *MinecraftServer) _command(c string) error {
+	if m.State != constant.MC_STATE_START {
+		return SEFVER_NOT_START_ERROR
+	}
 	// 不加换行无法执行命令
 	c += "\n"
 	cmd := []byte(c)
