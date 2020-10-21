@@ -96,7 +96,7 @@ func (p *HerePlugin) HandleMessage(message *models.ReciveMessage) {
 
 // 获取玩家坐标信息
 func (p *HerePlugin) PosDataHandle(originData []byte) {
-	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: (.+) has the following entity data: .+\\{.+Dimension: ?\\\"(.+)?\\\", Rotation: \\[.+\\[(.+)d, (.+)d, (.+)d\\],.+\\}")
+	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: (.+) has the following entity data: .+\\{.+Dimension: [\"]?([a-zA-Z0-9:]+)[\"]?, Rotation: \\[.+\\[(.+)d, (.+)d, (.+)d\\],.+\\}")
 	match := reg.FindStringSubmatch(string(originData))
 	if len(match) != 6 {
 		return
