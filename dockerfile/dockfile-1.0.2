@@ -1,0 +1,37 @@
+FROM debian
+
+ENV WORKDIR /date/app
+# 设置工作目录
+WORKDIR $WORKDIR
+
+ENV SMCD_VERSION 1.0.2
+
+#部署环境
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends g++ gcc libc6-dev make pkg-config wget xz-utils tar git \
+
+    #下载并解压node
+    && wget https://nodejs.org/dist/v12.19.0/node-v12.19.0-linux-x64.tar.xz --no-check-certificate \
+    && xz -d node-v12.19.0-linux-x64.tar.xz \
+    && tar xf node-v12.19.0-linux-x64.tar \
+    && rm node-v12.19.0-linux-x64.tar \
+    && mv node-v12.19.0-linux-x64 /node \
+
+    #下载并解压golang
+    && wget https://dl.google.com/go/go1.14.10.linux-amd64.tar.gz --no-check-certificate \
+    && tar xzf go1.14.10.linux-amd64.tar.gz \
+    && rm go1.14.10.linux-amd64.tar.gz \
+    && mv go /go \
+    && rm -rf /var/lib/apt/lists/* \
+
+ENV GOROOT /go
+ENV GOPATH $WORKDIR/golang
+ENV PATH /node/bin:$GOROOT/bin:$PATH
+
+#创建golang目录
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH" "$GOROOT"
+
+RUN git clone https://github.com/TISUnion/most-simple-mcd.git
+
+
+

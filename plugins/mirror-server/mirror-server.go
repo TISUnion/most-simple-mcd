@@ -139,7 +139,7 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *models.ReciveMessag
 		mcServerConf := mcServer.GetServerConf()
 		p.saveServer(mcServerConf.EntryId, mcServer)
 		mirrorId := uuid.NewV4().String()
-		runPath, ok := p.buildMirror(mcServerConf, mirrorId)
+		runPath, ok := p.buildMirrorPath(mcServerConf, mirrorId)
 		if !ok {
 			return
 		}
@@ -150,6 +150,7 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *models.ReciveMessag
 			RunPath:  runPath,
 			IsMirror: true,
 			Memory:   constant.MC_DEFAULT_MEMORY,
+			Side:     mcServerConf.Side,
 		}
 		p.mcContainer.AddServer(mirrorSrvConf, true)
 		p.getMirrors()
@@ -193,8 +194,8 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *models.ReciveMessag
 	}
 }
 
-// 构建镜像
-func (p *MirrorServerPlugin) buildMirror(conf *models.ServerConf, id string) (path string, ok bool) {
+// 构建镜像路径
+func (p *MirrorServerPlugin) buildMirrorPath(conf *models.ServerConf, id string) (path string, ok bool) {
 	serverPath, filename := filepath.Split(conf.RunPath)
 	mirrorPath := filepath.Join(modules.GetConfVal(constant.WORKSPACE), MC_MIRROR_DIR, id)
 	mirrorRunPath := filepath.Join(mirrorPath, id+constant.JAR_SUF)

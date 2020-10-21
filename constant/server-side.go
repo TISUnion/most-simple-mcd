@@ -12,7 +12,7 @@ const (
 	VANILLA_VERSION    = "Starting minecraft server version ([0-9]*\\.?[0-9]*\\.?[0-9]*\\.?)"
 	VANILLA_GAME_TYPE  = "Default game type: (?P<type>[a-zA-Z]+)"
 	VANILLA_GAME_START = "Done \\([0-9.]*s\\)! For help, type \"help\"( or \"\\?\")?"
-	VANILLA_GAME_SAVE  = "Saved the world"
+	VANILLA_GAME_SAVE  = "\\[Server thread/INFO\\]: Saved the (game|world)"
 	// [09:00:00] [Server thread/INFO]: <Steve> Hello
 	VANILLA_MESSAGE = `\[(\d+:\d+:\d+)]\s+\[Server thread/(\w+)\]: (.*)`
 	// Steve[/127.0.0.1:9864] logged in with entity id 131 at (187.2703, 146.79014, 404.84718)
