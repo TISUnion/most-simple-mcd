@@ -1,0 +1,203 @@
+syntax = "proto3";
+
+package most.simple.mcd;
+
+option go_package = "api";
+
+// `method:"POST"`
+service McServer {
+    // 监听服务端消耗资源
+    // `method:"GET" hasInput:"false" hasOutput:"false"`
+    rpc listenResource (ListenResourceReq) returns (ListenResourceResp);
+    // 服务器交互
+    // `method:"GET" hasInput:"false" hasOutput:"false"`
+    rpc serverInteraction (ServerInteractionReq) returns (ServerInteractionResp);
+    // 获取服务端信息列表
+    // `middleware:"auth" hasInput:"false"`
+    rpc list (ListReq) returns (ListResp);
+    // 获取服务端信息列表
+    // `middleware:"auth"`
+    rpc getServerState (GetServerStateReq) returns (GetServerStateResp);
+    // 获取服务端详情
+    // `middleware:"auth"`
+    rpc detail (DetailReq) returns (DetailResp);
+    // 操作服务端
+    // `middleware:"auth"`
+    rpc operateServer (OperateServerReq) returns (OperateServerResp);
+    // 修改服务端参数
+    // `middleware:"auth"`
+    rpc updateServerInfo (UpdateServerInfoReq) returns (UpdateServerInfoResp);
+    // 获取支持的服务端
+    // `method:"GET" hasInput:"false" middleware:"auth"`
+    rpc getServerSide (GetServerSideReq) returns (GetServerSideResp);
+}
+message GetServerSideReq {}
+
+message GetServerSideResp {
+    // 支持的服务端数组
+    repeated string server_sides = 1;
+}
+
+message ListenResourceReq {
+    // 服务端id
+    string id = 1;
+}
+
+message ListenResourceResp {
+}
+
+message ServerInteractionReq {
+    // 服务端id
+    string id = 1;
+}
+
+message ServerInteractionResp {
+}
+
+message ListReq {
+}
+
+message ListResp {
+    message Record {
+        // 服务端实例id
+        string entryId = 1 [json_name = "id"];
+        // 服务器名称
+        string name = 2;
+        // 执行的完整命令
+        repeated string cmdStr = 3 [json_name = "cmd_str"];
+        // 启动服务器端口
+        int64 port = 4;
+        // 运行所在工作区间
+        string runPath = 5 [json_name = "run_rath"];
+        // 是否是镜像服务器
+        bool isMirror = 6 [json_name = "is_mirror"];
+        // 是否启动资源监听器
+        bool isStartMonitor = 7 [json_name = "is_start_monitor"];
+        // 使用内存大小，单位M
+        int64 memory = 8 [json_name = "memory"];
+        // 服务端版本
+        string version = 9 [json_name = "version"];
+        // 服务器模式
+        string gameType = 10 [json_name = "game_type"];
+        // 启动状态：0.未启动 1.启动  -1.正在启动 -2.正在关闭
+        int64 state = 11;
+        // 本机的ip
+        repeated string ips = 12 [json_name = "ips"];
+        // 服务端类型
+        string side = 13;
+        // 备注
+        string comment = 14;
+    }
+    // 服务端配置
+    repeated Record list = 1;
+}
+
+message GetServerStateReq {
+    // 服务端id
+    string id = 1;
+}
+
+message GetServerStateResp {
+    // 启动状态：0.未启动 1.启动  -1.正在启动 -2.正在关闭
+    int64 state = 1;
+}
+
+message DetailReq {
+    // 服务端id
+    string id = 1;
+}
+
+message DetailResp {
+    message PluginRecord {
+        // 插件名称
+        string name = 1 [json_name = "name"];
+        // 插件id
+        string id = 2 [json_name = "id"];
+        // 是否被禁用
+        bool isBan = 3 [json_name = "is_ban"];
+        // 使用命令
+        string commandName = 4 [json_name = "command_name"];
+        // 描述
+        string description = 5 [json_name = "description"];
+        // 使用帮助
+        string helpDescription = 6 [json_name = "help_description"];
+    }
+
+    // 服务端实例id
+    string entryId = 1 [json_name = "id"];
+    // 服务器名称
+    string name = 2 [json_name = "name"];
+    // 执行的完整命令
+    repeated string cmdStr = 3 [json_name = "cmd_str"];
+    // 启动服务器端口
+    int64 port = 4 [json_name = "port"];
+    // 运行所在工作区间
+    string runPath = 5 [json_name = "run_rath"];
+    // 是否是镜像服务器
+    bool isMirror = 6 [json_name = "is_mirror"];
+    // 是否启动资源监听器
+    bool isStartMonitor = 7 [json_name = "is_start_monitor"];
+    // 使用内存大小，单位M
+    int64 memory = 8 [json_name = "memory"];
+    // 服务端版本
+    string version = 9 [json_name = "version"];
+    // 服务器模式
+    string gameType = 10 [json_name = "game_type"];
+    // 启动状态：0.未启动 1.启动  -1.正在启动 -2.正在关闭
+    int64 state = 11 [json_name = "state"];
+    // 本机的ip
+    repeated string ips = 12 [json_name = "ips"];
+    // 插件信息
+    repeated PluginRecord pluginfo = 13 [json_name = "plugin_info"];
+    // 服务端类型
+    string side = 14;
+    // 备注
+    string comment = 15;
+}
+
+message OperateServerReq {
+    // 服务端id
+    repeated string serverId = 1 [json_name = "id"];
+    // 操作类型：1. 启动  2. 停止  3.重启
+    int64 operateType = 2 [json_name = "operate_type"];
+}
+
+message OperateServerResp {
+
+}
+
+message UpdateServerInfoReq {
+    // 服务端实例id
+    string entryId = 1 [json_name = "id"];
+    // 服务器名称
+    string name = 2 [json_name = "name"];
+    // 执行的完整命令
+    repeated string cmdStr = 3 [json_name = "cmd_str"];
+    // 启动服务器端口
+    int64 port = 4 [json_name = "port"];
+    // 运行所在工作区间
+    string runPath = 5 [json_name = "run_rath"];
+    // 是否是镜像服务器
+    bool isMirror = 6 [json_name = "is_mirror"];
+    // 是否启动资源监听器
+    bool isStartMonitor = 7 [json_name = "is_start_monitor"];
+    // 使用内存大小，单位M
+    int64 memory = 8 [json_name = "memory"];
+    // 服务端版本
+    string version = 9 [json_name = "version"];
+    // 服务器模式
+    string gameType = 10 [json_name = "game_type"];
+    // 启动状态：0.未启动 1.启动  -1.正在启动 -2.正在关闭
+    int64 state = 11 [json_name = "state"];
+    // 本机的ip
+    repeated string ips = 12 [json_name = "ips"];
+    // 服务端类型
+    string side = 13;
+    // 备注
+    string comment = 14;
+}
+
+message UpdateServerInfoResp {
+
+}
+

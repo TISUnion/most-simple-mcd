@@ -7,7 +7,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/container"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
 	"os"
@@ -29,8 +29,6 @@ type MinecraftServerContainer struct {
 	// 所有mc服务器实例
 	minecraftServers map[string]server.MinecraftServer
 
-	groupLock *sync.WaitGroup
-
 	// 开启的mc服务器实例
 	startServers map[string]server.MinecraftServer
 
@@ -42,6 +40,37 @@ type MinecraftServerContainer struct {
 
 	// 各时间段的回调
 	mcCallbacks map[string][]func(string)
+}
+
+// 删除服务端
+func (m *MinecraftServerContainer) DeleteServer(id string) error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	_, err := m._getServerById(id)
+	if err != nil {
+		return err
+	}
+	logPath := filepath.Join(GetConfVal(constant.WORKSPACE), constant.LOG_DIR, id)
+	serverPath := filepath.Join(GetConfVal(constant.WORKSPACE), constant.MC_SERVER_DIR, id)
+	err = os.RemoveAll(logPath)
+	if err != nil {
+		return err
+	}
+	err = os.RemoveAll(serverPath)
+	if err != nil {
+		return err
+	}
+
+	// 从数据库删除中删除
+	oldC := m.getServerConfFromDb()
+	var newC []*models.ServerConf
+	for _, cfg := range oldC {
+		if cfg.EntryId != id {
+			newC = append(newC, cfg)
+		}
+	}
+	m._saveToDb(newC)
+	return nil
 }
 
 // 统一注册关闭回调
@@ -105,7 +134,7 @@ func (m *MinecraftServerContainer) _getServerById(id string) (server.MinecraftSe
 // 非完全匹配id
 func (m *MinecraftServerContainer) _getServerLikeId(id string) (string, error) {
 	aCfg := m._getAllServerConf()
-	aRes := make([]string, 1)
+	aRes := make([]string, 0)
 	for _, sCfg := range aCfg {
 		if strings.Contains(sCfg.EntryId, id) {
 			aRes = append(aRes, sCfg.EntryId)
@@ -203,14 +232,14 @@ func (m *MinecraftServerContainer) RestartById(id string) error {
 }
 
 // 获取所有服务端的配置
-func (m *MinecraftServerContainer) GetAllServerConf() []*json_struct.ServerConf {
+func (m *MinecraftServerContainer) GetAllServerConf() []*models.ServerConf {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	return m._getAllServerConf()
 }
 
-func (m *MinecraftServerContainer) _getAllServerConf() []*json_struct.ServerConf {
-	result := make([]*json_struct.ServerConf, 0)
+func (m *MinecraftServerContainer) _getAllServerConf() []*models.ServerConf {
+	result := make([]*models.ServerConf, 0)
 	for _, v := range m.minecraftServers {
 		result = append(result, v.GetServerConf())
 	}
@@ -219,7 +248,7 @@ func (m *MinecraftServerContainer) _getAllServerConf() []*json_struct.ServerConf
 }
 
 // 把根据配置添加服务端
-func (m *MinecraftServerContainer) AddServer(config *json_struct.ServerConf, isSave bool) {
+func (m *MinecraftServerContainer) AddServer(config *models.ServerConf, isSave bool) {
 	if config.Memory <= 0 {
 		config.Memory = constant.MC_DEFAULT_MEMORY
 	}
@@ -248,7 +277,8 @@ func (m *MinecraftServerContainer) AddServer(config *json_struct.ServerConf, isS
 		mcServer.RegisterSaveCallback(fCb)
 	}
 	if isSave {
-		m._saveToDb()
+		config := m._getAllServerConf()
+		m._saveToDb(config)
 	}
 }
 
@@ -258,7 +288,7 @@ func (m *MinecraftServerContainer) GetAllServerObj() map[string]server.Minecraft
 }
 
 // 处理mc服务端文件
-func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, memory int) *json_struct.ServerConf {
+func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, memory int64, side string, comment string) *models.ServerConf {
 	path, _ := utils.GetCurrentPath()
 	entryId := uuid.NewV4().String()
 	_, filename := filepath.Split(filePath)
@@ -280,13 +310,19 @@ func (m *MinecraftServerContainer) HandleMcFile(filePath, name string, port, mem
 		filename = name
 	}
 
+	if side == "" {
+		side = constant.VANILLA_SERVER
+	}
+
 	// 生成config
-	return &json_struct.ServerConf{
+	return &models.ServerConf{
 		Name:    filename,
 		RunPath: serverDir,
 		EntryId: entryId,
 		Port:    port,
 		Memory:  memory,
+		Side:    side,
+		Comment: comment,
 	}
 }
 
@@ -298,9 +334,10 @@ func (m *MinecraftServerContainer) loadLocalServer() {
 	jarspath, _ := filepath.Glob(fmt.Sprintf("%s/*.jar", path))
 	// 读取当前目录下的所有jar文件
 	for _, v := range jarspath {
-		m.AddServer(m.HandleMcFile(v, "", 0, 0), false)
+		m.AddServer(m.HandleMcFile(v, "", 0, 0, constant.VANILLA_SERVER, ""), false)
 	}
-	m._saveToDb()
+	config := m._getAllServerConf()
+	m._saveToDb(config)
 }
 
 // 读取数据库中mc配置
@@ -315,9 +352,9 @@ func (m *MinecraftServerContainer) loadDbServer() {
 }
 
 // 读取数据库中的服务端配置
-func (m *MinecraftServerContainer) getServerConfFromDb() []*json_struct.ServerConf {
+func (m *MinecraftServerContainer) getServerConfFromDb() []*models.ServerConf {
 	serversConfStr := GetFromDatabase(constant.MC_SERVER_DB_KEY)
-	var serversConf []*json_struct.ServerConf
+	var serversConf []*models.ServerConf
 	_ = json.Unmarshal([]byte(serversConfStr), &serversConf)
 	// 默认服务端未启动
 	for _, c := range serversConf {
@@ -330,12 +367,12 @@ func (m *MinecraftServerContainer) getServerConfFromDb() []*json_struct.ServerCo
 func (m *MinecraftServerContainer) SaveToDb() {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	m._saveToDb()
+	config := m._getAllServerConf()
+	m._saveToDb(config)
 }
 
 // 持久化服务器配置
-func (m *MinecraftServerContainer) _saveToDb() {
-	config := m._getAllServerConf()
+func (m *MinecraftServerContainer) _saveToDb(config []*models.ServerConf) {
 	data, _ := json.Marshal(config)
 	SetFromDatabase(constant.MC_SERVER_DB_KEY, string(data))
 }
@@ -360,11 +397,14 @@ func GetMinecraftServerContainerInstance() container.MinecraftContainer {
 
 	minecraftServerContainer = &MinecraftServerContainer{
 		minecraftServers: make(map[string]server.MinecraftServer),
-		groupLock:        &sync.WaitGroup{},
 		startServers:     make(map[string]server.MinecraftServer),
 		stopServers:      make(map[string]server.MinecraftServer),
 		lock:             &sync.Mutex{},
 	}
 	RegisterCallBack(minecraftServerContainer)
 	return minecraftServerContainer
+}
+
+func GetMinecraftServerById(id string) (server.MinecraftServer, error) {
+	return GetMinecraftServerContainerInstance().GetServerById(id)
 }

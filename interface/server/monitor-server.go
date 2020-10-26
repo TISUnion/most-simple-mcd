@@ -1,9 +1,9 @@
 package server
 
-import json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+import "github.com/TISUnion/most-simple-mcd/models"
 
 type MonitorServer interface {
 	BasicServer
 
-	GetMessageChan() chan *json_struct.MonitorMessage
+	GetMessageChan() chan *models.MonitorMessage
 }

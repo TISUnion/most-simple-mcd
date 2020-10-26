@@ -3,8 +3,8 @@ package modules
 import "sync"
 
 var (
-	increateId int         = 0
-	idLock     *sync.Mutex = &sync.Mutex{}
+	increateId = 1
+	idLock     = &sync.Mutex{}
 )
 
 // 全局唯一id生成器

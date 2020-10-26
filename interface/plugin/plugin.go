@@ -3,7 +3,7 @@ package plugin
 import (
 	"github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	"github.com/TISUnion/most-simple-mcd/models"
 )
 
 type Plugin interface {
@@ -34,7 +34,7 @@ type Plugin interface {
 	NewInstance() Plugin
 
 	// 处理投递消息
-	HandleMessage(messageType *json_struct.ReciveMessage)
+	HandleMessage(messageType *models.ReciveMessage)
 
 	// 开启插件
 	Start()

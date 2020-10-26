@@ -14,4 +14,5 @@ var plugins = []plugin_interface.Plugin{
 	BasicPluginObj,
 	broadcast.GetBroadcastPluginInstance(),
 	here.HerePluginObj,
+	//mcdr_plugin_compatible.GetMcdrPluginCompatiblePluginInstance(),
 }

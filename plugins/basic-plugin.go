@@ -4,7 +4,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	stateMap map[int]string
+	stateMap map[int64]string
 )
 
 type BasicPlugin struct {
@@ -62,7 +62,7 @@ func (p *BasicPlugin) Init(mcServer server.MinecraftServer) {
 func (p *BasicPlugin) ChangeConfCallBack() {}
 func (p *BasicPlugin) DestructCallBack()   {}
 func (p *BasicPlugin) InitCallBack() {
-	stateMap = make(map[int]string)
+	stateMap = make(map[int64]string)
 	// 0.未启动 1.启动  -1.正在启动 -2.正在关闭
 	stateMap[constant.MC_STATE_STOP] = "未启动"
 	stateMap[constant.MC_STATE_START] = "启动"
@@ -78,28 +78,27 @@ func (p *BasicPlugin) Stop()  {}
 
 /* --------------------------------------------- */
 
-func (p *BasicPlugin) HandleMessage(message *json_struct.ReciveMessage) {
-	if message.Player == "" {
+func (p *BasicPlugin) HandleMessage(message *models.ReciveMessage) {
+	if !message.IsPlayer {
 		return
 	}
-	commandObj := utils.ParsePluginCommand(message.Speak)
-	if commandObj.Command != pluginCommand {
+	if message.Command != pluginCommand {
 		return
 	}
-	if len(commandObj.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = p.mcServer.TellrawCommand(message.Player, helpDescription)
 	} else {
-		p.paramsHandle(message.Player, commandObj)
+		p.paramsHandle(message.Player, message)
 	}
 }
 
-func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand) {
+func (p *BasicPlugin) paramsHandle(player string, pc *models.ReciveMessage) {
 	switch pc.Params[0] {
 	case "info", "-if":
 		header := []string{"id", "名称", "端口", "内存(单位：M)", "版本", "模式"}
 		cfg := p.mcServer.GetServerConf()
-		data := [][]string{{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.Itoa(cfg.Port), strconv.Itoa(cfg.Memory), cfg.Version, cfg.GameType}}
-		p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
+		data := [][]string{{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.FormatInt(cfg.Port, 10), strconv.FormatInt(cfg.Memory, 10), cfg.Version, cfg.GameType}}
+		_ = p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
 	case "infos", "-ifs":
 		header := []string{"id", "名称", "端口", "内存(单位：M)", "版本", "模式", "运行状态"}
 		ctr := modules.GetMinecraftServerContainerInstance()
@@ -108,10 +107,10 @@ func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand)
 		for _, cfg := range aCfg {
 			// 镜像不展示
 			if !cfg.IsMirror {
-				data = append(data, []string{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.Itoa(cfg.Port), strconv.Itoa(cfg.Memory), cfg.Version, cfg.GameType, stateMap[cfg.State]})
+				data = append(data, []string{utils.Ellipsis(cfg.EntryId, maxLen), cfg.Name, strconv.FormatInt(cfg.Port, 10), strconv.FormatInt(cfg.Memory, 10), cfg.Version, cfg.GameType, stateMap[cfg.State]})
 			}
 		}
-		p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
+		_ = p.mcServer.TellrawCommand(player, utils.FormateTable(header, data))
 	case "plugins", "-ps":
 		aPlcfg := p.mcServer.GetPluginsInfo()
 		header := []string{"名称", "是否启用", "命令", "简介"}
@@ -179,7 +178,7 @@ func (p *BasicPlugin) paramsHandle(player string, pc *json_struct.PluginCommand)
 	}
 }
 
-func (p *BasicPlugin) getPluginByCmd(cmd string) *json_struct.PluginInfo {
+func (p *BasicPlugin) getPluginByCmd(cmd string) *models.PluginInfo {
 	aPlcfg := p.mcServer.GetPluginsInfo()
 	for _, plcfg := range aPlcfg {
 		if cmd == plcfg.CommandName {

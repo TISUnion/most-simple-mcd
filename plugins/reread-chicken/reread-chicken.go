@@ -3,9 +3,8 @@ package reread_chicken
 import (
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
-	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -63,23 +62,22 @@ func (p *RereadChickenPlugin) Stop()  {}
 
 /* --------------------------------------------- */
 
-func (p *RereadChickenPlugin) HandleMessage(message *json_struct.ReciveMessage) {
-	if message.Player == "" {
+func (p *RereadChickenPlugin) HandleMessage(message *models.ReciveMessage) {
+	if !message.IsPlayer {
 		return
 	}
-	com := utils.ParsePluginCommand(message.Speak)
-	if com.Command != pluginCommand {
+	if message.Command != pluginCommand {
 		return
 	}
 
-	if len(com.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = p.mcServer.TellrawCommand(message.Player, helpDescription)
 	} else {
-		p.paramsHandle(message.Player, com)
+		p.paramsHandle(message.Player, message)
 	}
 }
 
-func (p *RereadChickenPlugin) paramsHandle(player string, pc *json_struct.PluginCommand) {
+func (p *RereadChickenPlugin) paramsHandle(player string, pc *models.ReciveMessage) {
 	switch pc.Params[0] {
 	case "help", "-h":
 		_ = p.mcServer.TellrawCommand(player, helpDescription)

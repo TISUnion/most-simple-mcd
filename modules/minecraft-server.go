@@ -8,14 +8,13 @@ import (
 	_interface "github.com/TISUnion/most-simple-mcd/interface"
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	"gopkg.in/ini.v1"
 	"io"
 	"net"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -24,12 +23,15 @@ import (
 
 var (
 	PORT_REPEAT_ERROR = errors.New("服务器端口已被其他程序占用，请更换端口或者开启自动更换端口")
+	SEFVER_NOT_START_ERROR = errors.New("服务器未开启")
 )
 
 // MinecraftServer
 // mc服务器子进程对象
 type MinecraftServer struct {
-	*json_struct.ServerConf
+	*models.ServerConf
+
+	*ServerAdapter
 
 	// CmdObj
 	//子进程实例
@@ -53,7 +55,7 @@ type MinecraftServer struct {
 
 	// messageChan
 	// 玩家发言存储chan
-	messageChan chan *json_struct.ReciveMessage
+	messageChan chan string
 
 	// MonitorServer
 	// 资源监听器
@@ -70,7 +72,7 @@ type MinecraftServer struct {
 	logger _interface.Log
 
 	// 其他模块订阅服务的消息推送管道
-	subscribeMessageChans []chan *json_struct.ReciveMessage
+	subscribeMessageChans []chan *models.ReciveMessage
 
 	// 服务端关闭回调
 	mcCloseCallback []func(string)
@@ -91,11 +93,11 @@ func (m *MinecraftServer) UnbanPlugin(pluginId string) {
 }
 
 // 获取插件信息
-func (m *MinecraftServer) GetPluginsInfo() []*json_struct.PluginInfo {
-	res := make([]*json_struct.PluginInfo, 0)
+func (m *MinecraftServer) GetPluginsInfo() []*models.PluginInfo {
+	res := make([]*models.PluginInfo, 0)
 	ablePlugins := m.pluginManager.GetAblePlugins()
 	for _, p := range ablePlugins {
-		res = append(res, &json_struct.PluginInfo{
+		res = append(res, &models.PluginInfo{
 			Name:            p.GetName(),
 			Id:              p.GetId(),
 			IsBan:           false,
@@ -106,7 +108,7 @@ func (m *MinecraftServer) GetPluginsInfo() []*json_struct.PluginInfo {
 	}
 	disablePlugins := m.pluginManager.GetDisablePlugins()
 	for _, p := range disablePlugins {
-		res = append(res, &json_struct.PluginInfo{
+		res = append(res, &models.PluginInfo{
 			Name:            p.GetName(),
 			Id:              p.GetId(),
 			IsBan:           true,
@@ -118,7 +120,7 @@ func (m *MinecraftServer) GetPluginsInfo() []*json_struct.PluginInfo {
 	return res
 }
 
-func (m *MinecraftServer) RegisterSubscribeMessageChan(c chan *json_struct.ReciveMessage) {
+func (m *MinecraftServer) RegisterSubscribeMessageChan(c chan *models.ReciveMessage) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -148,15 +150,15 @@ func (m *MinecraftServer) GetServerMonitor() server.MonitorServer {
 	return m.monitorServer
 }
 
-func (m *MinecraftServer) GetServerConf() *json_struct.ServerConf {
+func (m *MinecraftServer) GetServerConf() *models.ServerConf {
 	return m.ServerConf
 }
 
-func (m *MinecraftServer) SetServerConf(c *json_struct.ServerConf) {
+func (m *MinecraftServer) SetServerConf(c *models.ServerConf) {
 	m.ServerConf = c
 }
 
-func (m *MinecraftServer) SetMemory(memory int) {
+func (m *MinecraftServer) SetMemory(memory int64) {
 	if memory > 0 {
 		m.Memory = memory
 	}
@@ -248,10 +250,7 @@ func (m *MinecraftServer) Start() error {
 		m.State = constant.MC_STATE_STOP
 		return err
 	}
-	// 运行开启回调
-	for _, f := range m.mcOpenCallback {
-		f(m.EntryId)
-	}
+
 	return nil
 }
 
@@ -288,7 +287,7 @@ func (m *MinecraftServer) Restart() error {
 }
 
 // 获取一条消息
-func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
+func (m *MinecraftServer) resiveOneMessage() (string, error) {
 	result := make([]byte, 0)
 	for {
 		buff := make([]byte, constant.MAX_RESIVE_BUFF_SIZE)
@@ -296,7 +295,7 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 		if err != nil {
 			errMsg := fmt.Sprintf("服务器: %s，已关闭。因为%v", m.Name, err)
 			m.sureServerStop()
-			return []byte{}, errors.New(errMsg)
+			return "", errors.New(errMsg)
 		}
 		if n <= 0 {
 			continue
@@ -308,7 +307,17 @@ func (m *MinecraftServer) resiveOneMessage() ([]byte, error) {
 	}
 
 	result, _ = utils.ParseCharacter(result)
-	return result, nil
+	return string(result), nil
+}
+
+// 解析信息
+func (m *MinecraftServer) parseMessage(originMsg string) *models.ReciveMessage {
+	msgObj, ok := m.GetMessageRegularExpression(originMsg)
+	if ok {
+		msgObj.ServerId = m.EntryId
+		return msgObj
+	}
+	return &models.ReciveMessage{OriginData: originMsg, ServerId: m.EntryId}
 }
 
 // 获取消息，并写入到管道中
@@ -320,9 +329,7 @@ func (m *MinecraftServer) reciveMessageToChan() {
 			WriteLogToDefault(err.Error(), constant.LOG_ERROR)
 			return
 		}
-		msg := utils.ParseMessage(everyBuff)
-		msg.ServerId = m.EntryId
-		m.messageChan <- msg
+		m.messageChan <- everyBuff
 	}
 }
 
@@ -330,25 +337,29 @@ func (m *MinecraftServer) reciveMessageToChan() {
 func (m *MinecraftServer) handleMessage() {
 	for {
 		msg := <-m.messageChan
-		//fmt.Print(string(msg.OriginData))
-		m.WriteLog(string(msg.OriginData), constant.LOG_INFO)
+		m.WriteLog(msg, constant.LOG_INFO)
 		if m.Version == "" {
-			m.getVersion(msg.OriginData)
+			m.getVersion(msg)
 		}
 		if m.GameType == "" {
-			m.getGameType(msg.OriginData)
+			m.getGameType(msg)
 		}
-
+		msgObj := m.parseMessage(msg)
 		// 分发给各已订阅模块
 		go func() {
 			for _, c := range m.subscribeMessageChans {
-				c <- msg
+				c <- msgObj
 			}
+		}()
+
+		// 分发给插件
+		go func() {
+			m.pluginManager.HandleMessage(msgObj)
 		}()
 
 		// 正在启动
 		if m.State == constant.MC_STATE_STARTIND {
-			m.sureServerStart(msg.OriginData)
+			m.sureServerStart(msg)
 			continue // 如果还没启动，就不分发消息
 		}
 
@@ -358,37 +369,31 @@ func (m *MinecraftServer) handleMessage() {
 		}
 
 		// 如果是保存服务端就调用回调
-		go m.sureServerSave(msg.OriginData)
-
-		// 分发给插件
-		go func() {
-			m.pluginManager.HandleMessage(msg)
-		}()
+		go m.sureServerSave(msg)
 	}
 }
 
-func (m *MinecraftServer) getVersion(data []byte) {
-	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Starting minecraft server version ([0-9]*\\.?[0-9]*\\.?[0-9]*\\.?)")
-	ves := reg.FindSubmatch(data)
-	if len(ves) > 1 {
-		m.Version = string(ves[1])
+func (m *MinecraftServer) getVersion(data string) {
+	if res, ok := m.GetVersionRegularExpression(data); ok {
+		m.Version = res.Content
 	}
 }
 
-func (m *MinecraftServer) getGameType(data []byte) {
-	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Default game type: (?P<type>[a-zA-Z]+)")
-	match := reg.FindSubmatch(data)
-	if len(match) > 1 {
-		m.GameType = string(match[1])
+func (m *MinecraftServer) getGameType(data string) {
+	if res, ok := m.GetVersionRegularExpression(data); ok {
+		m.GameType = res.Content
 	}
 }
 
 // 判断服务端是否已经启动
-func (m *MinecraftServer) sureServerStart(data []byte) {
-	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Done \\(.*\\)! For help, type \"help\"")
-	match := reg.Find(data)
-	if len(match) > 0 {
+func (m *MinecraftServer) sureServerStart(data string) {
+	_, ok := m.GetGameStartRegularExpression(data)
+	if ok {
 		m.State = constant.MC_STATE_START
+		// 运行开启回调
+		for _, f := range m.mcOpenCallback {
+			f(m.EntryId)
+		}
 	}
 }
 
@@ -398,11 +403,10 @@ func (m *MinecraftServer) sureServerStop() {
 }
 
 // 判断服务端是否已保存
-func (m *MinecraftServer) sureServerSave(data []byte) {
-	reg, _ := regexp.Compile("\\[Server thread/INFO\\]: Saved the world")
-	match := reg.Find(data)
+func (m *MinecraftServer) sureServerSave(data string) {
+	_, ok := m.GetGameSaveRegularExpression(data)
 	// 如果已关闭则发送关闭信息
-	if len(match) > 0 {
+	if ok {
 		for _, f := range m.mcSaveCallback {
 			f(m.EntryId)
 		}
@@ -416,6 +420,9 @@ func (m *MinecraftServer) Command(c string) error {
 }
 
 func (m *MinecraftServer) _command(c string) error {
+	if m.State != constant.MC_STATE_START {
+		return SEFVER_NOT_START_ERROR
+	}
 	// 不加换行无法执行命令
 	c += "\n"
 	cmd := []byte(c)
@@ -462,7 +469,7 @@ func (m *MinecraftServer) SayCommand(msg string) error {
 
 // validatePort
 // 校验mc的端口
-func (m *MinecraftServer) validatePort() (int, error) {
+func (m *MinecraftServer) validatePort() (int64, error) {
 	runDir := filepath.Dir(m.RunPath)
 	// 新建mc配置文件
 	mcConfPath := filepath.Join(runDir, constant.MC_CONF_NAME)
@@ -470,10 +477,10 @@ func (m *MinecraftServer) validatePort() (int, error) {
 		f.Close()
 	}
 	cfg, _ := ini.Load(mcConfPath)
-	var realPort int
+	var realPort int64
 	if m.Port != 0 {
 		realPort = m.Port
-		realPortStr := strconv.Itoa(realPort)
+		realPortStr := strconv.FormatInt(realPort, 10)
 		sec, _ := cfg.GetSection(ini.DefaultSection)
 		if sec.HasKey(constant.MC_PORT_TEXT) {
 			sec.Key(constant.MC_PORT_TEXT).SetValue(realPortStr)
@@ -507,7 +514,7 @@ func (m *MinecraftServer) validatePort() (int, error) {
 
 // changePort
 // 更换mc服务端端口
-func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int) (int, error) {
+func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int64) (int64, error) {
 	// 如果可以自动更换端口就自动更换端口
 	if isChange, _ := strconv.ParseBool(GetConfVal(constant.IS_AUTO_CHANGE_MC_SERVER_REPEAT_PORT)); isChange {
 		unusedPort, err := utils.GetFreePort(port)
@@ -515,7 +522,7 @@ func (m *MinecraftServer) changePort(cfg *ini.File, path string, port int) (int,
 			m.WriteLog(err.Error(), constant.LOG_ERROR)
 		}
 		sec, _ := cfg.GetSection(ini.DefaultSection)
-		unusedPortStr := strconv.Itoa(unusedPort)
+		unusedPortStr := strconv.FormatInt(unusedPort, 10)
 		// 重新配置文件
 		if sec.HasKey(constant.MC_PORT_TEXT) {
 			sec.Key(constant.MC_PORT_TEXT).SetValue(unusedPortStr)
@@ -611,12 +618,13 @@ func (m *MinecraftServer) initLocalIps() {
 
 // NewMinecraftServer
 // 新建一个mc服务端进程
-func NewMinecraftServer(serverConf *json_struct.ServerConf) server.MinecraftServer {
+func NewMinecraftServer(serverConf *models.ServerConf) server.MinecraftServer {
 	minecraftServer := &MinecraftServer{
-		ServerConf:  serverConf,
-		lock:        &sync.Mutex{},
-		messageChan: make(chan *json_struct.ReciveMessage, 10),
-		logger:      AddLog(serverConf.EntryId),
+		ServerConf:    serverConf,
+		lock:          &sync.Mutex{},
+		messageChan:   make(chan string, 10),
+		logger:        AddLog(serverConf.EntryId),
+		ServerAdapter: &ServerAdapter{side: serverConf.Side},
 	}
 	RegisterCallBack(minecraftServer)
 	return minecraftServer

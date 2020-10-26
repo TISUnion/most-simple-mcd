@@ -21,3 +21,4 @@ pack-data.go
 run.bat
 run.sh
 MCD-*
+tmp/

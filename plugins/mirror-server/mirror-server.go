@@ -6,7 +6,7 @@ import (
 	"github.com/TISUnion/most-simple-mcd/interface/container"
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
@@ -28,7 +28,7 @@ const (
 )
 
 var (
-	stateMap map[int]string
+	stateMap map[int64]string
 	listHead []string
 )
 
@@ -74,9 +74,9 @@ func (p *MirrorServerPlugin) Init(mcServer server.MinecraftServer) {
 /* ------------------回调接口-------------------- */
 func (p *MirrorServerPlugin) ChangeConfCallBack() {}
 func (p *MirrorServerPlugin) DestructCallBack()   {}
-func (p *MirrorServerPlugin) InitCallBack()       {
+func (p *MirrorServerPlugin) InitCallBack() {
 	p.mcSaveState = make(map[string]bool)
-	stateMap = make(map[int]string)
+	stateMap = make(map[int64]string)
 	p.savedChan = make(chan struct{})
 	p.lock = &sync.Mutex{}
 	// 0.未启动 1.启动  -1.正在启动 -2.正在关闭
@@ -102,32 +102,31 @@ func (p *MirrorServerPlugin) Stop()  {}
 
 /* --------------------------------------------- */
 
-func (p *MirrorServerPlugin) HandleMessage(message *json_struct.ReciveMessage) {
-	if message.Player == "" {
+func (p *MirrorServerPlugin) HandleMessage(message *models.ReciveMessage) {
+	if !message.IsPlayer {
 		return
 	}
-	com := utils.ParsePluginCommand(message.Speak)
-	if com.Command != pluginCommand {
+	if message.Command != pluginCommand {
 		return
 	}
 	mcServer, err := modules.GetMinecraftServerContainerInstance().GetServerById(message.ServerId)
 	if err != nil {
 		return
 	}
-	if len(com.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = mcServer.TellrawCommand(message.Player, helpDescription)
 	} else {
-		p.paramsHandle(message.Player, com, mcServer)
+		p.paramsHandle(message.Player, message, mcServer)
 	}
 }
 
-func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginCommand, mcServer server.MinecraftServer) {
+func (p *MirrorServerPlugin) paramsHandle(player string, pc *models.ReciveMessage, mcServer server.MinecraftServer) {
 	switch pc.Params[0] {
 	case "list", "-l":
 		data := make([][]string, 0)
 		for _, mcMs := range p.mirrors {
 			mcConf := mcMs.GetServerConf()
-			data = append(data, []string{utils.Ellipsis(mcConf.EntryId, maxLen), mcConf.Name, strconv.Itoa(mcConf.Memory), mcConf.Version, stateMap[mcConf.State]})
+			data = append(data, []string{utils.Ellipsis(mcConf.EntryId, maxLen), mcConf.Name, strconv.FormatInt(mcConf.Memory, 10), mcConf.Version, stateMap[mcConf.State]})
 		}
 		_ = mcServer.TellrawCommand(player, utils.FormateTable(listHead, data))
 	case "save", "-s":
@@ -140,17 +139,18 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 		mcServerConf := mcServer.GetServerConf()
 		p.saveServer(mcServerConf.EntryId, mcServer)
 		mirrorId := uuid.NewV4().String()
-		runPath, ok := p.buildMirror(mcServerConf, mirrorId)
+		runPath, ok := p.buildMirrorPath(mcServerConf, mirrorId)
 		if !ok {
 			return
 		}
-		mirrorSrvConf := &json_struct.ServerConf{
+		mirrorSrvConf := &models.ServerConf{
 			EntryId:  mirrorId,
 			Name:     name,
 			CmdStr:   utils.GetCommandArr(constant.MC_DEFAULT_MEMORY, runPath),
 			RunPath:  runPath,
 			IsMirror: true,
 			Memory:   constant.MC_DEFAULT_MEMORY,
+			Side:     mcServerConf.Side,
 		}
 		p.mcContainer.AddServer(mirrorSrvConf, true)
 		p.getMirrors()
@@ -169,7 +169,7 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 			}
 			return
 		} else {
-			p.mcContainer.StartById(mirrorSvr.GetServerEntryId())
+			_ = p.mcContainer.StartById(mirrorSvr.GetServerEntryId())
 			_ = mcServer.TellrawCommand(player, "启动成功，可通过-l查看服务端是否完成启动")
 		}
 	case "stop", "-sp":
@@ -186,7 +186,7 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 			}
 			return
 		} else {
-			p.mcContainer.StopById(mirrorSvr.GetServerEntryId())
+			_ = p.mcContainer.StopById(mirrorSvr.GetServerEntryId())
 			_ = mcServer.TellrawCommand(player, "关闭成功，可通过-l查看服务端是否完成关闭")
 		}
 	default:
@@ -194,8 +194,8 @@ func (p *MirrorServerPlugin) paramsHandle(player string, pc *json_struct.PluginC
 	}
 }
 
-// 构建镜像
-func (p *MirrorServerPlugin) buildMirror(conf *json_struct.ServerConf, id string) (path string, ok bool) {
+// 构建镜像路径
+func (p *MirrorServerPlugin) buildMirrorPath(conf *models.ServerConf, id string) (path string, ok bool) {
 	serverPath, filename := filepath.Split(conf.RunPath)
 	mirrorPath := filepath.Join(modules.GetConfVal(constant.WORKSPACE), MC_MIRROR_DIR, id)
 	mirrorRunPath := filepath.Join(mirrorPath, id+constant.JAR_SUF)

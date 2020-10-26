@@ -5,9 +5,8 @@ import (
 	"github.com/TISUnion/most-simple-mcd/constant"
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
-	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -64,26 +63,25 @@ func (p *BroadcastPlugin) Stop()  {}
 
 /* --------------------------------------------- */
 
-func (p *BroadcastPlugin) HandleMessage(message *json_struct.ReciveMessage) {
-	if message.Player == "" {
+func (p *BroadcastPlugin) HandleMessage(message *models.ReciveMessage) {
+	if !message.IsPlayer {
 		return
 	}
-	com := utils.ParsePluginCommand(message.Speak)
-	if com.Command != pluginCommand {
+	if message.Command != pluginCommand {
 		return
 	}
 	mcServer, err := modules.GetMinecraftServerContainerInstance().GetServerById(message.ServerId)
 	if err != nil {
 		return
 	}
-	if len(com.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = mcServer.TellrawCommand(message.Player, helpDescription)
 	} else {
-		p.paramsHandle(message.Player, com, mcServer)
+		p.paramsHandle(message.Player, message, mcServer)
 	}
 }
 
-func (p *BroadcastPlugin) paramsHandle(player string, pc *json_struct.PluginCommand, mcServer server.MinecraftServer) {
+func (p *BroadcastPlugin) paramsHandle(player string, pc *models.ReciveMessage, mcServer server.MinecraftServer) {
 	switch pc.Params[0] {
 	case "help", "-h":
 		_ = mcServer.TellrawCommand(player, helpDescription)
@@ -92,7 +90,10 @@ func (p *BroadcastPlugin) paramsHandle(player string, pc *json_struct.PluginComm
 		ctr := modules.GetMinecraftServerContainerInstance()
 		aMcSrv := ctr.GetAllServerObj()
 		for _, mcS := range aMcSrv {
-			_ = mcS.TellrawCommand(constant.MC_ALL_PLAYER, broadcast)
+			// 给开启的服务器发送
+			if mcS.GetServerConf().State == constant.MC_STATE_START {
+				_ = mcS.TellrawCommand(constant.MC_ALL_PLAYER, broadcast)
+			}
 		}
 	}
 }
@@ -101,15 +102,15 @@ func (*BroadcastPlugin) NewInstance() plugin.Plugin {
 	return nil
 }
 
-var BroadcastPluginObj plugin.Plugin
+var broadcastPluginObj plugin.Plugin
 
 func GetBroadcastPluginInstance() plugin.Plugin {
-	if BroadcastPluginObj != nil {
-		return BroadcastPluginObj
+	if broadcastPluginObj != nil {
+		return broadcastPluginObj
 	}
-	BroadcastPluginObj = &BroadcastPlugin{
+	broadcastPluginObj = &BroadcastPlugin{
 		id: uuid.NewV4().String(),
 	}
-	modules.RegisterCallBack(BroadcastPluginObj)
-	return BroadcastPluginObj
+	modules.RegisterCallBack(broadcastPluginObj)
+	return broadcastPluginObj
 }

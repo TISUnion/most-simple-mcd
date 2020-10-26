@@ -97,6 +97,9 @@ const (
 	MC_OPEN_CALLBACK  = "open"
 	MC_CLOSE_CALLBACK = "close"
 	MC_SAVE_CALLBACK  = "save"
+
+	MC_STDOUT     = 0
+	MC_SYSTEM_OUT = 1
 )
 
 // DB常量
@@ -122,7 +125,8 @@ const (
 	LOG_TYPE_GIN     = "2"
 	LOG_TYPE_DEFAULT = "3"
 
-	JAR_SUF = ".jar"
+	JAR_SUF           = ".jar"
+	TOKEN_HEADER_NAME = "X-Token"
 )
 
 // 各模块常量
@@ -139,6 +143,8 @@ const (
 	UPLOAD_PORT_TEXT                = "port"
 	UPLOAD_MEMORY_TEXT              = "memory"
 	UPLOAD_NAME_TEXT                = "name"
+	UPLOAD_SIDE_TEXT                = "side"
+	UPLOAD_COMMENT_TEXT             = "comment"
 
 	OS_WINDOWS = "windows"
 	OS_LINUX   = "linux"
@@ -151,4 +157,23 @@ const (
 	COMPARE_GT = 1
 	COMPARE_EQ = 0
 	COMPARE_LT = -1
+)
+
+// mc事件常量
+const (
+	ON_LOAD = iota + 1
+	ON_UNlOAD
+	ON_INFO
+	ON_USER_INFO
+	ON_PLAYER_JOINED
+	ON_PLAYER_LEFT
+	ON_DEATH
+	ON_PLAYER_MADE_ADVANCEMENT
+	ON_SERVER_STARTUP
+	ON_SERVER_STOP
+	ON_MCDR_STOP
+	VERSION
+	GAME_TYPE
+	GAME_START
+	GAME_SAVE
 )

@@ -20,7 +20,7 @@ git clone https://github.com/TISUnion/most-simple-mcd
     
 - 安装nodejs
 
-    自行安装，npm安装包速度慢，可以设置成阿里云的npm代理
+    自行安装，npm安装包速度慢，可以设置成阿里云的npm代理，推荐版本为14.12.0
     
 - 运行对应build文件
 

@@ -7,18 +7,15 @@ import (
 	"errors"
 	"fmt"
 	"github.com/TISUnion/most-simple-mcd/constant"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/olekukonko/tablewriter"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"net"
 	"os/exec"
-	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
 )
-
-const parseMessageRGX = `\[(\d+:\d+:\d+)]\s+\[Server thread/INFO\]:\s+[<|\[]{1}(.+)[>|\]]{1}\s+(.+)`
 
 // 致命错误，退出程序
 func PanicError(msg string, err error) {
@@ -26,8 +23,8 @@ func PanicError(msg string, err error) {
 }
 
 // 创建confParam实例
-func NewConfParam(confKey, ConfVal, description string, level int, IsAlterable bool) *json_struct.ConfParam {
-	return &json_struct.ConfParam{
+func NewConfParam(confKey, ConfVal, description string, level int64, IsAlterable bool) *models.ConfParam {
+	return &models.ConfParam{
 		ConfVal:        ConfVal,
 		DefaultConfVal: ConfVal,
 		Name:           confKey,
@@ -35,33 +32,6 @@ func NewConfParam(confKey, ConfVal, description string, level int, IsAlterable b
 		Description:    description,
 		IsAlterable:    IsAlterable,
 	}
-}
-
-// 解析mc玩家发言
-func ParseMessage(originMsg []byte) *json_struct.ReciveMessage {
-	re := regexp.MustCompile(parseMessageRGX)
-	match := re.FindStringSubmatch(string(originMsg))
-	if len(match) == 4 {
-		return &json_struct.ReciveMessage{
-			Player:     match[2],
-			Time:       match[1],
-			Speak:      match[3],
-			OriginData: originMsg,
-		}
-	}
-	return &json_struct.ReciveMessage{OriginData: originMsg}
-}
-
-// 解析mc玩家发言插件命令
-func ParsePluginCommand(msg string) *json_struct.PluginCommand {
-	ctx := strings.Fields(msg)
-	res := &json_struct.PluginCommand{
-		Command: strings.ToLower(ctx[0]),
-	}
-	if len(ctx) > 1 {
-		res.Params = ctx[1:]
-	}
-	return res
 }
 
 // 格式化数据为表格
@@ -125,7 +95,7 @@ func ParseCharacter(data []byte) ([]byte, error) {
 // GetFreePort
 // 获取系统空闲端口
 // 如果port为0，则表示随机获取一个空闲端口，不为0则为指定端口
-func GetFreePort(port int) (int, error) {
+func GetFreePort(port int64) (int64, error) {
 	if runtime.GOOS == constant.OS_DARWIN {
 		checkStatement := fmt.Sprintf("lsof -i:%d ", port)
 		output, err := exec.Command("sh", "-c", checkStatement).CombinedOutput()
@@ -148,7 +118,7 @@ func GetFreePort(port int) (int, error) {
 			return 0, err
 		}
 		defer l.Close()
-		return l.Addr().(*net.TCPAddr).Port, nil
+		return int64(l.Addr().(*net.TCPAddr).Port), nil
 	}
 }
 
@@ -164,42 +134,6 @@ func Uint64Tofloat64(ui uint64) float64 {
 	uiStr := strconv.FormatUint(ui, 10)
 	f64, _ := strconv.ParseFloat(uiStr, 64)
 	return f64
-}
-
-// 比较mc版本 1表示大于，0表示等于，-1表示小于
-func CompareMcVersion(mainVersion, compareVersion string) int {
-	if mainVersion == compareVersion {
-		return constant.COMPARE_EQ
-	}
-	aMainVersionStr := strings.Split(mainVersion, ".")
-	aCompareVersionStr := strings.Split(compareVersion, ".")
-	laMainVersionStr := len(aMainVersionStr)
-	laCompareVersionStr := len(aCompareVersionStr)
-	shortLen := 0
-	if laMainVersionStr > laCompareVersionStr {
-		shortLen = laCompareVersionStr
-	} else {
-		shortLen = laMainVersionStr
-	}
-
-	// 比对每个次版本
-	for i := 0; i < shortLen; i++ {
-		mainSubVersion, _ := strconv.ParseInt(aMainVersionStr[i], 10, 64)
-		compareSubVersion, _ := strconv.ParseInt(aCompareVersionStr[i], 10, 64)
-		if mainSubVersion > compareSubVersion {
-			return constant.COMPARE_GT
-		} else if mainSubVersion < compareSubVersion {
-			return constant.COMPARE_LT
-		}
-	}
-	// 比对最小版本
-	if laMainVersionStr > laCompareVersionStr {
-		return constant.COMPARE_GT
-	} else if laMainVersionStr < laCompareVersionStr {
-		return constant.COMPARE_LT
-	}
-
-	return constant.COMPARE_EQ
 }
 
 // 是否是UTF8编码
@@ -234,7 +168,7 @@ func IsUTF8(data []byte) bool {
 }
 
 // UTF8转GBK
-func UTF82GBK(data []byte) ([]byte, error)  {
+func UTF82GBK(data []byte) ([]byte, error) {
 	if result, err := simplifiedchinese.GBK.NewEncoder().Bytes(data); err != nil {
 		return data, err
 	} else {
@@ -243,23 +177,11 @@ func UTF82GBK(data []byte) ([]byte, error)  {
 }
 
 // GBK转UTF8
-func GBK2UTF8(data []byte) ([]byte, error)  {
+func GBK2UTF8(data []byte) ([]byte, error) {
 	if result, err := simplifiedchinese.GBK.NewDecoder().Bytes(data); err != nil {
 		return data, err
 	} else {
 		return result, nil
-	}
-}
-
-// 获取cmd命令数组
-func GetCommandArr(memory int, runPath string) []string {
-	return []string{
-		"java",
-		"-jar",
-		fmt.Sprintf("-Xmx%dM", memory),
-		fmt.Sprintf("-Xms%dM", memory),
-		runPath,
-		"nogui",
 	}
 }
 

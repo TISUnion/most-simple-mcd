@@ -10,7 +10,7 @@ var (
 import (
 	"github.com/TISUnion/most-simple-mcd/interface/plugin"
 	"github.com/TISUnion/most-simple-mcd/interface/server"
-	json_struct "github.com/TISUnion/most-simple-mcd/json-struct"
+	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/TISUnion/most-simple-mcd/modules"
 	"github.com/TISUnion/most-simple-mcd/utils"
 	uuid "github.com/satori/go.uuid"
@@ -68,12 +68,11 @@ func (p *{{.ENName}}Plugin) Start()              {}
 func (p *{{.ENName}}Plugin) Stop()               {}
 /* --------------------------------------------- */
 
-func (p *{{.ENName}}Plugin) HandleMessage(message *json_struct.ReciveMessage) {
-	if message.Player == "" {
+func (p *{{.ENName}}Plugin) HandleMessage(message *models.ReciveMessage) {
+	if !message.IsPlayer {
 		return
 	}
-	com := utils.ParsePluginCommand(message.Speak)
-	if com.Command != pluginCommand {
+	if message.Command != pluginCommand {
 		return
 	}
 	{{if .IsGlobal}}
@@ -82,14 +81,14 @@ func (p *{{.ENName}}Plugin) HandleMessage(message *json_struct.ReciveMessage) {
     	return
     }
     {{end}}
-	if len(com.Params) == 0 {
+	if len(message.Params) == 0 {
 		_ = {{if .IsGlobal}}mcServer{{else}}p.mcServer{{end}}.TellrawCommand(message.Player, helpDescription)
 	} else {
-        p.paramsHandle(message.Player, com{{if .IsGlobal}}, mcServer{{end}})
+        p.paramsHandle(message.Player, message{{if .IsGlobal}}, mcServer{{end}})
 	}
 }
 
-func (p *{{.ENName}}Plugin) paramsHandle(player string, pc *json_struct.PluginCommand{{if .IsGlobal}}, mcServer server.MinecraftServer{{end}}) {
+func (p *{{.ENName}}Plugin) paramsHandle(player string, pc *models.ReciveMessage{{if .IsGlobal}}, mcServer server.MinecraftServer{{end}}) {
     switch pc.Params[0] {
     // write code...
     default:

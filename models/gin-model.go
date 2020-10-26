@@ -1,4 +1,4 @@
-package json_struct
+package models
 
 // 用户信息
 type AdminUser struct {
@@ -26,11 +26,11 @@ type Config struct {
 }
 
 // 配置信息
-type ConfParam struct {
+type  ConfParam struct {
 	ConfVal        string `json:"config_val"`
 	DefaultConfVal string `json:"-"`
 	Name           string `json:"config_key"`
-	Level          int    `json:"level"`
+	Level          int64    `json:"level"`
 	Description    string `json:"description"`
 	IsAlterable    bool   `json:"is_alterable"`
 }
@@ -40,7 +40,7 @@ type Command struct {
 	Command string `json:"command"`
 
 	// 1：插件运行命令  2：服务端运行命令   3：插件、服务端都运行
-	Type int `json:"type"`
+	Type int64 `json:"type"`
 }
 
 // 运行一条命令
@@ -48,7 +48,7 @@ type SingleCommand struct {
 	Command  string `json:"command"`
 	ServerId string `json:"id"`
 	// 1：插件运行命令  2：服务端运行命令   3：插件、服务端都运行
-	Type int `json:"type"`
+	Type int64 `json:"type"`
 }
 
 type MonitorMessage struct {
