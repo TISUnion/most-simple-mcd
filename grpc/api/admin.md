@@ -6,6 +6,7 @@
 - [/most.simple.mcd.Admin/getLog](#mostsimplemcdadmingetlog)  获取服务端日志
 - [/most.simple.mcd.Admin/delTmpFlie](#mostsimplemcdadmindeltmpflie)  删除临时文件
 - [/most.simple.mcd.Admin/addUpToContainer](#mostsimplemcdadminadduptocontainer)  获取上传服务端文件，并注入到容器中
+- [/most.simple.mcd.Admin/UpMapToMcServer](#mostsimplemcdadminupmaptomcserver)  获取地图信息，并覆盖到对应服务端
 - [/most.simple.mcd.Admin/closeMcd](#mostsimplemcdadminclosemcd)  关闭mcd
 
 ##/most.simple.mcd.Admin/getConfig
@@ -234,6 +235,29 @@
 
 ##/most.simple.mcd.Admin/addUpToContainer
 ### 获取上传服务端文件，并注入到容器中
+
+#### 方法：GRPC
+
+#### 请求参数
+
+
+
+#### 响应
+
+```javascript
+{
+    "code": 0,
+    "message": "ok",
+    "data": 
+    {
+    }
+
+}
+```
+
+
+##/most.simple.mcd.Admin/UpMapToMcServer
+### 获取地图信息，并覆盖到对应服务端
 
 #### 方法：GRPC
 

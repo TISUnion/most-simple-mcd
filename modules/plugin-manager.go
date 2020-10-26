@@ -17,7 +17,7 @@ type PluginManager struct {
 	// mc服务端
 	mcServ server.MinecraftServer
 	// 锁
-	lock *sync.Mutex
+	lock sync.Locker
 }
 
 func (m *PluginManager) ChangeConfCallBack() {
@@ -28,7 +28,7 @@ func (m *PluginManager) DestructCallBack() {
 
 func (m *PluginManager) InitCallBack() {
 	m.disablePlugins = make(map[string]plugin_interface.Plugin)
-	m.lock = &sync.Mutex{}
+	m.lock = GetLock()
 }
 
 func (m *PluginManager) GetAblePlugins() map[string]plugin_interface.Plugin {

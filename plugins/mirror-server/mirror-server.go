@@ -40,7 +40,7 @@ type MirrorServerPlugin struct {
 	// 通知保存完成管道
 	savedChan chan struct{}
 	id        string
-	lock      *sync.Mutex
+	lock      sync.Locker
 }
 
 func (p *MirrorServerPlugin) GetDescription() string {
@@ -78,7 +78,7 @@ func (p *MirrorServerPlugin) InitCallBack() {
 	p.mcSaveState = make(map[string]bool)
 	stateMap = make(map[int64]string)
 	p.savedChan = make(chan struct{})
-	p.lock = &sync.Mutex{}
+	p.lock = modules.GetLock()
 	// 0.未启动 1.启动  -1.正在启动 -2.正在关闭
 	stateMap[constant.MC_STATE_STOP] = "未启动"
 	stateMap[constant.MC_STATE_START] = "启动"

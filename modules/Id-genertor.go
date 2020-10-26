@@ -1,10 +1,8 @@
 package modules
 
-import "sync"
-
 var (
 	increateId = 1
-	idLock     = &sync.Mutex{}
+	idLock     = GetLock()
 )
 
 // 全局唯一id生成器

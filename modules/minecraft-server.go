@@ -51,7 +51,7 @@ type MinecraftServer struct {
 
 	// lock
 	// 输入管道同步锁
-	lock *sync.Mutex
+	lock sync.Locker
 
 	// messageChan
 	// 玩家发言存储chan
@@ -621,7 +621,7 @@ func (m *MinecraftServer) initLocalIps() {
 func NewMinecraftServer(serverConf *models.ServerConf) server.MinecraftServer {
 	minecraftServer := &MinecraftServer{
 		ServerConf:    serverConf,
-		lock:          &sync.Mutex{},
+		lock:          GetLock(),
 		messageChan:   make(chan string, 10),
 		logger:        AddLog(serverConf.EntryId),
 		ServerAdapter: &ServerAdapter{side: serverConf.Side},

@@ -27,6 +27,7 @@ var PathAdminRunCommand = "/most.simple.mcd.Admin/runCommand"
 var PathAdminGetLog = "/most.simple.mcd.Admin/getLog"
 var PathAdminDelTmpFlie = "/most.simple.mcd.Admin/delTmpFlie"
 var PathAdminAddUpToContainer = "/most.simple.mcd.Admin/addUpToContainer"
+var PathAdminUpMapToMcServer = "/most.simple.mcd.Admin/UpMapToMcServer"
 var PathAdminCloseMcd = "/most.simple.mcd.Admin/closeMcd"
 
 // AdminGinServer is the server API for Admin service.
@@ -54,6 +55,9 @@ type AdminGinServer interface {
 
 	// 获取上传服务端文件，并注入到容器中
 	AddUpToContainer(ctx context.Context, req *AddUpToContainerReq) (resp *AddUpToContainerResp, err error)
+
+	// 获取地图信息，并覆盖到对应服务端
+	UpMapToMcServer(ctx context.Context, req *AddUpToContainerReq) (resp *AddUpToContainerResp, err error)
 
 	// 关闭mcd
 	CloseMcd(ctx context.Context, req *CloseMcdReq) (resp *CloseMcdResp, err error)
@@ -180,6 +184,18 @@ func addUpToContainer(c *gin.Context) {
 	c.JSON(http.StatusOK, getAdminResponse(c, resp))
 }
 
+func UpMapToMcServer(c *gin.Context) {
+	p := new(AddUpToContainerReq)
+	resp, err := apiAdminSvc.UpMapToMcServer(c, p)
+	if err != nil {
+		c.Set("code", -500)
+		c.Set("message", err.Error())
+		c.JSON(http.StatusOK, getAdminResponse(c, nil))
+		return
+	}
+	c.JSON(http.StatusOK, getAdminResponse(c, resp))
+}
+
 func closeMcd(c *gin.Context) {
 	p := new(CloseMcdReq)
 	resp, err := apiAdminSvc.CloseMcd(c, p)
@@ -202,6 +218,7 @@ func RegisterAdminAdminGinServer(e *gin.Engine, server AdminGinServer) {
 	e.Handle("POST", PathAdminGetLog, handleAdminAuthMiddleware, getLog)
 	e.Handle("POST", PathAdminDelTmpFlie, handleAdminAuthMiddleware, delTmpFlie)
 	e.Handle("POST", PathAdminAddUpToContainer, handleAdminAuthMiddleware, addUpToContainer)
+	e.Handle("POST", PathAdminUpMapToMcServer, handleAdminAuthMiddleware, UpMapToMcServer)
 	e.Handle("POST", PathAdminCloseMcd, handleAdminAuthMiddleware, closeMcd)
 }
 

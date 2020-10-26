@@ -19,14 +19,22 @@ import (
 type AdminService struct {
 }
 
-func (a *AdminService) GetLog(ctx context.Context, req *api.GetLogReq) (resp *api.GetLogResp, err error) {
+func (a *AdminService) UpMapToMcServer(ctx context.Context, _ *api.AddUpToContainerReq) (resp *api.AddUpToContainerResp, err error) {
+	if ginCtx, ok := ctx.(*gin.Context); ok {
+		err = a._upMapToMcServer(ginCtx)
+	}
+	resp = new(api.AddUpToContainerResp)
+	return
+}
+
+func (a *AdminService) GetLog(ctx context.Context, _ *api.GetLogReq) (resp *api.GetLogResp, err error) {
 	if ginCtx, ok := ctx.(*gin.Context); ok {
 		a._getLog(ginCtx)
 	}
 	return
 }
 
-func (a *AdminService) AddUpToContainer(ctx context.Context, req *api.AddUpToContainerReq) (resp *api.AddUpToContainerResp, err error) {
+func (a *AdminService) AddUpToContainer(ctx context.Context, _ *api.AddUpToContainerReq) (resp *api.AddUpToContainerResp, err error) {
 	if ginCtx, ok := ctx.(*gin.Context); ok {
 		err = a._addUpToContainer(ginCtx)
 	}
@@ -34,19 +42,16 @@ func (a *AdminService) AddUpToContainer(ctx context.Context, req *api.AddUpToCon
 	return
 }
 
-func (a *AdminService) GetConfig(ctx context.Context, req *api.GetConfigReq) (resp *api.GetConfigResp, err error) {
+func (a *AdminService) GetConfig(context.Context, *api.GetConfigReq) (resp *api.GetConfigResp, err error) {
 	confs := a._getConfig()
 	list := make([]*api.GetConfigResp_Record, 0)
 	for _, c := range confs {
 		list = append(list, &api.GetConfigResp_Record{
-			ConfVal:              c.ConfVal,
-			Name:                 c.Name,
-			Level:                c.Level,
-			Description:          c.Description,
-			IsAlterable:          c.IsAlterable,
-			XXX_NoUnkeyedLiteral: struct{}{},
-			XXX_unrecognized:     nil,
-			XXX_sizecache:        0,
+			ConfVal:     c.ConfVal,
+			Name:        c.Name,
+			Level:       c.Level,
+			Description: c.Description,
+			IsAlterable: c.IsAlterable,
 		})
 	}
 	resp = &api.GetConfigResp{
@@ -55,7 +60,7 @@ func (a *AdminService) GetConfig(ctx context.Context, req *api.GetConfigReq) (re
 	return
 }
 
-func (a *AdminService) UpdateConfig(ctx context.Context, req *api.UpdateConfigReq) (resp *api.UpdateConfigResp, err error) {
+func (a *AdminService) UpdateConfig(_ context.Context, req *api.UpdateConfigReq) (resp *api.UpdateConfigResp, err error) {
 	confs := make([]*models.ConfParam, 0)
 	for _, reqC := range req.List {
 		confs = append(confs, &models.ConfParam{
@@ -71,13 +76,13 @@ func (a *AdminService) UpdateConfig(ctx context.Context, req *api.UpdateConfigRe
 	return
 }
 
-func (a *AdminService) OperatePlugin(ctx context.Context, req *api.OperatePluginReq) (resp *api.OperatePluginResp, err error) {
+func (a *AdminService) OperatePlugin(_ context.Context, req *api.OperatePluginReq) (resp *api.OperatePluginResp, err error) {
 	resp = new(api.OperatePluginResp)
 	err = a._operatePlugin(req.ServerId, req.PluginId, req.OperateType)
 	return
 }
 
-func (a *AdminService) GetConfigVal(ctx context.Context, req *api.GetConfigValReq) (resp *api.GetConfigValResp, err error) {
+func (a *AdminService) GetConfigVal(_ context.Context, req *api.GetConfigValReq) (resp *api.GetConfigValResp, err error) {
 	conf, e := a._getConfigVal(req.Name)
 	err = e
 	if e == nil {
@@ -92,19 +97,19 @@ func (a *AdminService) GetConfigVal(ctx context.Context, req *api.GetConfigValRe
 	return
 }
 
-func (a *AdminService) RunCommand(ctx context.Context, req *api.RunCommandReq) (resp *api.RunCommandResp, err error) {
+func (a *AdminService) RunCommand(_ context.Context, req *api.RunCommandReq) (resp *api.RunCommandResp, err error) {
 	err = a._runCommand(req.Command, req.ServerId, req.Type)
 	resp = new(api.RunCommandResp)
 	return
 }
 
-func (a *AdminService) DelTmpFlie(ctx context.Context, req *api.DelTmpFlieReq) (resp *api.DelTmpFlieResp, err error) {
+func (a *AdminService) DelTmpFlie(context.Context, *api.DelTmpFlieReq) (resp *api.DelTmpFlieResp, err error) {
 	err = a._delTmpFlie()
 	resp = new(api.DelTmpFlieResp)
 	return
 }
 
-func (a *AdminService) CloseMcd(ctx context.Context, req *api.CloseMcdReq) (resp *api.CloseMcdResp, err error) {
+func (a *AdminService) CloseMcd(context.Context, *api.CloseMcdReq) (resp *api.CloseMcdResp, err error) {
 	resp = new(api.CloseMcdResp)
 	a._closeMcd()
 	return
@@ -142,24 +147,17 @@ func (a *AdminService) _getLog(ginCtx *gin.Context) {
 }
 
 func (a *AdminService) _addUpToContainer(c *gin.Context) error {
-	header, err := c.FormFile(constant.UPLOAD_FILE_NAME)
+	filename, dst, err := a.getUploadFile(c)
 	if err != nil {
-		modules.WriteLogToDefault(constant.PARSE_FILE_ERROR+err.Error(), constant.LOG_ERROR)
-		return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
+		return err
 	}
-
-	dst := filepath.Join(modules.GetConfVal(constant.TMP_PATH), header.Filename)
-	if err := c.SaveUploadedFile(header, dst); err != nil {
-		modules.WriteLogToDefault(constant.COPY_FILE_ERROR+err.Error(), constant.LOG_ERROR)
-		return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
-	}
-	ext := filepath.Ext(header.Filename)
+	ext := filepath.Ext(filename)
 	if ext != constant.JAR_SUF {
 		return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
 	}
 	ctr := modules.GetMinecraftServerContainerInstance()
 	port, _ := strconv.ParseInt(c.DefaultPostForm(constant.UPLOAD_PORT_TEXT, strconv.Itoa(constant.MC_DEFAULT_PORT)), 10, 64)
-	name := c.DefaultPostForm(constant.UPLOAD_NAME_TEXT, header.Filename)
+	name := c.DefaultPostForm(constant.UPLOAD_NAME_TEXT, filename)
 	memory, _ := strconv.ParseInt(c.DefaultPostForm(constant.UPLOAD_MEMORY_TEXT, strconv.Itoa(constant.MC_DEFAULT_MEMORY)), 10, 64)
 	if memory == 0 {
 		memory = constant.MC_DEFAULT_MEMORY
@@ -229,7 +227,7 @@ func (a *AdminService) _runCommand(command, serverId string, type_ int64) error 
 func (a *AdminService) _delTmpFlie() error {
 	err := os.RemoveAll(modules.GetConfVal(constant.TMP_PATH))
 	// 创建tmp目录
-	utils.CreatDir(modules.GetConfVal(constant.TMP_PATH))
+	_ = utils.CreatDir(modules.GetConfVal(constant.TMP_PATH))
 	if err != nil {
 		modules.WriteLogToDefault(err.Error(), constant.LOG_ERROR)
 		return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
@@ -239,4 +237,46 @@ func (a *AdminService) _delTmpFlie() error {
 
 func (a *AdminService) _closeMcd() {
 	modules.SendExitSign()
+}
+
+// TODO
+func (a *AdminService) _upMapToMcServer(c *gin.Context) error {
+	panic("")
+	//filename, dst, err := a.getUploadFile(c)
+	//if err != nil {
+	//	return err
+	//}
+	//ext := filepath.Ext(filename)
+	//if ext != constant.ZIP_SUF {
+	//	return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
+	//}
+	//ctr := modules.GetMinecraftServerContainerInstance()
+	//id := c.DefaultPostForm(constant.UPLOAD_ID_TEXT, "")
+	//if id == "" {
+	//	return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
+	//}
+	//srv, err := ctr.GetServerById(id)
+	//if err != nil {
+	//	return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
+	//}
+	//if srv.GetServerConf().State != constant.MC_SERVER_STOP {
+	//	return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
+	//}
+}
+
+func (a *AdminService) getUploadFile(c *gin.Context) (filename, dst string, err error) {
+	header, err := c.FormFile(constant.UPLOAD_FILE_NAME)
+	if err != nil {
+		modules.WriteLogToDefault(constant.PARSE_FILE_ERROR+err.Error(), constant.LOG_ERROR)
+		err = errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
+		return
+	}
+	dst = filepath.Join(modules.GetConfVal(constant.TMP_PATH), header.Filename)
+	if err := c.SaveUploadedFile(header, dst); err != nil {
+		modules.WriteLogToDefault(constant.COPY_FILE_ERROR+err.Error(), constant.LOG_ERROR)
+		err = errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
+		return
+	}
+	filename = header.Filename
+	return
 }

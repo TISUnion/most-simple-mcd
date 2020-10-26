@@ -21,7 +21,7 @@ type LogContainer struct {
 	NameIdMapping   map[string]int
 	Logs            map[int]*Log
 	LogDir          string
-	lock            *sync.Mutex
+	lock            sync.Locker
 	logSaveInterval string
 }
 
@@ -176,7 +176,7 @@ func GetLogContainerInstance() container.LogContainer {
 		NameIdMapping:   make(map[string]int),
 		Logs:            make(map[int]*Log),
 		LogDir:          GetConfVal(constant.LOG_PATH),
-		lock:            &sync.Mutex{},
+		lock:            GetLock(),
 		logSaveInterval: GetConfVal(constant.LOG_SAVE_INTERVAL),
 	}
 	// 注册回调

@@ -22,7 +22,7 @@ type MonitorServer struct {
 	serverPid   int
 	processObj  *process.Process
 	jobName     string
-	lock        *sync.Mutex
+	lock        sync.Locker
 }
 
 func (m *MonitorServer) GetMessageChan() chan *models.MonitorMessage {
@@ -113,7 +113,7 @@ func NewMonitorServer(id string, pid int) server.MonitorServer {
 		serverId:    id,
 		serverPid:   pid,
 		jobName:     fmt.Sprintf("monitor:%d", id),
-		lock:        &sync.Mutex{},
+		lock:        GetLock(),
 	}
 	return ms
 }

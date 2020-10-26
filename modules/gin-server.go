@@ -23,12 +23,12 @@ type GinServer struct {
 	router              *gin.Engine
 	httpServer          *http.Server
 	port                int
-	lock                *sync.Mutex
+	lock                sync.Locker
 	resourceWsPool      map[string][]*websocket.Conn
 	stdoutWsPool        map[string][]*websocket.Conn
 	stdoutChans         map[string]chan *models.ReciveMessage
-	lockeResourceWsPool *sync.Mutex
-	lockeStdoutWsPool   *sync.Mutex
+	lockeResourceWsPool sync.Locker
+	lockeStdoutWsPool   sync.Locker
 }
 
 func (g *GinServer) GetRouter() *gin.Engine {
@@ -239,9 +239,9 @@ func GetGinServerInstance() server.GinServer {
 		router:              router,
 		httpServer:          httpServer,
 		port:                port,
-		lock:                &sync.Mutex{},
-		lockeResourceWsPool: &sync.Mutex{},
-		lockeStdoutWsPool:   &sync.Mutex{},
+		lock:                GetLock(),
+		lockeResourceWsPool: GetLock(),
+		lockeStdoutWsPool:   GetLock(),
 	}
 	RegisterCallBack(ginServerInstance)
 	return ginServerInstance

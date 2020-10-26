@@ -16,7 +16,7 @@ type PluginContainer struct {
 	plugins map[string]plugin_interface.Plugin
 
 	// 锁
-	lock *sync.Mutex
+	lock sync.Locker
 
 	// 插件管理器（动态增加插件）
 	managers []plugin_interface.PluginManager
@@ -32,7 +32,7 @@ func (c *PluginContainer) InitCallBack() {
 	c.globalPlugins = make(map[string]plugin_interface.Plugin)
 	c.plugins = make(map[string]plugin_interface.Plugin)
 	c.managers = make([]plugin_interface.PluginManager, 0)
-	c.lock = &sync.Mutex{}
+	c.lock = GetLock()
 }
 
 func (c *PluginContainer) RegisterPlugin(p plugin_interface.Plugin) {

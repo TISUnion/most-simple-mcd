@@ -36,7 +36,7 @@ type MinecraftServerContainer struct {
 	stopServers map[string]server.MinecraftServer
 
 	// 操作锁
-	lock *sync.Mutex
+	lock sync.Locker
 
 	// 各时间段的回调
 	mcCallbacks map[string][]func(string)
@@ -399,7 +399,7 @@ func GetMinecraftServerContainerInstance() container.MinecraftContainer {
 		minecraftServers: make(map[string]server.MinecraftServer),
 		startServers:     make(map[string]server.MinecraftServer),
 		stopServers:      make(map[string]server.MinecraftServer),
-		lock:             &sync.Mutex{},
+		lock:             GetLock(),
 	}
 	RegisterCallBack(minecraftServerContainer)
 	return minecraftServerContainer

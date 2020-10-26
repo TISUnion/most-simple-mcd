@@ -8,11 +8,10 @@ import (
 	"github.com/dgraph-io/badger"
 	"github.com/dgraph-io/badger/options"
 	"path/filepath"
-	"sync"
 	"time"
 )
 
-var lock = &sync.Mutex{}
+var lock = GetLock()
 
 type DataBase struct {
 	badgerDb *badger.DB

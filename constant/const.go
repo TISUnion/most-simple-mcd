@@ -126,6 +126,7 @@ const (
 	LOG_TYPE_DEFAULT = "3"
 
 	JAR_SUF           = ".jar"
+	ZIP_SUF           = ".zip"
 	TOKEN_HEADER_NAME = "X-Token"
 )
 
@@ -143,6 +144,7 @@ const (
 	UPLOAD_PORT_TEXT                = "port"
 	UPLOAD_MEMORY_TEXT              = "memory"
 	UPLOAD_NAME_TEXT                = "name"
+	UPLOAD_ID_TEXT                  = "id"
 	UPLOAD_SIDE_TEXT                = "side"
 	UPLOAD_COMMENT_TEXT             = "comment"
 

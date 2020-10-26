@@ -33,7 +33,7 @@ type Conf struct {
 
 	// lock
 	// 读写锁
-	lock *sync.Mutex
+	lock sync.Locker
 }
 
 func (c *Conf) GetConfigObj() map[string]*models.ConfParam {
@@ -267,7 +267,7 @@ func GetConfInstance() _interface.Conf {
 		return _appConf
 	}
 	_appConf = &Conf{
-		lock:     &sync.Mutex{},
+		lock:     GetLock(),
 		ConfKeys: make([]string, 0),
 		confs:    make(map[string]*models.ConfParam),
 	}

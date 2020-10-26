@@ -25,6 +25,9 @@ service Admin {
     // 获取上传服务端文件，并注入到容器中
     // `hasInput:"false"`
     rpc addUpToContainer (AddUpToContainerReq) returns (AddUpToContainerResp);
+    // 获取地图信息，并覆盖到对应服务端
+    // `hasInput:"false"`
+    rpc UpMapToMcServer (AddUpToContainerReq) returns (AddUpToContainerResp);
     // 关闭mcd
     // `hasInput:"false"`
     rpc closeMcd (CloseMcdReq) returns (CloseMcdResp);

@@ -21,7 +21,7 @@ type Log struct {
 	Level     int
 	WriteChan chan *_interface.LogMsgType
 	FileObj   *os.File
-	lock      *sync.Mutex // 文件锁：用于防止重新载入*os.file时，正在写入日志
+	lock      sync.Locker // 文件锁：用于防止重新载入*os.file时，正在写入日志
 }
 
 // 直接写入日志，不进行格式化
@@ -150,7 +150,7 @@ func (l *Log) InitFileObj() {
 }
 
 func (l *Log) Init() error {
-	l.lock = &sync.Mutex{}
+	l.lock = GetLock()
 	l.InitFileObj()
 	go l.writeToFile()
 	return nil

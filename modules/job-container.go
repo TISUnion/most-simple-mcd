@@ -18,7 +18,7 @@ type job struct {
 type JobContainer struct {
 	cron     *cron.Cron
 	jobs     map[string]*job
-	lock     *sync.Mutex
+	lock     sync.Locker
 	jobNames []string
 }
 
@@ -120,7 +120,7 @@ func GetJobContainerInstance() container.JobContainer {
 	JobContainerObj = &JobContainer{
 		cron:     jcron,
 		jobs:     make(map[string]*job),
-		lock:     &sync.Mutex{},
+		lock:     GetLock(),
 		jobNames: make([]string, 0),
 	}
 	// 注册回调
