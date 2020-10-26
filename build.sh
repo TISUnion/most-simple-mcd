@@ -4,7 +4,7 @@ git submodule update
 echo "---------------下载git子模块成功------------------"
 
 #安装前端依赖
-npm install ./web-admin
+npm install --prefix=./web-admin --registry=https://registry.npm.taobao.org
 echo "---------------安装前端依赖成功-------------------"
 
 #编译前端模块

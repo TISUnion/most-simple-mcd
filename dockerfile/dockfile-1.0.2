@@ -11,11 +11,11 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends g++ gcc libc6-dev make pkg-config wget xz-utils tar git python \
 
     #下载并解压node
-    && wget https://nodejs.org/dist/v15.0.1/node-v15.0.1-linux-x64.tar.xz --no-check-certificate \
-    && xz -d node-v15.0.1-linux-x64.tar.xz \
-    && tar xf node-v15.0.1-linux-x64.tar \
-    && rm node-v15.0.1-linux-x64.tar \
-    && mv node-v15.0.1-linux-x64 /node \
+    && wget https://nodejs.org/dist/v14.12.0/node-v14.12.0-linux-x64.tar.xz --no-check-certificate \
+    && xz -d node-v14.12.0-linux-x64.tar.xz \
+    && tar xf node-v14.12.0-linux-x64.tar \
+    && rm node-v14.12.0-linux-x64.tar \
+    && mv node-v14.12.0-linux-x64 /node \
 
     #下载并解压golang
     && wget https://dl.google.com/go/go1.14.10.linux-amd64.tar.gz --no-check-certificate \
@@ -40,7 +40,6 @@ RUN git config --global http.sslverify false \
     && git checkout 1.1.0-rc.1 \
     && git submodule init \
     && git submodule update \
-    && npm install ./web-admin --registry=https://registry.npm.taobao.org \
     && /bin/bash build.sh
 
 
