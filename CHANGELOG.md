@@ -32,9 +32,10 @@
 ## 1.0.2
 1. 修复在linux中对端口是否可用检测失败
 
-## 1.1.0-rc.1
+## 1.1.0
 1. 使用[protobuf插件](https://github.com/lightbrotherV/gin-protobuf)重写http接口
 2. 添加兼容不同版本服务端组件
 3. 添加服务端备注
 4. 将命令行模式拆分出来
 5. 插件兼容1.16+
+6. 添加dockerfile
