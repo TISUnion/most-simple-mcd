@@ -1,10 +1,14 @@
 package modules
 
-import "sync"
+import (
+	_interface "github.com/TISUnion/most-simple-mcd/interface"
+	"sync"
+)
 
 type Lock struct {
-	lock   sync.Locker
-	isLock bool
+	lock    sync.Locker
+	isLock  bool
+	message string
 }
 
 func (l *Lock) IsLock() bool {
@@ -21,8 +25,20 @@ func (l *Lock) Unlock() {
 	l.isLock = false
 }
 
-func GetLock() sync.Locker {
+func (l *Lock) LockWithMessage(msg string) {
+	l.Lock()
+	l.message = msg
+}
+
+func (l *Lock) GetLockMessage() (msg string) {
+	if l.isLock {
+		msg = l.message
+	}
+	return
+}
+
+func GetLock() _interface.Lock {
 	return &Lock{
-		lock:   GetLock(),
+		lock: GetLock(),
 	}
 }

@@ -16,7 +16,7 @@ import (
 type UserService struct {
 }
 
-func (u *UserService) Login(ctx context.Context, req *api.LoginReq) (resp *api.LoginResp, err error) {
+func (u *UserService) Login(_ context.Context, req *api.LoginReq) (resp *api.LoginResp, err error) {
 	token, e := u._login(req.Account, req.Password)
 	err = e
 	resp = &api.LoginResp{
@@ -25,13 +25,13 @@ func (u *UserService) Login(ctx context.Context, req *api.LoginReq) (resp *api.L
 	return
 }
 
-func (u *UserService) Logout(ctx context.Context, req *api.LogoutReq) (resp *api.LogoutResp, err error) {
+func (u *UserService) Logout( context.Context,  *api.LogoutReq) (resp *api.LogoutResp, err error) {
 	u._logout()
 	resp = new(api.LogoutResp)
 	return
 }
 
-func (u *UserService) Info(ctx context.Context, req *api.InfoReq) (resp *api.InfoResp, err error) {
+func (u *UserService) Info( context.Context,  *api.InfoReq) (resp *api.InfoResp, err error) {
 	userModel := u._info()
 	resp = &api.InfoResp{
 		Account:  userModel.Account,
@@ -43,7 +43,7 @@ func (u *UserService) Info(ctx context.Context, req *api.InfoReq) (resp *api.Inf
 	return
 }
 
-func (u *UserService) Update(ctx context.Context, req *api.UpdateReq) (resp *api.UpdateResp, err error) {
+func (u *UserService) Update(_ context.Context, req *api.UpdateReq) (resp *api.UpdateResp, err error) {
 	err = u._update(&models.AdminUser{
 		Nickname: req.Nickname,
 		Account:  req.Account,

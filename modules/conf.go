@@ -31,9 +31,9 @@ type Conf struct {
 	// 所有配置键值
 	ConfKeys []string
 
-	// lock
+	// ioLock
 	// 读写锁
-	lock sync.Locker
+	ioLock sync.Locker
 }
 
 func (c *Conf) GetConfigObj() map[string]*models.ConfParam {
@@ -112,8 +112,8 @@ func (c *Conf) loadFilePath(terminalConfs map[string]string) {
 // reloadConfig
 // 重新再加配置
 func (c *Conf) ReloadConfig() {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.ioLock.Lock()
+	defer c.ioLock.Unlock()
 	// 加载配置文件
 	c.loadFileConf()
 	// 加载环境变量
@@ -185,8 +185,8 @@ func (c *Conf) GetConfVal(key string) string {
 
 func (c *Conf) Init(terminalConfs map[string]string) {
 
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.ioLock.Lock()
+	defer c.ioLock.Unlock()
 
 	// 加载文件配置文件路径
 	c.loadFilePath(terminalConfs)
@@ -267,7 +267,7 @@ func GetConfInstance() _interface.Conf {
 		return _appConf
 	}
 	_appConf = &Conf{
-		lock:     GetLock(),
+		ioLock:   GetLock(),
 		ConfKeys: make([]string, 0),
 		confs:    make(map[string]*models.ConfParam),
 	}

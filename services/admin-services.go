@@ -239,29 +239,27 @@ func (a *AdminService) _closeMcd() {
 	modules.SendExitSign()
 }
 
-// TODO
 func (a *AdminService) _upMapToMcServer(c *gin.Context) error {
-	panic("")
-	//filename, dst, err := a.getUploadFile(c)
-	//if err != nil {
-	//	return err
-	//}
-	//ext := filepath.Ext(filename)
-	//if ext != constant.ZIP_SUF {
-	//	return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
-	//}
-	//ctr := modules.GetMinecraftServerContainerInstance()
-	//id := c.DefaultPostForm(constant.UPLOAD_ID_TEXT, "")
-	//if id == "" {
-	//	return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
-	//}
-	//srv, err := ctr.GetServerById(id)
-	//if err != nil {
-	//	return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
-	//}
-	//if srv.GetServerConf().State != constant.MC_SERVER_STOP {
-	//	return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
-	//}
+	filename, dst, err := a.getUploadFile(c)
+	if err != nil {
+		return err
+	}
+	ext := filepath.Ext(filename)
+	if ext != constant.ZIP_SUF {
+		return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
+	}
+	ctr := modules.GetMinecraftServerContainerInstance()
+	id := c.DefaultPostForm(constant.UPLOAD_ID_TEXT, "")
+	if id == "" {
+		return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
+	}
+	srv, err := ctr.GetServerById(id)
+	if err != nil {
+		return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
+	}
+	if srv.GetServerConf().State != constant.MC_SERVER_STOP {
+		return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
+	}
 }
 
 func (a *AdminService) getUploadFile(c *gin.Context) (filename, dst string, err error) {

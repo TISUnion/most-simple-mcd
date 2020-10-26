@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	PORT_REPEAT_ERROR = errors.New("服务器端口已被其他程序占用，请更换端口或者开启自动更换端口")
+	PORT_REPEAT_ERROR      = errors.New("服务器端口已被其他程序占用，请更换端口或者开启自动更换端口")
 	SEFVER_NOT_START_ERROR = errors.New("服务器未开启")
 )
 
@@ -33,31 +33,27 @@ type MinecraftServer struct {
 
 	*ServerAdapter
 
-	// CmdObj
 	//子进程实例
 	CmdObj *exec.Cmd
 
-	// stdin
 	// 用于关闭输入管道
 	stdin io.WriteCloser
 
-	// stdout
 	// 子进程输出
 	stdout io.ReadCloser
 
-	// Pid
 	// 进程pid
 	Pid int
 
-	// lock
 	// 输入管道同步锁
-	lock sync.Locker
+	ioLock sync.Locker
 
-	// messageChan
+	// 服务端同步锁，锁住整个服务端
+	srvLock _interface.Lock
+
 	// 玩家发言存储chan
 	messageChan chan string
 
-	// MonitorServer
 	// 资源监听器
 	monitorServer server.MonitorServer
 
@@ -67,7 +63,6 @@ type MinecraftServer struct {
 	// 接收关闭服务器信号管道
 	stopTagChan chan struct{}
 
-	// Logger
 	// 服务端对应日志
 	logger _interface.Log
 
@@ -85,10 +80,16 @@ type MinecraftServer struct {
 }
 
 func (m *MinecraftServer) BanPlugin(pluginId string) {
+	if m.srvLock.IsLock() {
+		return
+	}
 	m.pluginManager.BanPlugin(pluginId)
 }
 
 func (m *MinecraftServer) UnbanPlugin(pluginId string) {
+	if m.srvLock.IsLock() {
+		return
+	}
 	m.pluginManager.UnbanPlugin(pluginId)
 }
 
@@ -121,8 +122,8 @@ func (m *MinecraftServer) GetPluginsInfo() []*models.PluginInfo {
 }
 
 func (m *MinecraftServer) RegisterSubscribeMessageChan(c chan *models.ReciveMessage) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
+	m.ioLock.Lock()
+	defer m.ioLock.Unlock()
 
 	m.subscribeMessageChans = append(m.subscribeMessageChans, c)
 }
@@ -155,16 +156,25 @@ func (m *MinecraftServer) GetServerConf() *models.ServerConf {
 }
 
 func (m *MinecraftServer) SetServerConf(c *models.ServerConf) {
+	if m.srvLock.IsLock() {
+		return
+	}
 	m.ServerConf = c
 }
 
 func (m *MinecraftServer) SetMemory(memory int64) {
+	if m.srvLock.IsLock() {
+		return
+	}
 	if memory > 0 {
 		m.Memory = memory
 	}
 }
 
 func (m *MinecraftServer) Rename(name string) {
+	if m.srvLock.IsLock() {
+		return
+	}
 	if name != "" {
 		m.Name = name
 	}
@@ -191,20 +201,20 @@ func (m *MinecraftServer) DestructCallBack() {
 }
 
 func (m *MinecraftServer) RegisterCloseCallback(c func(string)) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
+	m.ioLock.Lock()
+	defer m.ioLock.Unlock()
 	m.mcCloseCallback = append(m.mcCloseCallback, c)
 }
 
 func (m *MinecraftServer) RegisterOpenCallback(c func(string)) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
+	m.ioLock.Lock()
+	defer m.ioLock.Unlock()
 	m.mcOpenCallback = append(m.mcOpenCallback, c)
 }
 
 func (m *MinecraftServer) RegisterSaveCallback(c func(string)) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
+	m.ioLock.Lock()
+	defer m.ioLock.Unlock()
 	m.mcSaveCallback = append(m.mcSaveCallback, c)
 }
 
@@ -237,8 +247,11 @@ func (m *MinecraftServer) runProcess() error {
 }
 
 func (m *MinecraftServer) Start() error {
-	m.lock.Lock()
-	defer m.lock.Unlock()
+	if m.srvLock.IsLock() {
+		return errors.New(m.srvLock.GetLockMessage())
+	}
+	m.ioLock.Lock()
+	defer m.ioLock.Unlock()
 	// 重置cmd对象
 	m.resetParams()
 
@@ -255,8 +268,14 @@ func (m *MinecraftServer) Start() error {
 }
 
 func (m *MinecraftServer) Stop() error {
-	m.lock.Lock()
-	defer m.lock.Unlock()
+	if m.srvLock.IsLock() {
+		return errors.New(m.srvLock.GetLockMessage())
+	}
+	if m.srvLock.IsLock() {
+		return errors.New(m.srvLock.GetLockMessage())
+	}
+	m.ioLock.Lock()
+	defer m.ioLock.Unlock()
 	if m.State != constant.MC_STATE_START {
 		return nil
 	}
@@ -275,6 +294,9 @@ func (m *MinecraftServer) Stop() error {
 }
 
 func (m *MinecraftServer) Restart() error {
+	if m.srvLock.IsLock() {
+		return errors.New(m.srvLock.GetLockMessage())
+	}
 	if m.State == constant.MC_STATE_START {
 		if err := m.Stop(); err != nil {
 			return err
@@ -414,8 +436,11 @@ func (m *MinecraftServer) sureServerSave(data string) {
 }
 
 func (m *MinecraftServer) Command(c string) error {
-	m.lock.Lock()
-	defer m.lock.Unlock()
+	if m.srvLock.IsLock() {
+		return errors.New(m.srvLock.GetLockMessage())
+	}
+	m.ioLock.Lock()
+	defer m.ioLock.Unlock()
 	return m._command(c)
 }
 
@@ -437,6 +462,9 @@ func (m *MinecraftServer) _command(c string) error {
 }
 
 func (m *MinecraftServer) RunCommand(cmd string, params ...string) error {
+	if m.srvLock.IsLock() {
+		return errors.New(m.srvLock.GetLockMessage())
+	}
 	for _, param := range params {
 		cmd += fmt.Sprintf(" %s", param)
 	}
@@ -445,11 +473,17 @@ func (m *MinecraftServer) RunCommand(cmd string, params ...string) error {
 
 // 执行tell命令
 func (m *MinecraftServer) TellCommand(player string, msg string) error {
+	if m.srvLock.IsLock() {
+		return errors.New(m.srvLock.GetLockMessage())
+	}
 	return m.RunCommand("/tell", player, msg)
 }
 
 // 执行tellraw命令
 func (m *MinecraftServer) TellrawCommand(player string, msg interface{}) error {
+	if m.srvLock.IsLock() {
+		return errors.New(m.srvLock.GetLockMessage())
+	}
 	rawmsg := ""
 	switch msg.(type) {
 	case string:
@@ -464,6 +498,9 @@ func (m *MinecraftServer) TellrawCommand(player string, msg interface{}) error {
 }
 
 func (m *MinecraftServer) SayCommand(msg string) error {
+	if m.srvLock.IsLock() {
+		return errors.New(m.srvLock.GetLockMessage())
+	}
 	return m.RunCommand("/say", msg)
 }
 
@@ -621,7 +658,8 @@ func (m *MinecraftServer) initLocalIps() {
 func NewMinecraftServer(serverConf *models.ServerConf) server.MinecraftServer {
 	minecraftServer := &MinecraftServer{
 		ServerConf:    serverConf,
-		lock:          GetLock(),
+		ioLock:        GetLock(),
+		srvLock:       GetLock(),
 		messageChan:   make(chan string, 10),
 		logger:        AddLog(serverConf.EntryId),
 		ServerAdapter: &ServerAdapter{side: serverConf.Side},

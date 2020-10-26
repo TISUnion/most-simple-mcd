@@ -15,28 +15,28 @@ import (
 type ServerService struct {
 }
 
-func (s *ServerService) GetServerSide(ctx context.Context, req *api.GetServerSideReq) (resp *api.GetServerSideResp, err error) {
+func (s *ServerService) GetServerSide(context.Context, *api.GetServerSideReq) (resp *api.GetServerSideResp, err error) {
 	resp = &api.GetServerSideResp{
 		ServerSides: modules.GetAllServerSide(),
 	}
 	return
 }
 
-func (s *ServerService) ListenResource(ctx context.Context, req *api.ListenResourceReq) (resp *api.ListenResourceResp, err error) {
+func (s *ServerService) ListenResource(ctx context.Context, _ *api.ListenResourceReq) (resp *api.ListenResourceResp, err error) {
 	if ginCtx, ok := ctx.(*gin.Context); ok {
 		s._listenResource(ginCtx)
 	}
 	return
 }
 
-func (s *ServerService) ServerInteraction(ctx context.Context, req *api.ServerInteractionReq) (resp *api.ServerInteractionResp, err error) {
+func (s *ServerService) ServerInteraction(ctx context.Context, _ *api.ServerInteractionReq) (resp *api.ServerInteractionResp, err error) {
 	if ginCtx, ok := ctx.(*gin.Context); ok {
 		s._serverInteraction(ginCtx)
 	}
 	return
 }
 
-func (s *ServerService) List(ctx context.Context, req *api.ListReq) (resp *api.ListResp, err error) {
+func (s *ServerService) List(context.Context, *api.ListReq) (resp *api.ListResp, err error) {
 	list, e := s._list()
 	if e != nil {
 		err = e
@@ -66,7 +66,7 @@ func (s *ServerService) List(ctx context.Context, req *api.ListReq) (resp *api.L
 	}, nil
 }
 
-func (s *ServerService) GetServerState(ctx context.Context, req *api.GetServerStateReq) (resp *api.GetServerStateResp, err error) {
+func (s *ServerService) GetServerState(_ context.Context, req *api.GetServerStateReq) (resp *api.GetServerStateResp, err error) {
 	ste, e := s._getServerState(req.Id)
 	if e != nil {
 		err = e
@@ -78,7 +78,7 @@ func (s *ServerService) GetServerState(ctx context.Context, req *api.GetServerSt
 	return
 }
 
-func (s *ServerService) Detail(ctx context.Context, req *api.DetailReq) (resp *api.DetailResp, err error) {
+func (s *ServerService) Detail(_ context.Context, req *api.DetailReq) (resp *api.DetailResp, err error) {
 	sc, pls, e := s._detail(req.Id)
 	if e != nil {
 		err = e
@@ -115,13 +115,13 @@ func (s *ServerService) Detail(ctx context.Context, req *api.DetailReq) (resp *a
 	}, nil
 }
 
-func (s *ServerService) OperateServer(ctx context.Context, req *api.OperateServerReq) (resp *api.OperateServerResp, err error) {
-	s._operateServer(req.ServerId, req.OperateType)
+func (s *ServerService) OperateServer(_ context.Context, req *api.OperateServerReq) (resp *api.OperateServerResp, err error) {
+	err = s._operateServer(req.ServerId, req.OperateType)
 	resp = &api.OperateServerResp{}
 	return
 }
 
-func (s *ServerService) UpdateServerInfo(ctx context.Context, req *api.UpdateServerInfoReq) (resp *api.UpdateServerInfoResp, err error) {
+func (s *ServerService) UpdateServerInfo(_ context.Context, req *api.UpdateServerInfoReq) (resp *api.UpdateServerInfoResp, err error) {
 	reqModel := &models.ServerConf{
 		EntryId:        req.EntryId,
 		Name:           req.Name,
@@ -257,7 +257,7 @@ func (s *ServerService) _operateServer(serverIds []string, opType int64) error {
 			modules.WriteLogToDefault(errorFormat(err), constant.LOG_ERROR)
 		}
 	}
-	return nil
+	return err
 }
 
 func (s *ServerService) _updateServerInfo(reqModel *models.ServerConf) (err error) {
