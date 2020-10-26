@@ -26,6 +26,7 @@ RUN apt-get update \
 
 ENV GOROOT /go
 ENV GOPATH $SMCD_DIR/golang
+ENV GOPROXY https://goproxy.cn
 ENV PATH /node/bin:$GOROOT/bin:$PATH
 
 #创建golang目录
