@@ -42,7 +42,6 @@ WORKDIR $GOPATH/src
 #下载并编译smcd
 RUN git clone https://github.com/TISUnion/most-simple-mcd.git \
     && cd most-simple-mcd \
-    && git checkout 1.1.0-rc.1 \
     && git submodule init \
     && git submodule update \
     && /bin/bash build.sh
