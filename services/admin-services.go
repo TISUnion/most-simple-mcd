@@ -257,9 +257,48 @@ func (a *AdminService) _upMapToMcServer(c *gin.Context) error {
 	if err != nil {
 		return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
 	}
+	// 锁住服务端，防止后续操作时文件被锁住
+	srv.LockWithMessage("导入地图数据中")
+	// 保证导入时服务端为关闭状态
 	if srv.GetServerConf().State != constant.MC_SERVER_STOP {
+		srv.Unlock()
 		return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
 	}
+	go func() {
+		defer srv.Unlock()
+		uncompressFilepath := filepath.Join(constant.TMP_PATH, utils.GetRandomString(10))
+		err = utils.UnCompressDir(dst, uncompressFilepath)
+		if err != nil {
+			modules.WriteLogToDefault()
+			return
+		}
+		serverJarArr, err := filepath.Glob(uncompressFilepath + "/*.jar")
+		if err != nil || len(serverJarArr) > 1 {
+			return
+		}
+		// 如果上传文件提供了服务端，则使用上传服务端
+		if len(serverJarArr) == 1 {
+			serverJar := serverJarArr[0]
+			err := os.Rename(serverJar, filepath.Join(uncompressFilepath, srv.GetServerEntryId()+".jar"))
+			if err != nil {
+				return
+			}
+		}
+		// 删除日志
+		err = os.Remove(filepath.Join(uncompressFilepath, constant.LOG_DIR))
+		if err != nil {
+			return
+		}
+
+		// 循环转移 TODO
+		err = filepath.Walk(filepath.Join(modules.GetConfVal(constant.WORKSPACE), constant.MC_SERVER_DIR, srv.GetServerEntryId()), func(path string, info os.FileInfo, err error) error {
+			if utils.IsFile(path) {
+
+			}
+			return nil
+		})
+	}()
+	return nil
 }
 
 func (a *AdminService) getUploadFile(c *gin.Context) (filename, dst string, err error) {

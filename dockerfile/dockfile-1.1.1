@@ -6,7 +6,8 @@ WORKDIR $SMCD_DIR
 
 ENV SMCD_VERSION 1.1.0
 
-#部署环境
+#初始化环境
+
     #修改阿里源
 RUN sed -i "s/deb.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list \
     && sed -i "s/security.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list \
@@ -15,18 +16,8 @@ RUN sed -i "s/deb.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list \
     && apt-get install -y --no-install-recommends g++ gcc libc6-dev make pkg-config xz-utils tar git python curl ca-certificates \
     #更新证书
     && update-ca-certificates \
-    #下载并解压node
-    && curl -O https://nodejs.org/dist/v14.12.0/node-v14.12.0-linux-x64.tar.xz \
-    && xz -d node-v14.12.0-linux-x64.tar.xz \
-    && tar xf node-v14.12.0-linux-x64.tar \
-    && rm node-v14.12.0-linux-x64.tar \
-    && mv node-v14.12.0-linux-x64 /node \
-
-    #下载并解压golang
-    && curl -O https://dl.google.com/go/go1.14.10.linux-amd64.tar.gz \
-    && tar xzf go1.14.10.linux-amd64.tar.gz \
-    && rm go1.14.10.linux-amd64.tar.gz \
-    && mv go /go \
+    #删除缓存
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 ENV GOROOT /go
@@ -39,19 +30,35 @@ RUN mkdir -p $GOPATH/src $GOPATH/bin
 
 WORKDIR $GOPATH/src
 
-#下载并编译smcd
-RUN git clone https://github.com/TISUnion/most-simple-mcd.git \
+#下载环境并编译smcd
+
+    #下载并解压node
+RUN curl -O https://nodejs.org/dist/v14.12.0/node-v14.12.0-linux-x64.tar.xz \
+    && xz -d node-v14.12.0-linux-x64.tar.xz \
+    && tar xf node-v14.12.0-linux-x64.tar \
+    && rm node-v14.12.0-linux-x64.tar \
+    && mv node-v14.12.0-linux-x64 /node \
+
+    #下载并解压golang
+    && curl -O https://dl.google.com/go/go1.14.10.linux-amd64.tar.gz \
+    && tar xzf go1.14.10.linux-amd64.tar.gz \
+    && rm go1.14.10.linux-amd64.tar.gz \
+    && mv go /go \
+    && git clone https://github.com/TISUnion/most-simple-mcd.git \
     && cd most-simple-mcd \
-    && git checkout 1.1.0 \
     && git submodule init \
     && git submodule update \
-    && /bin/bash build.sh
+    && /bin/bash build.sh \
+
+    # 删除无用文件
+    && mv $GOPATH/src/most-simple-mcd/main /smcd-main \
+    && rm -rf /node $GOROOT $GOPATH
 
 EXPOSE 80 25565
 
-WORKDIR $GOPATH/src/most-simple-mcd
+WORKDIR /
 
 #运行smcd
-ENTRYPOINT ["sh", "-c", "./main"]
+ENTRYPOINT ["sh", "-c", "./smcd-main"]
 
 

@@ -16,7 +16,7 @@ func UnCompress() error {
 	if err != nil {
 		utils.PanicError("无法创建管理后台文件", err)
 	}
-	_, err = fl.Write([]byte(PackCompressData))
+	_, err = fl.Write(PackCompressData)
 	if err != nil {
 		utils.PanicError("无法写入管理后台文件内容", err)
 	}
@@ -24,7 +24,7 @@ func UnCompress() error {
 
 	uncompressFilepath := filepath.Join(currentPath, constant.Web_FILE_DIR_NAME)
 	// 删除旧的
-	os.RemoveAll(uncompressFilepath)
+	_ = os.RemoveAll(uncompressFilepath)
 	err = utils.UnCompressDir(compressFilepath, uncompressFilepath)
 	if err != nil {
 		utils.PanicError("无法解压管理后台文件", err)

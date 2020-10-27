@@ -33,6 +33,9 @@ type MinecraftServer struct {
 
 	*ServerAdapter
 
+	// 服务端同步锁，锁住整个服务端
+	_interface.Lock
+
 	//子进程实例
 	CmdObj *exec.Cmd
 
@@ -47,9 +50,6 @@ type MinecraftServer struct {
 
 	// 输入管道同步锁
 	ioLock sync.Locker
-
-	// 服务端同步锁，锁住整个服务端
-	srvLock _interface.Lock
 
 	// 玩家发言存储chan
 	messageChan chan string
@@ -80,14 +80,14 @@ type MinecraftServer struct {
 }
 
 func (m *MinecraftServer) BanPlugin(pluginId string) {
-	if m.srvLock.IsLock() {
+	if m.IsLock() {
 		return
 	}
 	m.pluginManager.BanPlugin(pluginId)
 }
 
 func (m *MinecraftServer) UnbanPlugin(pluginId string) {
-	if m.srvLock.IsLock() {
+	if m.IsLock() {
 		return
 	}
 	m.pluginManager.UnbanPlugin(pluginId)
@@ -156,14 +156,14 @@ func (m *MinecraftServer) GetServerConf() *models.ServerConf {
 }
 
 func (m *MinecraftServer) SetServerConf(c *models.ServerConf) {
-	if m.srvLock.IsLock() {
+	if m.IsLock() {
 		return
 	}
 	m.ServerConf = c
 }
 
 func (m *MinecraftServer) SetMemory(memory int64) {
-	if m.srvLock.IsLock() {
+	if m.IsLock() {
 		return
 	}
 	if memory > 0 {
@@ -172,7 +172,7 @@ func (m *MinecraftServer) SetMemory(memory int64) {
 }
 
 func (m *MinecraftServer) Rename(name string) {
-	if m.srvLock.IsLock() {
+	if m.IsLock() {
 		return
 	}
 	if name != "" {
@@ -247,8 +247,8 @@ func (m *MinecraftServer) runProcess() error {
 }
 
 func (m *MinecraftServer) Start() error {
-	if m.srvLock.IsLock() {
-		return errors.New(m.srvLock.GetLockMessage())
+	if m.IsLock() {
+		return errors.New(m.GetLockMessage())
 	}
 	m.ioLock.Lock()
 	defer m.ioLock.Unlock()
@@ -268,11 +268,11 @@ func (m *MinecraftServer) Start() error {
 }
 
 func (m *MinecraftServer) Stop() error {
-	if m.srvLock.IsLock() {
-		return errors.New(m.srvLock.GetLockMessage())
+	if m.IsLock() {
+		return errors.New(m.GetLockMessage())
 	}
-	if m.srvLock.IsLock() {
-		return errors.New(m.srvLock.GetLockMessage())
+	if m.IsLock() {
+		return errors.New(m.GetLockMessage())
 	}
 	m.ioLock.Lock()
 	defer m.ioLock.Unlock()
@@ -294,8 +294,8 @@ func (m *MinecraftServer) Stop() error {
 }
 
 func (m *MinecraftServer) Restart() error {
-	if m.srvLock.IsLock() {
-		return errors.New(m.srvLock.GetLockMessage())
+	if m.IsLock() {
+		return errors.New(m.GetLockMessage())
 	}
 	if m.State == constant.MC_STATE_START {
 		if err := m.Stop(); err != nil {
@@ -436,8 +436,8 @@ func (m *MinecraftServer) sureServerSave(data string) {
 }
 
 func (m *MinecraftServer) Command(c string) error {
-	if m.srvLock.IsLock() {
-		return errors.New(m.srvLock.GetLockMessage())
+	if m.IsLock() {
+		return errors.New(m.GetLockMessage())
 	}
 	m.ioLock.Lock()
 	defer m.ioLock.Unlock()
@@ -462,8 +462,8 @@ func (m *MinecraftServer) _command(c string) error {
 }
 
 func (m *MinecraftServer) RunCommand(cmd string, params ...string) error {
-	if m.srvLock.IsLock() {
-		return errors.New(m.srvLock.GetLockMessage())
+	if m.IsLock() {
+		return errors.New(m.GetLockMessage())
 	}
 	for _, param := range params {
 		cmd += fmt.Sprintf(" %s", param)
@@ -473,16 +473,16 @@ func (m *MinecraftServer) RunCommand(cmd string, params ...string) error {
 
 // 执行tell命令
 func (m *MinecraftServer) TellCommand(player string, msg string) error {
-	if m.srvLock.IsLock() {
-		return errors.New(m.srvLock.GetLockMessage())
+	if m.IsLock() {
+		return errors.New(m.GetLockMessage())
 	}
 	return m.RunCommand("/tell", player, msg)
 }
 
 // 执行tellraw命令
 func (m *MinecraftServer) TellrawCommand(player string, msg interface{}) error {
-	if m.srvLock.IsLock() {
-		return errors.New(m.srvLock.GetLockMessage())
+	if m.IsLock() {
+		return errors.New(m.GetLockMessage())
 	}
 	rawmsg := ""
 	switch msg.(type) {
@@ -498,8 +498,8 @@ func (m *MinecraftServer) TellrawCommand(player string, msg interface{}) error {
 }
 
 func (m *MinecraftServer) SayCommand(msg string) error {
-	if m.srvLock.IsLock() {
-		return errors.New(m.srvLock.GetLockMessage())
+	if m.IsLock() {
+		return errors.New(m.GetLockMessage())
 	}
 	return m.RunCommand("/say", msg)
 }
@@ -659,7 +659,7 @@ func NewMinecraftServer(serverConf *models.ServerConf) server.MinecraftServer {
 	minecraftServer := &MinecraftServer{
 		ServerConf:    serverConf,
 		ioLock:        GetLock(),
-		srvLock:       GetLock(),
+		Lock:          GetLock(),
 		messageChan:   make(chan string, 10),
 		logger:        AddLog(serverConf.EntryId),
 		ServerAdapter: &ServerAdapter{side: serverConf.Side},

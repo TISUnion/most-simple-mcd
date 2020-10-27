@@ -10,11 +10,13 @@ import (
 	"github.com/TISUnion/most-simple-mcd/models"
 	"github.com/olekukonko/tablewriter"
 	"golang.org/x/text/encoding/simplifiedchinese"
+	"math/rand"
 	"net"
 	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // 致命错误，退出程序
@@ -134,6 +136,17 @@ func Uint64Tofloat64(ui uint64) float64 {
 	uiStr := strconv.FormatUint(ui, 10)
 	f64, _ := strconv.ParseFloat(uiStr, 64)
 	return f64
+}
+
+// 生成随机字符串
+func  GetRandomString(l int) string {
+	b := []byte(constant.RANDOM_ELE)
+	result := []byte{}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for i := 0; i < l; i++ {
+		result = append(result, b[r.Intn(len(b))])
+	}
+	return string(result)
 }
 
 // 是否是UTF8编码

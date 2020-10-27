@@ -6,6 +6,8 @@ import (
 )
 
 type MinecraftServer interface {
+	// 服务端同步锁
+	_interface.Lock
 	// 服务端适配器
 	_interface.ServerAdapter
 	// 通用服务器接口
