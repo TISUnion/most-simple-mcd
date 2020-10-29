@@ -289,11 +289,13 @@ func (a *AdminService) _upMapToMcServer(c *gin.Context) error {
 		if err != nil {
 			return
 		}
+		serverBasePath := filepath.Join(modules.GetConfVal(constant.WORKSPACE), constant.MC_SERVER_DIR, srv.GetServerEntryId())
 
-		// 循环转移 TODO
-		err = filepath.Walk(filepath.Join(modules.GetConfVal(constant.WORKSPACE), constant.MC_SERVER_DIR, srv.GetServerEntryId()), func(path string, info os.FileInfo, err error) error {
+		// 循环转移
+		err = filepath.Walk(uncompressFilepath, func(path string, info os.FileInfo, err error) error {
 			if utils.IsFile(path) {
-
+				filePath := filepath.Join(serverBasePath, info.Name())
+				_ = os.Rename(path, filePath)
 			}
 			return nil
 		})
