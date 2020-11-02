@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
+	github.com/boltdb/bolt v1.3.1
 	github.com/dgraph-io/badger v1.6.1
 	github.com/gin-contrib/gzip v0.0.1
 	github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2

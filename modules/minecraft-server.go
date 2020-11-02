@@ -34,7 +34,7 @@ type MinecraftServer struct {
 	*ServerAdapter
 
 	// 服务端同步锁，锁住整个服务端
-	_interface.Lock
+	*MLock
 
 	//子进程实例
 	CmdObj *exec.Cmd
@@ -657,9 +657,11 @@ func (m *MinecraftServer) initLocalIps() {
 // 新建一个mc服务端进程
 func NewMinecraftServer(serverConf *models.ServerConf) server.MinecraftServer {
 	minecraftServer := &MinecraftServer{
-		ServerConf:    serverConf,
-		ioLock:        GetLock(),
-		Lock:          GetLock(),
+		ServerConf: serverConf,
+		ioLock:     GetLock(),
+		MLock: &MLock{
+			lock: GetLock(),
+		},
 		messageChan:   make(chan string, 10),
 		logger:        AddLog(serverConf.EntryId),
 		ServerAdapter: &ServerAdapter{side: serverConf.Side},

@@ -258,7 +258,7 @@ func (c *Conf) InitCallBack() {
 	c.Init(terminalConfs)
 	c.ChangeConfCallBack()
 	// 创建tmp目录
-	utils.CreatDir(c.GetConfVal(constant.TMP_PATH))
+	_ = utils.CreatDir(c.GetConfVal(constant.TMP_PATH))
 }
 
 // 获取配置实例

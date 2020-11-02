@@ -311,8 +311,8 @@ func (a *AdminService) getUploadFile(c *gin.Context) (filename, dst string, err 
 		return
 	}
 	dst = filepath.Join(modules.GetConfVal(constant.TMP_PATH), header.Filename)
-	if err := c.SaveUploadedFile(header, dst); err != nil {
-		modules.WriteLogToDefault(constant.COPY_FILE_ERROR+err.Error(), constant.LOG_ERROR)
+	if e := c.SaveUploadedFile(header, dst); e != nil {
+		modules.WriteLogToDefault(constant.COPY_FILE_ERROR+e.Error(), constant.LOG_ERROR)
 		err = errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
 		return
 	}

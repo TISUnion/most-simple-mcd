@@ -5,32 +5,32 @@ import (
 	"sync"
 )
 
-type Lock struct {
+type MLock struct {
 	lock    sync.Locker
 	isLock  bool
 	message string
 }
 
-func (l *Lock) IsLock() bool {
+func (l *MLock) IsLock() bool {
 	return l.isLock
 }
 
-func (l *Lock) Lock() {
+func (l *MLock) Lock() {
 	l.lock.Lock()
 	l.isLock = true
 }
 
-func (l *Lock) Unlock() {
+func (l *MLock) Unlock() {
 	l.lock.Unlock()
 	l.isLock = false
 }
 
-func (l *Lock) LockWithMessage(msg string) {
+func (l *MLock) LockWithMessage(msg string) {
 	l.Lock()
 	l.message = msg
 }
 
-func (l *Lock) GetLockMessage() (msg string) {
+func (l *MLock) GetLockMessage() (msg string) {
 	if l.isLock {
 		msg = l.message
 	}
@@ -38,7 +38,7 @@ func (l *Lock) GetLockMessage() (msg string) {
 }
 
 func GetLock() _interface.Lock {
-	return &Lock{
-		lock: GetLock(),
+	return &MLock{
+		lock: &sync.Mutex{},
 	}
 }

@@ -105,6 +105,7 @@ const (
 // DB常量
 const (
 	DEFAULT_DATABASE_NAME = "default-db"
+	PERMANENT_VAL_TTL = 0
 )
 
 // web后台常量
