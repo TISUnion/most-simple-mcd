@@ -73,6 +73,14 @@ func GetDatabase(name string) (db _interface.Database, err error) {
 	if err != nil {
 		return
 	}
+	// 创建桶
+	err = boltdb.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte(name))
+		return err
+	})
+	if err != nil {
+		return
+	}
 	db = &DataBase{
 		boltDb: boltdb,
 		name:   name,
@@ -82,7 +90,10 @@ func GetDatabase(name string) (db _interface.Database, err error) {
 }
 
 func setValJson(val string, ttl time.Duration) []byte {
-	t := time.Now().Add(ttl).UnixNano()
+	var t int64 = constant.PERMANENT_VAL_TTL
+	if ttl != constant.PERMANENT_VAL_TTL {
+		t = time.Now().Add(ttl).UnixNano()
+	}
 	obj := &models.ValueWithTTL{
 		Value:      val,
 		NanoExpire: t,
