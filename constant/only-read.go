@@ -2,7 +2,7 @@ package constant
 
 // 只读变量
 var (
-	CLI_THX      = []byte{45, 109, 99, 100, 101, 103, 103}
+	CLI_THX      = []byte{109, 99, 100, 101, 103, 103}
 	CLI_THX_TEXT = []byte{116, 104, 97, 110, 107, 32, 121, 111, 117, 32, 102, 111, 114, 32, 117, 115, 105, 110, 103, 32, 77, 79, 83, 84, 45, 83, 73, 77, 80, 76, 69, 45, 77, 67, 68}
 
 	PLUGIN_TMPL = `package {{filename2packagename .Dirname}}

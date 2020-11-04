@@ -10,12 +10,11 @@ import (
 	"time"
 )
 
-var ExitChan chan os.Signal
+var ExitChan = make(chan os.Signal)
 
 // 优雅的处理退出
 func ExitHandle() {
 	// 退出信号管道
-	ExitChan = make(chan os.Signal)
 	signal.Notify(ExitChan, os.Interrupt, os.Kill, syscall.SIGQUIT, syscall.SIGTERM)
 	<-ExitChan
 	RunDestructCallBacks()
