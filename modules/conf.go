@@ -84,7 +84,7 @@ func (c *Conf) loadFilePath(terminalConfs map[string]string) {
 				confParam := c.confs[constant.CONF_PATH]
 				// 回退至默认配置
 				confParam.ConfVal = confParam.DefaultConfVal
-				confParam.Level = constant.CONF_DEFAULT_LEVEL
+				confParam.Level = constant.CONF_GUARANTEED_LEVEL
 				if !utils.ExistsResource(confParam.ConfVal) {
 					if f, err = utils.CreateFile(confParam.ConfVal); err != nil {
 						utils.PanicError(constant.CREATE_CONF_ERROR, err)

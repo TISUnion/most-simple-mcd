@@ -40,6 +40,7 @@ const (
 const (
 	RELOAD_CONF_JOB_NAME = "reload-conf"
 	// 配置覆盖优先级
+	CONF_GUARANTEED_LEVEL  = 9999 // 保底策略，出现错误时，回退到默认配置，并无法被修改
 	CONF_SYSTEM_LEVEL      = 4
 	CONF_TERMINAL_LEVEL    = 3
 	CONF_ENVIRONMENT_LEVEL = 2
@@ -105,7 +106,7 @@ const (
 // DB常量
 const (
 	DEFAULT_DATABASE_NAME = "default-db"
-	PERMANENT_VAL_TTL = 0
+	PERMANENT_VAL_TTL     = 0
 )
 
 // web后台常量
