@@ -29,6 +29,7 @@ const (
 	PASSWORD_ERROR_MESSAGE    = "账号或密码错误"
 	TOKEN_FAILED              = 2009190002
 	TOKEN_FAILED_MESSAGE      = "token过期"
-	PARSE_FILE_ERROR = "上传文件获取错误"
-	COPY_FILE_ERROR = "复制文件错误"
+	PARSE_FILE_ERROR          = "上传文件获取错误"
+	COPY_FILE_ERROR           = "复制文件错误"
+	UNCOMPRESS_FILE_ERROR     = "解压文件错误"
 )

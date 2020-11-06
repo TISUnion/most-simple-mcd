@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -260,16 +261,16 @@ func (a *AdminService) _upMapToMcServer(c *gin.Context) error {
 	// 锁住服务端，防止后续操作时文件被锁住
 	srv.LockWithMessage("导入地图数据中")
 	// 保证导入时服务端为关闭状态
-	if srv.GetServerConf().State != constant.MC_SERVER_STOP {
+	if srv.GetServerConf().State != constant.MC_STATE_STOP {
 		srv.Unlock()
 		return errors.New(constant.HTTP_PARAMS_ERROR_MESSAGE)
 	}
 	go func() {
 		defer srv.Unlock()
-		uncompressFilepath := filepath.Join(constant.TMP_PATH, utils.GetRandomString(10))
+		uncompressFilepath := filepath.Join(modules.GetConfVal(constant.WORKSPACE), modules.GetConfVal(constant.TMP_PATH), utils.GetRandomString(10))
 		err = utils.UnCompressDir(dst, uncompressFilepath)
 		if err != nil {
-			modules.WriteLogToDefault()
+			modules.WriteLogToDefault(constant.UNCOMPRESS_FILE_ERROR + err.Error())
 			return
 		}
 		serverJarArr, err := filepath.Glob(uncompressFilepath + "/*.jar")
@@ -285,16 +286,17 @@ func (a *AdminService) _upMapToMcServer(c *gin.Context) error {
 			}
 		}
 		// 删除日志
-		err = os.Remove(filepath.Join(uncompressFilepath, constant.LOG_DIR))
-		if err != nil {
-			return
-		}
+		_ = os.Remove(filepath.Join(uncompressFilepath, constant.LOG_DIR))
 		serverBasePath := filepath.Join(modules.GetConfVal(constant.WORKSPACE), constant.MC_SERVER_DIR, srv.GetServerEntryId())
 
 		// 循环转移
 		err = filepath.Walk(uncompressFilepath, func(path string, info os.FileInfo, err error) error {
 			if utils.IsFile(path) {
-				filePath := filepath.Join(serverBasePath, info.Name())
+				// 去除临时目录
+				dir := filepath.Dir(path)
+				dir = strings.ReplaceAll(dir, uncompressFilepath, "")
+				// 拼接迁移目录
+				filePath := filepath.Join(serverBasePath, dir, info.Name())
 				_ = os.Rename(path, filePath)
 			}
 			return nil
