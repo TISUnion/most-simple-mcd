@@ -273,6 +273,8 @@ func (a *AdminService) _upMapToMcServer(c *gin.Context) error {
 			modules.WriteLogToDefault(constant.UNCOMPRESS_FILE_ERROR + err.Error())
 			return
 		}
+		// 添加解压目录
+		uncompressFilepath = filepath.Join(uncompressFilepath, constant.MC_MAP_DIR)
 		serverJarArr, err := filepath.Glob(uncompressFilepath + "/*.jar")
 		if err != nil || len(serverJarArr) > 1 {
 			return
@@ -288,6 +290,10 @@ func (a *AdminService) _upMapToMcServer(c *gin.Context) error {
 		// 删除日志
 		_ = os.Remove(filepath.Join(uncompressFilepath, constant.LOG_DIR))
 		serverBasePath := filepath.Join(modules.GetConfVal(constant.WORKSPACE), constant.MC_SERVER_DIR, srv.GetServerEntryId())
+		// 删除原来的地图
+		_ = os.Remove(filepath.Join(serverBasePath, constant.WORLD_DIR))
+		// 删除原来的日志
+		_ = os.Remove(filepath.Join(serverBasePath, constant.LOG_DIR))
 
 		// 循环转移
 		err = filepath.Walk(uncompressFilepath, func(path string, info os.FileInfo, err error) error {

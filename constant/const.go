@@ -130,6 +130,7 @@ const (
 	JAR_SUF           = ".jar"
 	ZIP_SUF           = ".zip"
 	TOKEN_HEADER_NAME = "X-Token"
+	MC_MAP_DIR        = "uploadMC"
 )
 
 // 各模块常量
@@ -140,6 +141,7 @@ const (
 	SERVER_COMMAND_TYPE             = 2 //服务端运行命令
 	ALL_COMMAND_TYPE                = 3 //插件、服务端都运行
 	LOG_DIR                         = "logs"
+	WORLD_DIR                       = "world"
 	PLUGIN_DIR                      = "plugins"
 	GIN_LOG_NAME                    = "gin-server"
 	UPLOAD_FILE_NAME                = "file"
