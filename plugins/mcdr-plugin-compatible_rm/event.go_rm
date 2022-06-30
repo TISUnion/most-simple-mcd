@@ -22,7 +22,8 @@ func (p *McdrPlugin) dealEvent(srv server.MinecraftServer, originData string) {
 	}
 
 	// 离开游戏
-	re = regexp.MustCompile(srv.GetPlayerLeftRegularExpression())
+	srv.GetPlayerLeftRegularExpression(originData)
+	re = regexp.MustCompile()
 	match = re.FindStringSubmatch(originData)
 	if len(match) > 0 {
 		player = match[0]
@@ -49,7 +50,7 @@ func (p *McdrPlugin) onPlayerLeft(srv server.MinecraftServer, player string) {
 
 }
 
-func (p *McdrPlugin) onPlayerMadeAdvancement(srv server.MinecraftServer, player , advancement string) {
+func (p *McdrPlugin) onPlayerMadeAdvancement(srv server.MinecraftServer, player, advancement string) {
 
 }
 
