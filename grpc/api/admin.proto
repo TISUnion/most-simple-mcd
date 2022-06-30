@@ -21,6 +21,7 @@ service Admin {
     // `hasInput:"false" hasOutput:"false"`
     rpc getLog (GetLogReq) returns (GetLogResp);
     // 删除临时文件
+    // `hasInput:"false"`
     rpc delTmpFlie (DelTmpFlieReq) returns (DelTmpFlieResp);
     // 获取上传服务端文件，并注入到容器中
     // `hasInput:"false"`

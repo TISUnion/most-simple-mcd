@@ -156,12 +156,6 @@ func getLog(c *gin.Context) {
 
 func delTmpFlie(c *gin.Context) {
 	p := new(DelTmpFlieReq)
-	if err := c.BindJSON(p); err != nil {
-		c.Set("code", -500)
-		c.Set("message", err.Error())
-		c.JSON(http.StatusOK, getAdminResponse(c, nil))
-		return
-	}
 	resp, err := apiAdminSvc.DelTmpFlie(c, p)
 	if err != nil {
 		c.Set("code", -500)

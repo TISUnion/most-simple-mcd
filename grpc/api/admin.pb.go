@@ -976,6 +976,7 @@ type AdminClient interface {
 	// `hasInput:"false" hasOutput:"false"`
 	GetLog(ctx context.Context, in *GetLogReq, opts ...grpc.CallOption) (*GetLogResp, error)
 	// 删除临时文件
+	// `hasInput:"false"`
 	DelTmpFlie(ctx context.Context, in *DelTmpFlieReq, opts ...grpc.CallOption) (*DelTmpFlieResp, error)
 	// 获取上传服务端文件，并注入到容器中
 	// `hasInput:"false"`
@@ -1103,6 +1104,7 @@ type AdminServer interface {
 	// `hasInput:"false" hasOutput:"false"`
 	GetLog(context.Context, *GetLogReq) (*GetLogResp, error)
 	// 删除临时文件
+	// `hasInput:"false"`
 	DelTmpFlie(context.Context, *DelTmpFlieReq) (*DelTmpFlieResp, error)
 	// 获取上传服务端文件，并注入到容器中
 	// `hasInput:"false"`
